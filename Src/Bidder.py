@@ -2,13 +2,13 @@
 import Behaviour
 
 class Bidder:
-  def __init__(self, id, amount, needs, behaviour, currentAuctions, winningAuctions, marketPrice):
+  def __init__(self, id, amount, needs, behaviour, marketPrice):
     self.id = id
     self.amount = amount
     self.needs = needs
     self.behaviour = behaviour
-    self.currentAuctions = currentAuctions
-    self.winningAuctions = winningAuctions
+    self.currentAuctions = 0
+    self.winningAuctions = 0
     self.marketPrice = marketPrice
 
 class Needs:
@@ -18,7 +18,7 @@ class Needs:
 
 # Demonstration:
 
-bidder1 = Bidder(1, 150000, Needs(55, "steel beam"), Behaviour.A, 1, 0, 15000)
+bidder1 = Bidder(1, 150000, Needs(55, "steel beam"), Behaviour.A, 15000)
 
 print("Created: Bidder ",bidder1.id,"\n",
       "amount: ",bidder1.amount,"\n",
