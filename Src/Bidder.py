@@ -16,16 +16,14 @@ class Needs:
         self.amount = amount
         self.type = type
 
-
 # Demonstration:
 
-needsBidder1 = Needs(55, "steel beam")
-bidder1 = Bidder(1, 150000, needsBidder1, Behaviour.A, 1, 0, 15000)
+bidder1 = Bidder(1, 150000, Needs(55, "steel beam"), Behaviour.A, 1, 0, 15000)
 
 print("Created: Bidder ",bidder1.id,"\n",
       "amount: ",bidder1.amount,"\n",
-      "needs (amount): ",needsBidder1.amount,"\n",
-      "needs (type): ",needsBidder1.type,"\n",
+      "needs (amount): ",bidder1.needs.amount,"\n",
+      "needs (type): ",bidder1.needs.type,"\n",
       "behaviour: ",bidder1.behaviour,"\n",
       "currentAuctions: ",bidder1.currentAuctions,"\n",
       "winning auctions: ",bidder1.winningAuctions,"\n",
