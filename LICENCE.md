@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2021 Eric Naim Chiquito García
+Copyright (c) 2022 Elliot Palokangas Karlsson, Jakob Olsson, Axel Johansson, Cristian Phillips, Markus Blomqvist
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
