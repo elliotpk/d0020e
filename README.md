@@ -8,8 +8,8 @@ The simulator is dependant on the Negotiation Engine API: https://github.com/Eri
 
 ## Sequence Diagram
 
-<img src="images/sequence.png" width="50%" height="50%">
+<img src="images/sequence.png" width="75%" height="75%">
 
 ## Class Diagram
 
-<img src="images\classes.png" width="50%" height="50%">
+<img src="images\classes.png" width="75%" height="75%">
