@@ -10,6 +10,8 @@ The simulator is dependant on the Negotiation Engine API: https://github.com/Eri
 
 <img src="images/sequence.png" width="75%" height="75%">
 
+This diagram shows the rough process of the simulation.
+
 ## Class Diagram
 
 <img src="images\classes.png" width="75%" height="75%">
