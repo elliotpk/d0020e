@@ -1,10 +1,79 @@
+import random
 
-#seed =
-#behaviour seed =
-#num buyers =
-#num sellers =
+def readConfig():
+    #Reads the config file for seed/data/numbuyers
+    try:
+        config = open("config.txt","r")
+        text=config.read()
+        text.replace("  ","")
+        line = text.split("\n")
+        for x in line:
+            x.strip()
+            if x.find("seed")!=-1:
+                seed=int(x.strip("seed= "))
+                random.seed(seed)
+            elif x.find("numbuyers")!=-1:
+                numbuyers=int(x.strip("numbuyers= "))
+            elif x.find("data")!=-1:
+                data=int(x.strip("data= "))
+        config.close()
 
-#if empty get from config
+        #If somtihing is missing then only that gets generated
+        try:
+            seed
+        except:
+            seed=genSeed()
+            config = open("config.txt","a")
+            config.write("seed="+str(seed))
+            config.close()
+        try:
+            data
+        except:
+            data=genData()
+            config = open("config.txt","a")
+            config.write("data="+str(data))
+            config.close()
+        try:
+            numbuyers
+        except:
+            numbuyers=genNumBuyers()
+            config = open("config.txt","a")
+            config.write("numbuyers="+str(numbuyers))
+            config.close()
+
+        #returns a checksum for comparisons
+        check = (seed * data * numbuyers)
+        return str(check)[0:4]
+
+    #If there is no config file, one gets generated and saved with a mathcing checksum
+    except:
+        config = open('config.txt', "w")
+        seed=genSeed()
+        data=genData()
+        numbuyers=genNumBuyers()
+        config.write("seed="+str(seed)+"\n""numbuyers="+str(numbuyers)+"\n"+"data="+str(data))
+        print("generated indata")
+        check = (seed * data * numbuyers)
+        return str(check)[0:4]
+
+
+
+def genSeed():
+    rng = random.randrange(0, 10000)
+    random.seed(rng)
+    seed=rng
+    return seed
+
+def genData():
+    data = random.randrange(0, 5000)
+    return data
+
+def genNumBuyers():
+    numbuyers = random.randrange(0, 100)
+    return numbuyers
+
+
+
 
 
 #main() call on setup, reference, simengine
@@ -14,3 +83,5 @@
 #printseed()
 
 #Graphs()
+
+checksum=readConfig()

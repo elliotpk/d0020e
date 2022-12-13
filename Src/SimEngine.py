@@ -13,4 +13,14 @@
 #actual++
 
 
-#print(Api.data) print to csv-file
+import os
+def printdata(string):
+    #prints the results into a csv file and labels the different runs into a new csv file
+    testnr = 0
+    while (os.path.exists('test'+str(testnr)+'.csv')):
+        testnr=testnr+1
+    print(testnr)
+    mkcsv = open('test'+str(testnr)+'.csv','w')
+    for x in string.split(';'):
+        mkcsv.write(x+'\n')
+    mkcsv.close()
