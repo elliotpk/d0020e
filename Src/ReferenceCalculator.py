@@ -8,13 +8,16 @@
 # Note: The sellers themselves should not matter, only their blockchains. 
 
 from itertools import combinations
+from itertools import permutations
 
 # blocklist: All the blocks together in a list (since the linked block class is not yet finished. Either one later changes the code to use these instead or adds a funtion to convert the linked list to an ordinary one)
 # buyers: A list of buyers.
 def referenceCalculator(blocklist, buyers):
-    #splitfinder to find all combinations
-    
-    #round-robin with the buyers so that all buyers test all combinations, do this by switching their indexes probably 
+    #for permutation in permutations(blocklist): # Will be performance intensive, consider more effective way if performance becomes a problem
+        #for combination in splitfinder(permutaion, len(buyers)):
+            
+        
+    #splitfinder to find all combinations of all permutations 
     
     #test the validity of all the combinations (not buying a block with a previous block unbought, (demand fullfilled?))
     
@@ -88,8 +91,30 @@ def rajJainFairness(metricList):
     fairnessIndex = numerator / denominator
     return fairnessIndex
 
-def averageCost():
-    return
+# Feed this function a valid set of blocks for a seller to buy and it will return the average cost paid
+# May have to be changed depending on how we decide to define discount. Now works on the assumption that it is defined as the price reduction if the previous block is bought
+def averageCost(boughtBlocks):
+    sum = 0
+    for block in boughtBlocks:
+        discount = findDiscount(block,boughtBlocks)
+        sum = sum + (block.price - discount)
+    return sum
+
+# Finds the discount that should be applied to a given block recursivly under the assumption that block.discount is the cumulative discount on a base price given all previous blocks are bought.
+# Block = Block discount is sought for, boughtBlocks = The blocks bought by a buyer, foundPrevBlocks = recursion variable, init at 0
+def findDiscount(block, boughtBlocks, foundPrevBlocks = 0):
+    if (block.prev != None):
+        if(block.prev in boughtBlocks):
+            foundPrevBlocks = foundPrevBlocks + 1
+        return findDiscount(block.prev, boughtBlocks, foundPrevBlocks)
+    else:
+        discount = 0
+        while foundPrevBlocks > 0:
+            discount = block.next.discount
+            block = block.next
+            foundPrevBlocks = foundPrevBlocks - 1
+        return discount
+            
 
 def demo():
     blocklist = ["block11", "block12", "block21", "block31"]
