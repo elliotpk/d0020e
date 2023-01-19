@@ -1,12 +1,12 @@
 #Library, module
 
-# Desperate behaviour, always bids max amount.
+# Desperate behaviour, always bids max amount with and without discounts.
 # Can bid for more than the market value, but not over the maximum amount.
 A = {
   "onlyBidMaxAmount": True,
   "bidMax": 0,
   "discounts": {
-    "bidOnDiscounts": False,
+    "bidOnDiscounts": True,
     "onlyBidOnDiscounts": False,
     "minimumDiscount": 0.0
   },
