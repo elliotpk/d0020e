@@ -1,5 +1,7 @@
 import random
 import SimEngine
+from Sellers import Sellers
+from Sellers import Block
 from Bidder import Bidder
 from Bidder import Needs
 from Bidder import Behaviour
@@ -23,6 +25,7 @@ def readConfig():
                 numbuyers=int(x.strip("numbuyers= "))
             elif x.find("data")!=-1:
                 data=int(x.strip("data= "))
+
         config.close()
 
         #If somtihing is missing then only that gets generated
@@ -72,7 +75,7 @@ def genSeed():
     return seed
 
 def genData():
-    data = random.randrange(0, 5000)
+    data = random.randrange(0, 8)
     return data
 
 def genNumBuyers():
@@ -100,10 +103,17 @@ Bidders=[]
 # id, name, currentamount, needs, behaviour, marketPrice
 
 for x in range(numbuyers):
-    Bidders.append("Bidder"+str(x))
-    Bidders[x]=Bidder(x,"Namn",random.randint(0, 100),Needs(random.randint(5, 50), "bilar"),Behaviour.A,data)
+    Bidders.append(1)
+    Bidders[x]=Bidder(x,"Namn",random.randint(0, 100),Needs(random.randint(5, 50), "bilar"),Behaviour.A,1000)
 
+seller=Sellers()
+seller.genBlockList(data)
+next= seller.blockList
+i=1
+while next != None:
 
-
+    print("Block nr "+ str(i)+" price "+str(next.price)+", Amount "+str(next.amount))
+    next = next.nextblock
+    i = i +1
 
 #SimEngine.printdata("checksum="+str(checksum)+";"+"pris,data,vinnare,id;1,sten,34,#91;420,lera,2,#54") prints
