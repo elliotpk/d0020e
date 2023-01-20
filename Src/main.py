@@ -1,6 +1,13 @@
 import random
+import SimEngine
+from Bidder import Bidder
+from Bidder import Needs
+from Bidder import Behaviour
 
 def readConfig():
+    global seed
+    global numbuyers
+    global data
     #Reads the config file for seed/data/numbuyers
     try:
         config = open("config.txt","r")
@@ -75,7 +82,6 @@ def genNumBuyers():
 
 
 
-
 #main() call on setup, reference, simengine
 
 #setup() setup all
@@ -85,3 +91,19 @@ def genNumBuyers():
 #Graphs()
 
 checksum=readConfig()
+
+
+
+Bidders=[]
+
+
+# id, name, currentamount, needs, behaviour, marketPrice
+
+for x in range(numbuyers):
+    Bidders.append("Bidder"+str(x))
+    Bidders[x]=Bidder(x,"Namn",random.randint(0, 100),Needs(random.randint(5, 50), "bilar"),Behaviour.A,data)
+
+
+
+
+#SimEngine.printdata("checksum="+str(checksum)+";"+"pris,data,vinnare,id;1,sten,34,#91;420,lera,2,#54") prints

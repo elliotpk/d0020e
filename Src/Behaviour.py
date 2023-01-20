@@ -10,4 +10,4 @@ B = {
   "bidMaxAmount": False,
   "bidUpTo": 150000,
   "onlyBidDiscounts": True
-} 
+}
