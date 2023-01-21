@@ -4,11 +4,10 @@ class Bidder:
   def __init__(self, id, amount, needs, marketPrice, behaviour):
     self.id = id
     self.initAmount = amount
-    self.currentAmount = amount
+    self.currentAmount = self.initAmount
     self.needs = needs
     self.marketPrice = marketPrice
     self.behaviour = behaviour
-    self.behaviour["bidMax"] = amount # maybe unneccessary to have a bidMax in behaviour
     self.currentAuctions = 0
     self.winningAuctions = 0
     
@@ -21,6 +20,7 @@ class Bidder:
 
   def setCurrentAmount(self, amount):
     self.currentAmount = amount
+
 
 class Needs:
     def __init__(self, amount, type):
@@ -36,7 +36,7 @@ def demo():
         "amount: ",bidder1.initAmount,"\n",
         "needs (amount): ",bidder1.needs.amount,"\n",
         "needs (type): ",bidder1.needs.type,"\n",
-        "behaviour: ",bidder1.behaviour,"\n",
+        "behaviour: ",bidder1.behaviour["behaviour"],"\n",
         "currentAuctions: ",bidder1.currentAuctions,"\n",
         "winning auctions: ",bidder1.winningAuctions,"\n",
         "market price: ",bidder1.marketPrice)
@@ -45,7 +45,7 @@ def demo():
         "amount: ",bidder2.initAmount,"\n",
         "needs (amount): ",bidder2.needs.amount,"\n",
         "needs (type): ",bidder2.needs.type,"\n",
-        "behaviour: ",bidder2.behaviour,"\n",
+        "behaviour: ",bidder2.behaviour["behaviour"],"\n",
         "currentAuctions: ",bidder2.currentAuctions,"\n",
         "winning auctions: ",bidder2.winningAuctions,"\n",
         "market price: ",bidder2.marketPrice)
@@ -56,7 +56,7 @@ def demo():
   print("-----------------------------------------------------------------")
   if(bidder1.behaviour["onlyBidMaxAmount"] == True
      and
-     bidder1.behaviour["bid"](14000,bidder1.marketPrice, bidder1.behaviour["bidMax"])
+     bidder1.behaviour["bid"](14000, bidder1.marketPrice, bidder1.currentAmount)
     ):
     bidder1.setCurrentAuctions(2)
     bidder1.setWinningAuctions(1)
@@ -65,36 +65,42 @@ def demo():
   else:
     bidder1.setCurrentAuctions(2)
     print("Bidder ",bidder1.id," didn't bid in any auction.")
+  # Restore the initial amount.
+  bidder1.setCurrentAmount(bidder1.initAmount)
 
   # Tests that can make a bidder bid differently based on what a bidder knows
   # about price, market price (15000) and the maximum amount.
   print("-----------------------------------------------------------------")
   print("Bid behaviour test if Bidder 1 can bid or not:")
   # Can bid (TRUE) with behaviour type A:
-  print("bidMax > price > marketPrice: ",bidder1.behaviour["bid"](15001,bidder1.marketPrice, bidder1.behaviour["bidMax"]))
-  print("bidMax > marketPrice > price: ",bidder1.behaviour["bid"](14001,bidder1.marketPrice, bidder1.behaviour["bidMax"]))
-  print("marketPrice > bidMax > price: ",bidder1.behaviour["bid"](14001,bidder1.marketPrice, 14002))
+  print("bidMax > price > marketPrice: ", bidder1.behaviour["bid"](15001, bidder1.marketPrice, bidder1.currentAmount))
+  print("bidMax > marketPrice > price: ", bidder1.behaviour["bid"](14001, bidder1.marketPrice, bidder1.currentAmount))
+  print("marketPrice > bidMax > price: ", bidder1.behaviour["bid"](14001, bidder1.marketPrice, 14002))
   # Can't bid (FALSE) with behaviour type A:
-  print("marketPrice > price > bidMax: ",bidder1.behaviour["bid"](14001,bidder1.marketPrice, 10000))
-  print("price > marketPrice > bidMax: ",bidder1.behaviour["bid"](15001,bidder1.marketPrice, 10000))
-  print("price > bidMax > marketPrice: ",bidder1.behaviour["bid"](15002,bidder1.marketPrice, 15000))
+  print("marketPrice > price > bidMax: ", bidder1.behaviour["bid"](14001, bidder1.marketPrice, 10000))
+  print("price > marketPrice > bidMax: ", bidder1.behaviour["bid"](15001, bidder1.marketPrice, 10000))
+  print("price > bidMax > marketPrice: ", bidder1.behaviour["bid"](15002, bidder1.marketPrice, 15000))
   print("-----------------------------------------------------------------")
 
-  # Testing discount behaviour of Bidder 2 with behaviour B:
-  print("Bid behaviour test if Bidder 2 bids on over 20 percent discount:")
-  if(bidder2.behaviour["discounts"]["bidOnDiscounts"] == True
-     and
-     bidder2.behaviour["discounts"]["minimumDiscount"] > 0.2
-     and
-     bidder2.behaviour["bid"](14000,bidder2.marketPrice, bidder2.behaviour["bidMax"])
-    ):
-    bidder1.setCurrentAuctions(2)
-    bidder1.setWinningAuctions(1)
-    bidder1.setCurrentAmount(0)
-    print("Bidder ",bidder2.id," bid in 1 auction with over 20 percent discount.")
-  else:
-    bidder1.setCurrentAuctions(2)
-    print("Bidder ",bidder2.id," didn't bid in any auction.")
+  print("Random behaviour selection test:")
+  print("1 random behaviour selection: ", Behaviour.randomBehaviour())
+  # 5 times larger chance to select behaviour B
+  print("1 advanced random behaviour selection: ", Behaviour.randomBehaviourAdvanced([1,5], 1))
   print("-----------------------------------------------------------------")
+
+  print("Test if bidder 2 bids if it's less than 3 blocks:")
+  if(bidder2.behaviour["bidMaxBlocks"] < 3
+     and
+     bidder2.behaviour["bid"](14000, bidder2.marketPrice, bidder2.currentAmount)
+    ):
+    bidder2.setCurrentAuctions(2)
+    bidder2.setWinningAuctions(1)
+    bidder2.setCurrentAmount(0)
+    print("Bidder ",bidder2.id," bid in 1 auction with less than 3 blocks.")
+  else:
+    bidder2.setCurrentAuctions(2)
+    print("Bidder ",bidder2.id," didn't bid in any auction.")
+  # Restore the initial amount.
+  bidder2.setCurrentAmount(bidder2.initAmount)
 
 demo()
