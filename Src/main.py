@@ -5,26 +5,67 @@ from Sellers import Block
 from Bidder import Bidder
 from Bidder import Needs
 from Bidder import Behaviour
-
+global bidderslist
+bidderslist = []
+global sellerslist
+sellerslist = []
 def readConfig():
-    global seed
-    global numbuyers
-    global data
-    #Reads the config file for seed/data/numbuyers
+    #Reads the config file for seed/numsellers/numrandombidders
     try:
         config = open("config.txt","r")
         text=config.read()
-        text.replace("  ","")
         line = text.split("\n")
-        for x in line:
-            x.strip()
-            if x.find("seed")!=-1:
-                seed=int(x.strip("seed= "))
+        for rowoflist in line:
+            rowoflist=rowoflist.replace(" ","")
+            if rowoflist.find("seed")!=-1:
+                seed=int(rowoflist.split("=")[1])
                 random.seed(seed)
-            elif x.find("numbuyers")!=-1:
-                numbuyers=int(x.strip("numbuyers= "))
-            elif x.find("data")!=-1:
-                data=int(x.strip("data= "))
+
+            #reads number of random bidders
+            elif rowoflist.find("numrandombidders")!=-1:
+                numrandombidders=rowoflist.split("=")
+                numrandombidders=int(numrandombidders[1])
+                if int(numrandombidders) < 1:
+                    continue
+                for x in range(numrandombidders):
+                    createBidder()
+
+            #reads number of sellers
+            elif rowoflist.find("numsellers")!=-1:
+                numsellers=rowoflist.split("=")
+                number=int(numsellers[1])
+                for x in range(number):
+                    createSeller()
+
+            #reads demands for buyers
+            elif rowoflist.find("bidder") != -1 and rowoflist.find("numrandombidders") == -1:
+                rowoflist=rowoflist.split(",")
+                namn=None
+                amount=None
+                need=None
+                behaviour=None
+                marketprice=None
+                for i in range(len(rowoflist)):
+                    if rowoflist[i].find("bidder")!=-1:
+                        rowoflist[i]=rowoflist[i].split("bidder")[1]
+                        namn=rowoflist[i]
+                    elif rowoflist[i].find("amount")!=-1:
+                        rowoflist[i]=rowoflist[i].split("=")[1]
+                        amount=rowoflist[i]
+                    elif rowoflist[i].find("need")!=-1:
+                        rowoflist[i] = rowoflist[i].split("=")[1]
+                        need=rowoflist[i]
+                    elif rowoflist[i].find("behaviour")!=-1:
+                        rowoflist[i] = rowoflist[i].split("=")[1]
+                        behaviour=rowoflist[i]
+                    elif rowoflist[i].find("marketprice")!=-1:
+                        rowoflist[i] = rowoflist[i].split("=")[1]
+                        marketprice = rowoflist[i]
+                    #id,amount,needs,behaviour,marketprice
+                createBidder(namn=namn,amount=amount,needs=need,behaviour=behaviour,marketprice=marketprice)
+
+
+
 
         config.close()
 
@@ -37,34 +78,34 @@ def readConfig():
             config.write("seed="+str(seed))
             config.close()
         try:
-            data
+            numsellers
         except:
-            data=genData()
+            numsellers=genRandomAmountSellers()
             config = open("config.txt","a")
-            config.write("data="+str(data))
+            config.write("numsellers="+str(numsellers))
             config.close()
         try:
-            numbuyers
+            numrandombidders
         except:
-            numbuyers=genNumBuyers()
+            numrandombidders=genNumBuyers()
             config = open("config.txt","a")
-            config.write("numbuyers="+str(numbuyers))
+            config.write("numrandombidders="+str(numrandombidders))
             config.close()
 
         #returns a checksum for comparisons
-        check = (seed * data * numbuyers)
+        check = (seed * numsellers * numrandombidders)
         return str(check)[0:4]
 
     #If there is no config file, one gets generated and saved with a mathcing checksum
     except:
         config = open('config.txt', "w")
         seed=genSeed()
-        data=genData()
-        numbuyers=genNumBuyers()
-        config.write("seed="+str(seed)+"\n""numbuyers="+str(numbuyers)+"\n"+"data="+str(data))
-        print("generated indata")
-        check = (seed * data * numbuyers)
+        numrandomsellers=genRandomAmountSellers()
+        numrandombidders=genNumBuyers()
+        config.write("seed="+str(seed)+"\n""numrandombidders="+str(numrandombidders)+"\n"+"numrandomsellers="+str(numrandomsellers))
+        check = (seed * numrandomsellers * numrandombidders)
         return str(check)[0:4]
+
 
 
 
@@ -74,9 +115,10 @@ def genSeed():
     seed=rng
     return seed
 
-def genData():
-    data = random.randrange(0, 8)
-    return data
+def genRandomAmountSellers():
+    #amountsellers = random.randrange(0, 8)
+    amountsellers = 1
+    return amountsellers
 
 def genNumBuyers():
     numbuyers = random.randrange(0, 100)
@@ -93,27 +135,69 @@ def genNumBuyers():
 
 #Graphs()
 
-checksum=readConfig()
 
 
 
-Bidders=[]
 
 
-# id, name, currentamount, needs, behaviour, marketPrice
 
-for x in range(numbuyers):
-    Bidders.append(1)
-    Bidders[x]=Bidder(x,"Namn",random.randint(0, 100),Needs(random.randint(5, 50), "bilar"),Behaviour.A,1000)
 
-seller=Sellers()
-seller.genBlockList(data)
-next= seller.blockList
-i=1
+#creates bidders from config or random if no value was given
+def createBidder(**kwargs):
+    try:
+        if kwargs["namn"] != None:
+            namn = kwargs["namn"]
+        else:
+            raise
+    except:
+        namn=len(bidderslist)
+    try:
+        if kwargs["amount"] != None:
+            amount = kwargs["amount"]
+        else:
+            raise
+    except:
+        amount=random.randrange(10,200)
+    try:
+        if kwargs["needs"] != None:
+            need = kwargs["needs"]
+        else:
+            raise
+    except:
+        need=Needs(random.randrange(10,200),"Stenmalm")
+    try:
+        if kwargs["marketprice"] != None:
+            marketprice = kwargs["marketprice"]
+        else:
+            raise
+    except:
+        marketprice = random.randrange(1000, 10000)
+    try:
+        if kwargs["behaviour"] != None:
+            behaviour = kwargs["behaviour"]
+        else:
+            raise
+    except:
+        #behaviour=bihaviour.getRandomBehaviour
+        i=None
+    # id, currentamount, needs, behaviour, marketPrice
+    bidderslist.append(Bidder(namn,amount,need,marketprice,Behaviour.A))
+
+    #creates number of sellers
+def createSeller():
+    sellerslist.append(Sellers(len(sellerslist)))
+
+
+
+"""   
 while next != None:
 
     print("Block nr "+ str(i)+" price "+str(next.price)+", Amount "+str(next.amount))
     next = next.nextblock
     i = i +1
-
+"""
 #SimEngine.printdata("checksum="+str(checksum)+";"+"pris,data,vinnare,id;1,sten,34,#91;420,lera,2,#54") prints
+
+
+
+checksum=readConfig()

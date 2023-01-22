@@ -1,9 +1,10 @@
-
+import APILink
 import random
 
 class Sellers:
 
-    def __init__(self):
+    def __init__(self,id):
+        self.id = id
         self.hasAuction = False
         self.blockList = Block
 
