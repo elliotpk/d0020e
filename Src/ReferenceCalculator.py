@@ -13,13 +13,29 @@ from itertools import permutations
 # blocklist: All the blocks together in a list (since the linked block class is not yet finished. Either one later changes the code to use these instead or adds a funtion to convert the linked list to an ordinary one)
 # buyers: A list of buyers.
 def referenceCalculator(blocklist, buyers):
-    #for permutation in permutations(blocklist): # Will be performance intensive, consider more effective way if performance becomes a problem
-        #for combination in splitfinder(permutaion, len(buyers)):
-            
+    bestRajJainCostFairness = -1
+    PermNum = 0 # For testing
+    
+    for permutation in permutations(blocklist): # Will be performance intensive, consider more effective way if performance becomes a problem
+        for combination in splitfinder(permutation, len(buyers)):
+            if(validCombination(combination)):
+                averageCostsForBuyers = []
+                i = 0
+                while i < len(combination)-1: # Runs through what the buyers have bought (the last index is the "unboughts")
+                    averageCostsForBuyers.append(averageCost(combination[i]))
+                    i = i + 1
+                    
+                RajJainCostFairness = rajJainFairness(averageCostsForBuyers)
+                if (RajJainCostFairness > bestRajJainCostFairness):
+                    bestRajJainCostFairness = RajJainCostFairness
+                    
+        print("Permutation", PermNum, "/", len(permutation))
+        
+    return bestRajJainCostFairness
         
     #splitfinder to find all combinations of all permutations 
     
-    #test the validity of all the combinations (not buying a block with a previous block unbought, (demand fullfilled?))
+    #test the validity of all the combinations (not buying a block with a previous block unbought, demand fullfilled
     
     #for the valid combinations: calculate the average price each buyer paid and place these in a list
     
@@ -28,7 +44,6 @@ def referenceCalculator(blocklist, buyers):
     #after every combination: sort the list and return the highest fairness index
     
     #Make all of this modular so that the Fairness Index is easily switched to something else.
-    return
     
 
 # Find all possible ways to split the blocks between the buyers (including one "buyer" for unbought blocks)
@@ -47,7 +62,7 @@ def splitfinder(blocklist, numBuyers):
     
     return possibleSplits
 
-# Takes in a way to split the blocks between the buyers and returns whether what they have bought is allowed (and fullfills everyones demand, at least until we've clarified that)
+# Takes in a way to split the blocks between the buyers and returns whether what they have bought is allowed and whether their demand is fullfilled
 def validCombination(possibleCombination, buyers):
     unboughts = possibleCombination.pop()
     
