@@ -97,4 +97,4 @@ def demo():
     print("Bidder ",bidder2.id," didn't bid in any auction.")
   print("-----------------------------------------------------------------")
 
-demo()
+#demo()
