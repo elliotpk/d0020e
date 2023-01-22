@@ -107,7 +107,6 @@ def rajJainFairness(metricList):
     return fairnessIndex
 
 # Feed this function a valid set of blocks for a seller to buy and it will return the average cost paid
-# May have to be changed depending on how we decide to define discount. Now works on the assumption that it is defined as the price reduction if the previous block is bought
 def averageCost(boughtBlocks):
     sum = 0
     for block in boughtBlocks:
@@ -115,8 +114,10 @@ def averageCost(boughtBlocks):
         sum = sum + (block.price - discount)
     return sum
 
-# Finds the discount that should be applied to a given block recursivly under the assumption that block.discount is the cumulative discount on a base price given all previous blocks are bought.
+# Finds the discount that should be applied to a given block recursivly under the assumption that block.discount is the cumulative discount on a base price given all previous blocks are bought 
 # Block = Block discount is sought for, boughtBlocks = The blocks bought by a buyer, foundPrevBlocks = recursion variable, init at 0
+# Goes back to the beginning of the sellers blockchain, finding how many blocks in that chain have been purchased. Then goes to the "index" in that blockchain that 
+# corresponds to the number of blocks found, there finding the discount of if the block had been moved to that place in the chain.
 def findDiscount(block, boughtBlocks, foundPrevBlocks = 0):
     if (block.prev != None):
         if(block.prev in boughtBlocks):
