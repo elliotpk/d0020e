@@ -62,7 +62,7 @@ datad = {
     #catch 404
   
 def createAuction(room_name:str, username:str, quantity:int):
-    "Posts an auction to the database and returns the Room ID if successful, otherwise None"
+    "Posts an auction to the database and returns the Room ID if successful, otherwise None."
 
     current_time = datetime.now() + timedelta(minutes=ROOM_DURATION)
     payload = {
