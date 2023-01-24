@@ -15,7 +15,7 @@ import json
 # Perhaps import this from the config file?
 API_URL = "http://127.0.0.1:5000"
 TIME_OUT = 3                            # Seconds
-ROOM_DURATION = 5                       # Minutes
+ROOM_DURATION = 40                       # Minutes
 
 #Create Room (POST)
 #   To create the rooms(auctions) for the different blocks, done at init step of simulation
@@ -55,12 +55,35 @@ datad = {
 
 #def checkWinner():
 
-#def placeBids(room_id):
-    #command = "/rooms/" + room_id
-    #required payload: username, message_input (bid amount), 
-    #requests.post()....
-    #catch 404
-  
+def placeBid(room_id:str, username:str, value:int):
+    "Places a bid to auction <room_id> with amount <value>, returns True if successful, otherwise False"
+
+    payload = {
+        'message_input':value
+    }
+
+    r = requests.post(API_URL+"/rooms/"+room_id, auth=(username, ''), timeout=TIME_OUT, data=payload)
+    if(r.status_code == 200):
+        return True
+    else:
+        return False
+
+def getRoomInfo(room_id:str, username:str):
+    "Used to get all the auction bids placed in a specific auction room"
+    r = requests.get(API_URL+"/rooms/"+room_id, auth=(username, ''), timeout=TIME_OUT)
+    json_obj = r.json()                                                                     
+    layer1 = str(json_obj["Bids"]).split(":", 10)                                           # Might be a weird method to get out the bidder name and amount
+    name = layer1[8].split("'", 2)[1]                                                       # but it worked alright in testing so should be good seeing as this function
+    value = layer1[10].split("'",2)[1]                                                      # may not even end up seeing use
+    return name + ", " + value
+
+def addUser(room_id:str, username:str):
+    r = requests.get(API_URL+"/rooms/"+room_id+"/join", auth=(username, ''), timeout=TIME_OUT)
+    if(r.status_code==200):
+        return True
+    else:
+        return False
+
 def createAuction(room_name:str, username:str, quantity:int):
     "Posts an auction to the database and returns the Room ID if successful, otherwise None"
 
@@ -81,8 +104,8 @@ def createAuction(room_name:str, username:str, quantity:int):
     
     r = requests.post(API_URL+"/create-room", auth=(username, ''), timeout=TIME_OUT, data=payload)
     if(r.status_code == 200):
-        json_obj = r.json()
-        out = str(json_obj["message"])
+        json_obj = r.json()                     # Some formatting of the original JSON return message
+        out = str(json_obj["message"])          # to only return the room id to caller
         return out.split("id: ",1)[1]
     else:
         return None
