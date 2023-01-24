@@ -27,8 +27,8 @@ class Needs:
         self.amount = amount
         self.type = type
 
-# Demonstration
-def demo():
+# Testing function for testing different behaviours
+def test():
   bidder1 = Bidder(1, 150000, Needs(55, "steel beam"), 15000, Behaviour.A)
   bidder2 = Bidder(2, 150000, Needs(55, "steel beam"), 15000, Behaviour.B)
 
@@ -85,7 +85,7 @@ def demo():
   print("Random behaviour selection test:")
   print("1 random behaviour selection: ", Behaviour.randomBehaviour())
   # 5 times larger chance to select behaviour B
-  print("1 advanced random behaviour selection: ", Behaviour.randomBehaviourAdvanced([1,5], 1))
+  print("1 advanced random behaviour selection: ", Behaviour.randomBehaviourAdvanced([1,5,1], 1))
   print("-----------------------------------------------------------------")
 
   print("Test if bidder 2 bids if it's less than 3 blocks:")
@@ -102,5 +102,24 @@ def demo():
     print("Bidder ",bidder2.id," didn't bid in any auction.")
   # Restore the initial amount.
   bidder2.setCurrentAmount(bidder2.initAmount)
+  print("-----------------------------------------------------------------")
 
-demo()
+  print("Test 100 times if bidder 2 wants to bid if it's only 1 block (50 percent chance):")
+  counter = 0
+  for x in range(100):
+    if(bidder2.behaviour["blockBehaviour"](1)
+      and
+      bidder2.behaviour["bid"](14000, bidder2.marketPrice, bidder2.currentAmount)
+      ):
+      bidder2.setCurrentAuctions(2)
+      bidder2.setWinningAuctions(1)
+      bidder2.setCurrentAmount(0)
+      counter = counter + 1
+    else:
+      bidder2.setCurrentAuctions(2)
+    # Restore the initial amount.
+    bidder2.setCurrentAmount(bidder2.initAmount)
+
+  print("Bidder ", bidder2.id, "bid ", counter, " times out of 100.")
+
+test()
