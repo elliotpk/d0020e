@@ -27,10 +27,11 @@ class Needs:
         self.amount = amount
         self.type = type
 
-# Testing function for testing different behaviours
+# Testing method for testing different behaviours
 def test():
   bidder1 = Bidder(1, 150000, Needs(55, "steel beam"), 15000, Behaviour.A)
   bidder2 = Bidder(2, 150000, Needs(55, "steel beam"), 15000, Behaviour.B)
+  bidder3 = Bidder(3, 150000, Needs(55, "steel beam"), 15000, Behaviour.C)
 
   print("Created: Bidder ",bidder1.id,"\n",
         "amount: ",bidder1.initAmount,"\n",
@@ -88,38 +89,9 @@ def test():
   print("1 advanced random behaviour selection: ", Behaviour.randomBehaviourAdvanced([1,5,1], 1))
   print("-----------------------------------------------------------------")
 
-  print("Test if bidder 2 bids if it's less than 3 blocks:")
-  if(bidder2.behaviour["bidMaxBlocks"] < 3
-     and
-     bidder2.behaviour["bid"](14000, bidder2.marketPrice, bidder2.currentAmount)
-    ):
-    bidder2.setCurrentAuctions(2)
-    bidder2.setWinningAuctions(1)
-    bidder2.setCurrentAmount(0)
-    print("Bidder ",bidder2.id," bid in 1 auction with less than 3 blocks.")
-  else:
-    bidder2.setCurrentAuctions(2)
-    print("Bidder ",bidder2.id," didn't bid in any auction.")
-  # Restore the initial amount.
-  bidder2.setCurrentAmount(bidder2.initAmount)
-  print("-----------------------------------------------------------------")
-
-  print("Test 100 times if bidder 2 wants to bid if it's only 1 block (50 percent chance):")
-  counter = 0
-  for x in range(100):
-    if(bidder2.behaviour["blockBehaviour"](1)
-      and
-      bidder2.behaviour["bid"](14000, bidder2.marketPrice, bidder2.currentAmount)
-      ):
-      bidder2.setCurrentAuctions(2)
-      bidder2.setWinningAuctions(1)
-      bidder2.setCurrentAmount(0)
-      counter = counter + 1
-    else:
-      bidder2.setCurrentAuctions(2)
-    # Restore the initial amount.
-    bidder2.setCurrentAmount(bidder2.initAmount)
-
-  print("Bidder ", bidder2.id, "bid ", counter, " times out of 100.")
+  print("Tests if Bidder 3 changes the aggressiveness in a scenario of participating in 3 auctions, 2 auctions lost, 3 total bidders and 1 current bid:")
+  print("Bidder 3: initial aggressiveness: ", bidder3.behaviour["aggressiveness"])
+  print("Bidder 3: changes aggressiveness: ", bidder3.behaviour["adaptiveAggressiveness"](3, 2, 3, 1))
+  print("Bidder 3: new aggressiveness: ", bidder3.behaviour["aggressiveness"])
 
 test()
