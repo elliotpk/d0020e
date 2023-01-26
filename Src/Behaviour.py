@@ -33,6 +33,7 @@ A = {
                             changeAggressiveness(A, A["aggressiveness"]) if(auctions > 2 and auctionsLost > 1 and bidders > 1 and currentBids >= 0) else
                             changeAggressiveness(A, A["aggressiveness"]) if(auctions == 1 and bidders > 1 and currentBids > 10) else
                             changeAggressiveness(A, A["aggressiveness"]),
+  "bidOverMarketPrice": True,
   "bid": lambda price, marketPrice, currentAmount:
          # Can't bid over budget
          False if (price > currentAmount) else
@@ -55,6 +56,7 @@ B = {
                             changeAggressiveness(B, 0.6) if(auctions > 2 and auctionsLost > 1 and bidders > 1 and currentBids >= 0) else
                             changeAggressiveness(B, 0.6) if(auctions == 1 and bidders > 1 and currentBids > 10) else
                             changeAggressiveness(B, B["aggressiveness"]),
+  "bidOverMarketPrice": False,
   "bid": lambda price, marketPrice, currentAmount:
          # Can't bid over budget
          False if (price > currentAmount) else 
@@ -77,6 +79,7 @@ C = {
                             changeAggressiveness(C, 0.2) if(auctions > 2 and auctionsLost > 1 and bidders > 1 and currentBids >= 0) else
                             changeAggressiveness(C, 0.2) if(auctions == 1 and bidders > 1 and currentBids > 10) else
                             changeAggressiveness(C, C["aggressiveness"]),
+  "bidOverMarketPrice": False,
   "bid": lambda price, marketPrice, currentAmount:
          # Can't bid over budget
          False if (price > currentAmount) else 
