@@ -34,6 +34,7 @@ def referenceCalculator(blocklist, buyers):
                 if (RajJainCostFairness > bestRajJainCostFairness):
                     bestRajJainCostFairness = RajJainCostFairness
                     bestData.append(averageCostsForBuyers)
+                    bestData.append(permAndComb)
                     i = 0
                     while i < len(combination):
                         bestData.append(combination[i])
@@ -89,7 +90,7 @@ def validCombination(Combination, buyers):
             demand = demand - block.get_amount()
         if(demand > 0):
             return False
-    buyerIndex = buyerIndex + 1
+        buyerIndex = buyerIndex + 1
             
     return True
     
@@ -99,8 +100,8 @@ def checkIfPreviousBlockUnbought(unboughtBlock, boughtBlocks):
         for blockset in boughtBlocks:
             if(unboughtBlock.next() in blockset):
                 return False
-            else:
-                return checkIfPreviousBlockUnbought(unboughtBlock.next(), boughtBlocks)
+            
+        return checkIfPreviousBlockUnbought(unboughtBlock.next(), boughtBlocks)
     else:
         return True
     
@@ -148,15 +149,18 @@ def findDiscount(block, boughtBlocks, foundPrevBlocks = 0):
 
 def demo():
 
-    # blocklist = ["block11", "block12", "block21", "block31"]
-    # buyers = 2
-    # blocklist = ["block11", "block12", "block13", "block21", "block22", "block31"]
+    # blocklist = ["block11", "2", "3", "4", "5", "6", "7", "8"]
     # buyers = 3
+    # # blocklist = ["block11", "block12", "block13", "block21", "block22", "block31"]
+    # # buyers = 3
     
     # splits = splitfinder(blocklist, buyers)
     # print("\nPossible combinations:")
+    # i = 0
     # for split in splits:
     #      print(split)
+    #      i = i + 1
+    # print(i)
     
     
     # demoMetrics = [10, 10, 10, 10, 10]    
@@ -215,4 +219,15 @@ def demo():
     
 demo()
     
-# TODO: Firstly fix checkIfPreviousBlockUnbought not working properly, then do the rest
+# TODO: Comprehensive testing and making things nicer and more modular
+
+# Calculations and test data to try to find the actual performance: 
+# Ex1: (1 * 5 + 3 * 4) / 4 = 4,25   (2 * 5)   NO!
+# 600 1200 1200 600 120 0 Blocknum! * (Blocknum! / 2 * Buyers+1!) Ex1: 5! * (5! /2 * 3!) = 1200
+# 1-5 2-10 3-10 4-5 5-1 6-0
+
+# 2! / 3! != 1  4! / 3! = 4 != 6   5! / 3! = 20 != 10 = 20 / 2    6! / 3! = 120 != 15 = 120 / 8   7! / 3! = 840 != 21 = 840 / 40    8!/3! = 6720 != 28 = 6720 / 240   NO!
+
+# 1,1: 1  2,1: 2  3,1: 3  4,1: 4  5,1: 5   6,1: 6   7,1: 7
+#         2,2: 1  3,2: 3  4,2: 6  5,2: 10  6,2: 15  7,2: 21  8,2: 28
+#                 3,3: 1  4,3: 4  5,3: 10  6,3: 20  7,3: 35  8,3: 56   Hmmmm... finns ett samband här, gäller att hitta det matematiska uttrycket bara 
