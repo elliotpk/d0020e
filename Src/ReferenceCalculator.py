@@ -11,6 +11,7 @@ from itertools import combinations
 from itertools import permutations
 from Block import *
 from Bidder import Bidder
+import math
 
 # blocklist: All the blocks together in a list (since the linked block class is not yet finished. Either one later changes the code to use these instead or adds a funtion to convert the linked list to an ordinary one)
 # buyers: A list of buyers.
@@ -149,8 +150,8 @@ def findDiscount(block, boughtBlocks, foundPrevBlocks = 0):
 
 def demo():
 
-    # blocklist = ["block11", "2", "3", "4", "5", "6", "7", "8"]
-    # buyers = 3
+    # blocklist = ["block11", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+    # buyers = 4
     # # blocklist = ["block11", "block12", "block13", "block21", "block22", "block31"]
     # # buyers = 3
     
@@ -199,35 +200,62 @@ def demo():
     block2.set_nextBlock(block3)
     block3.set_nextBlock(block4)
     block4.set_nextBlock(block5)
-    
-    
+     
     block2.set_prevBlock(block1)
     block3.set_prevBlock(block2)
     block4.set_prevBlock(block3)
     block5.set_prevBlock(block4)
     
+    
+    block6 = AuctionBlock("block6")
+    block7 = AuctionBlock("block7")
+    block8 = AuctionBlock("block8")
+    block9 = AuctionBlock("block9")
+    block0 = AuctionBlock("block0")
+    
+    block6.set_amount(1)
+    block7.set_amount(2)
+    block8.set_amount(3)
+    block9.set_amount(4)
+    block0.set_amount(5)
+    
+    block6.set_price(5)
+    block7.set_price(5)
+    block8.set_price(5)
+    block9.set_price(5)
+    block0.set_price(5)
+    
+    block6.set_discount(0)
+    block7.set_discount(1)
+    block8.set_discount(2)
+    block9.set_discount(3)
+    block0.set_discount(4)
+    
+    block6.set_nextBlock(block7)
+    block7.set_nextBlock(block8)
+    block8.set_nextBlock(block9)
+    block9.set_nextBlock(block0)
+    
+    block7.set_prevBlock(block6)
+    block8.set_prevBlock(block7)
+    block9.set_prevBlock(block8)
+    block0.set_prevBlock(block9)
+    
     buyer1 = Bidder(0,"Buyer",0,3,0,0)
     buyer2 = Bidder(0,"Buyer",0,5,0,0)
     buyer3 = Bidder(0,"Buyer",0,8,0,0)
     
-    blocklist = [block1,block2,block3,block4,block5]
-    buyerlist = [buyer1, buyer2]
+    blocklist = [block1,block2,block3,block4,block5,block6,block7,block8,block9,block0]
+    buyerlist = [buyer1, buyer2]  
     #buyerlist = [buyer1, buyer2, buyer3] # Show returning -1 when no solution can be found
     
     print(referenceCalculator(blocklist, buyerlist))
+    print(math.factorial(len(blocklist))**2/(math.factorial(len(buyerlist))*math.factorial(len(blocklist)-len(buyerlist)))) # n! * nCb
     
     
 demo()
+
     
 # TODO: Comprehensive testing and making things nicer and more modular
 
-# Calculations and test data to try to find the actual performance: 
-# Ex1: (1 * 5 + 3 * 4) / 4 = 4,25   (2 * 5)   NO!
-# 600 1200 1200 600 120 0 Blocknum! * (Blocknum! / 2 * Buyers+1!) Ex1: 5! * (5! /2 * 3!) = 1200
-# 1-5 2-10 3-10 4-5 5-1 6-0
-
-# 2! / 3! != 1  4! / 3! = 4 != 6   5! / 3! = 20 != 10 = 20 / 2    6! / 3! = 120 != 15 = 120 / 8   7! / 3! = 840 != 21 = 840 / 40    8!/3! = 6720 != 28 = 6720 / 240   NO!
-
-# 1,1: 1  2,1: 2  3,1: 3  4,1: 4  5,1: 5   6,1: 6   7,1: 7
-#         2,2: 1  3,2: 3  4,2: 6  5,2: 10  6,2: 15  7,2: 21  8,2: 28
-#                 3,3: 1  4,3: 4  5,3: 10  6,3: 20  7,3: 35  8,3: 56   Hmmmm... finns ett samband här, gäller att hitta det matematiska uttrycket bara 
+# Maths equation for total iterations given n blocks and b bidders: n! * nCb = n!^2/(b!(n-b)!)
