@@ -35,7 +35,7 @@ class Bidder:
       else:
         return None
   
-  # Work in progress, a bidder will return a value to bid on an auction and the auction to bid on.
+  # A bidder will return the lowest to bid on an auction and the auction for that bid.
   # The function loops through all the auctions to find the best auction to bid on.
   def bidMultiAuctionStrategy(self):
     # Update the aggressiveness of the behaviour
@@ -174,7 +174,7 @@ def test():
   for auction in bidder3.auctionList:
     print("Bidder 3 participates in auction ", auction.auctionID ,"  |  auction price: ", auction.price, "  |  market price: ", bidder3.marketPrice) 
   bestBid, bestAuction = bidder3.bidMultiAuctionStrategy()
-  if(bestAuction == None):
+  if(bestBid == None or bestAuction == None):
     print("Bidder 3 doesn't bid in any auction, the price is over market value.")
   else:
     print("Bidder 3 bids ", bestBid, " on auction ", bestAuction.auctionID)
