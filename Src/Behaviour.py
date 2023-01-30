@@ -27,11 +27,11 @@ A = {
   "behaviour": "A",
   "onlyBidMaxAmount": True,
   "aggressiveness": 0.9,
-  "adaptiveAggressiveness": lambda auctions, auctionsLost, bidders, currentBids:
-                            changeAggressiveness(A, A["aggressiveness"]) if(auctions > 4 and auctionsLost > 3 and bidders > 1 and currentBids >= 0) else
-                            changeAggressiveness(A, A["aggressiveness"]) if(auctions > 3 and auctionsLost > 2 and bidders > 1 and currentBids >= 0) else
-                            changeAggressiveness(A, A["aggressiveness"]) if(auctions > 2 and auctionsLost > 1 and bidders > 1 and currentBids >= 0) else
-                            changeAggressiveness(A, A["aggressiveness"]) if(auctions == 1 and bidders > 1 and currentBids > 10) else
+  "adaptiveAggressiveness": lambda auctions, auctionsLost, currentBids:
+                            changeAggressiveness(A, A["aggressiveness"]) if(auctions > 4 and auctionsLost > 3 and currentBids >= 0) else
+                            changeAggressiveness(A, A["aggressiveness"]) if(auctions > 3 and auctionsLost > 2 and currentBids >= 0) else
+                            changeAggressiveness(A, A["aggressiveness"]) if(auctions > 2 and auctionsLost > 1 and currentBids >= 0) else
+                            changeAggressiveness(A, A["aggressiveness"]) if(auctions == 1 and currentBids > 10) else
                             changeAggressiveness(A, A["aggressiveness"]),
   "bidOverMarketPrice": True,
   "bid": lambda price, marketPrice, currentAmount:
@@ -50,11 +50,11 @@ B = {
   "behaviour": "B",
   "onlyBidMaxAmount": False,
   "aggressiveness": 0.5,
-  "adaptiveAggressiveness": lambda auctions, auctionsLost, bidders, currentBids:
-                            changeAggressiveness(B, 0.8) if(auctions > 4 and auctionsLost > 3 and bidders > 1 and currentBids >= 0) else
-                            changeAggressiveness(B, 0.7) if(auctions > 3 and auctionsLost > 2 and bidders > 1 and currentBids >= 0) else
-                            changeAggressiveness(B, 0.6) if(auctions > 2 and auctionsLost > 1 and bidders > 1 and currentBids >= 0) else
-                            changeAggressiveness(B, 0.6) if(auctions == 1 and bidders > 1 and currentBids > 10) else
+  "adaptiveAggressiveness": lambda auctions, auctionsLost, currentBids:
+                            changeAggressiveness(B, 0.8) if(auctions > 4 and auctionsLost > 3 and currentBids >= 0) else
+                            changeAggressiveness(B, 0.7) if(auctions > 3 and auctionsLost > 2 and currentBids >= 0) else
+                            changeAggressiveness(B, 0.6) if(auctions > 2 and auctionsLost > 1 and currentBids >= 0) else
+                            changeAggressiveness(B, 0.6) if(auctions == 1 and currentBids > 10) else
                             changeAggressiveness(B, B["aggressiveness"]),
   "bidOverMarketPrice": False,
   "bid": lambda price, marketPrice, currentAmount:
@@ -73,11 +73,11 @@ C = {
   "behaviour": "C",
   "onlyBidMaxAmount": False,
   "aggressiveness": 0.1,
-  "adaptiveAggressiveness": lambda auctions, auctionsLost, bidders, currentBids:
-                            changeAggressiveness(C, 0.6) if(auctions > 4 and auctionsLost > 3 and bidders > 1 and currentBids >= 0) else
-                            changeAggressiveness(C, 0.4) if(auctions > 3 and auctionsLost > 2 and bidders > 1 and currentBids >= 0) else
-                            changeAggressiveness(C, 0.2) if(auctions > 2 and auctionsLost > 1 and bidders > 1 and currentBids >= 0) else
-                            changeAggressiveness(C, 0.2) if(auctions == 1 and bidders > 1 and currentBids > 10) else
+  "adaptiveAggressiveness": lambda auctions, auctionsLost, currentBids:
+                            changeAggressiveness(C, 0.6) if(auctions > 4 and auctionsLost > 3 and currentBids >= 0) else
+                            changeAggressiveness(C, 0.4) if(auctions > 3 and auctionsLost > 2 and currentBids >= 0) else
+                            changeAggressiveness(C, 0.2) if(auctions > 2 and auctionsLost > 1 and currentBids >= 0) else
+                            changeAggressiveness(C, 0.2) if(auctions == 1 and currentBids > 10) else
                             changeAggressiveness(C, C["aggressiveness"]),
   "bidOverMarketPrice": False,
   "bid": lambda price, marketPrice, currentAmount:
