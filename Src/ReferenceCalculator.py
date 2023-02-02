@@ -12,10 +12,11 @@ from itertools import permutations
 from Block import *
 from Bidder import Bidder
 import math
+from collections import deque
 
 # blocklist: All the blocks together in a list (since the linked block class is not yet finished. Either one later changes the code to use these instead or adds a funtion to convert the linked list to an ordinary one)
 # buyers: A list of buyers.
-def referenceCalculator(blocklist, buyers):
+def referenceCalculator_old(blocklist, buyers):
     bestRajJainCostFairness = -1
     bestData = []
     permNum = 0 # For testing
@@ -42,9 +43,10 @@ def referenceCalculator(blocklist, buyers):
                         i = i + 1
             permAndComb = permAndComb + 1
         permNum = permNum + 1  # For testing
-        print("Permutation number ", permNum, "Combination number ", permAndComb)
-        
-    print(bestData)    # For testing 
+        #print("Permutation number ", permNum, "Combination number ", permAndComb)
+         
+    print("Permutation number ", permNum, "Combination number ", permAndComb)
+    print(bestData)    # For testing
     return bestRajJainCostFairness
         
     #splitfinder to find all combinations of all permutations 
@@ -58,6 +60,58 @@ def referenceCalculator(blocklist, buyers):
     #after every combination: sort the list and return the highest fairness index
     
     #Make all of this modular so that the Fairness Index is easily switched to something else.
+
+
+# blocklist: All the blocks together in a list (since the linked block class is not yet finished. Either one later changes the code to use these instead or adds a funtion to convert the linked list to an ordinary one)
+# buyers: A list of buyers.
+def referenceCalculator(blocklist, buyers):
+    bestRajJainCostFairness = -1
+    bestData = []
+    permNum = 0 # For testing
+    permAndComb = 0
+    
+    for permutation in permutations(blocklist):
+        for rotationOfPermutation in tupleRotatorLister(permutation):
+            for combination in splitfinder(rotationOfPermutation, len(buyers)):
+                if(validCombination(combination, buyers)):
+                    averageCostsForBuyers = []
+                    i = 0
+                    while i < len(combination)-1: # Runs through what the buyers have bought (the last index is the "unboughts")
+                        averageCostsForBuyers.append(averageCost(combination[i]))
+                        i = i + 1
+                        
+                    RajJainCostFairness = rajJainFairness(averageCostsForBuyers)
+                    if (RajJainCostFairness > bestRajJainCostFairness):
+                        bestRajJainCostFairness = RajJainCostFairness
+                        bestData.append(averageCostsForBuyers)
+                        bestData.append(permAndComb)
+                        i = 0
+                        while i < len(combination):
+                            bestData.append(combination[i])
+                            i = i + 1
+                permAndComb = permAndComb + 1
+        permNum = permNum + 1  # For testing
+        #print("Permutation number ", permNum, "Combination number ", permAndComb)
+        if (permNum > len(blocklist)**2): # Due to the way permutations are listed in the permutation-function this will have tested all relevant possibilities when the lists have also been rotated.
+            break
+        
+    print("Permutation number ", permNum, "Combination number ", permAndComb)
+    print(bestData)    # For testing 
+    return bestRajJainCostFairness
+
+# Helper function that takes in a list and returns a list of all rotations of that list.
+def tupleRotatorLister(tup):
+    rotations = len(tup)
+    rotList = []
+    tup = deque(tup)
+
+    while(rotations > 0):
+        rotList.append(tuple(tup))
+        tup.rotate(1)
+        rotations = rotations - 1
+
+    return rotList
+
     
 
 # Find all possible ways to split the blocks between the buyers (including one "buyer" for unbought blocks)
@@ -246,12 +300,15 @@ def demo():
     buyer3 = Bidder(0,"Buyer",0,8,0,0)
     
     blocklist = [block1,block2,block3,block4,block5,block6,block7,block8,block9,block0]
+    blocklist = [block1,block2,block3,block4,block5]
     buyerlist = [buyer1, buyer2]  
     #buyerlist = [buyer1, buyer2, buyer3] # Show returning -1 when no solution can be found
-    
+
     print(referenceCalculator(blocklist, buyerlist))
-    print(math.factorial(len(blocklist))**2/(math.factorial(len(buyerlist))*math.factorial(len(blocklist)-len(buyerlist)))) # n! * nCb
+    print(referenceCalculator_old(blocklist,buyerlist))
+    #print(math.factorial(len(blocklist))**2/(math.factorial(len(buyerlist))*math.factorial(len(blocklist)-len(buyerlist)))) # n! * nCb
     
+    #print(tupleRotatorLister((block1, block2, block3, block4, block5)))
     
 demo()
 
