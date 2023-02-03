@@ -67,13 +67,13 @@ class Bidder:
 
   def addAuction(self, auction):
     self.auctionList.append(auction)
-    self.setCurrentAuctions(self.currentAuctions + 1)
+    self.currentAuctions = len(self.auctionList)
 
   def removeAuction(self, auctionID):
     for auction in self.auctionList:
       if(auction.auctionID == auctionID):
         self.auctionList.remove(auction)
-        self.setCurrentAuctions(self.currentAuctions - 1)
+        self.currentAuctions = len(self.auctionList)
 
 class Auction:
   def __init__(self, auctionID, price):
@@ -167,9 +167,9 @@ def test():
     print("Bidder 1 participates in auction ", auction.auctionID ,"  |  auction price: ", auction.price, "  |  market price: ", bidder1.marketPrice) 
   bestBid2, bestAuction2 = bidder1.bid()
   if(bestBid2 == None or bestAuction2 == None):
-    print("Bidder 3 doesn't bid in any auction, the price is over market value.")
+    print("Bidder 1 doesn't bid in any auction.")
   else:
-    print("Bidder 3 bids ", bestBid2, " on auction ", bestAuction2.auctionID)
+    print("Bidder 1 bids ", bestBid2, " on auction ", bestAuction2.auctionID)
 
 
 test()
