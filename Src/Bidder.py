@@ -172,4 +172,4 @@ def test():
     print("Bidder 1 bids ", bestBid2, " on auction ", bestAuction2.auctionID)
 
 
-test()
+#test()
