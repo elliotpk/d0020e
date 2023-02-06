@@ -15,6 +15,7 @@
 
 import os
 def printdata(string):
+    #spara data före print
     #prints the results into a csv file and labels the different runs into a new csv file
     testnr = 0
     while (os.path.exists('test'+str(testnr)+'.csv')):
@@ -24,3 +25,8 @@ def printdata(string):
     for x in string.split(';'):
         mkcsv.write(x+'\n')
     mkcsv.close()
+""""
+pris,data,vinnare,id
+1,sten,34,#91
+420,lera,2,#54
+"""
