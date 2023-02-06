@@ -11,7 +11,7 @@ sellerslist = []
 
 def readConfig():
     # Reads the config file for seed/numsellers/numrandombidders
-    #try:
+    try:
         config = open("config.txt", "r")
         text = config.read()
         config.close()
@@ -148,7 +148,7 @@ def readConfig():
         return str(check)[0:4]
 
     # If there is no config file, one gets generated and saved with a mathcing checksum
-"""
+
     except:
         config = open('config.txt', "w")
         seed = genSeed()
@@ -160,7 +160,7 @@ def readConfig():
         check = (seed * numrandomsellers * numrandombidders)
         return str(check)[0:4]
 
-"""
+
 def genSeed():
     rng = random.randrange(0, 10000)
     random.seed(rng)
