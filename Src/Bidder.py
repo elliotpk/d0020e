@@ -74,6 +74,18 @@ class Bidder:
       if(auction.auctionID == auctionID):
         self.auctionList.remove(auction)
         self.currentAuctions = len(self.auctionList)
+  
+  def bidUpdate(self, input):
+    for auction in self.auctionList:
+      if(auction.auctionID == input["room_id"]):
+        auction.price = input["value"]
+
+    bestBid, bestAuction = self.bid()
+    if(bestBid == None or bestAuction == None):
+      return []
+    else:
+      return [bestBid, bestAuction]
+    
 
 class Auction:
   def __init__(self, auctionID, price):
@@ -163,7 +175,7 @@ def test():
   bidder1.addAuction(Auction(3, 11000))
   bidder1.addAuction(Auction(4, 12000))
 
-  for auction in bidder3.auctionList:
+  for auction in bidder1.auctionList:
     print("Bidder 1 participates in auction ", auction.auctionID ,"  |  auction price: ", auction.price, "  |  market price: ", bidder1.marketPrice) 
   bestBid2, bestAuction2 = bidder1.bid()
   if(bestBid2 == None or bestAuction2 == None):
