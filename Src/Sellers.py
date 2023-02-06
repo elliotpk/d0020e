@@ -16,6 +16,11 @@ class Sellers:
         return roomid
 
     def genBlock(self,price,amount,discount):
+        self.LinkOfBlocks.head.set_price(price)
+        self.LinkOfBlocks.head.set_amount(amount)
+        self.LinkOfBlocks.head.set_discount(discount)
+
+    def addBlock(self,price,amount,discount):
         block=Block.AuctionBlock()
         block.set_price(price)
         block.set_amount(amount)

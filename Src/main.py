@@ -11,10 +11,9 @@ sellerslist = []
 
 def readConfig():
     # Reads the config file for seed/numsellers/numrandombidders
-    try:
+    #try:
         config = open("config.txt", "r")
         text = config.read()
-        text.find("seed")
         line = text.split("\n")
 
         # Set the seed for all random numbers generated
@@ -23,6 +22,7 @@ def readConfig():
             if rowoflist.find("seed") != -1:
                 seed = int(rowoflist.split("=")[1])
                 random.seed(seed)
+
 
         try:
             seed
@@ -38,40 +38,48 @@ def readConfig():
             rowoflist = rowoflist.replace(" ", "")
             if rowoflist.find("numrandomseller") != -1:
                 numsellers = rowoflist.split("=")
-                number = int(numsellers[1])
-                for x in range(number):
-                    createRandomSeller()
+                number = numsellers[1]
+                if int(number) > 0:
+                    for x in range(int(number)):
+                        createRandomSeller()
 
             elif rowoflist.find("seller") != -1 and rowoflist.find("numrandomseller") == -1:
-                block = rowoflist.split("=")[1]
+                seller=Sellers.Sellers(len(sellerslist))
+                headcreated = False
+                sellerslist.append(seller)
+                block = rowoflist.split("seller=")[1]
                 if block.find("->"):
-                    blockatribute=block.split("->")
+                    listblockatribute=block.split("->")
                 else:
                     print("no ->")
-                    blockatribute=block
-                blockatribute.split(",")
-                for atrtibute in blockatribute:
-                    if atrtibute.find("price")!=-1:
-                        price=blockatribute.split("=")[1]
-                    elif atrtibute.find("amount")!=-1:
-                        amount=blockatribute.split("=")[1]
-                    elif atrtibute.find("discount")!=-1:
-                        discount=blockatribute.split("=")[1]
+                    listblockatribute=block
+                for i in range(len(listblockatribute)):
+                    blockatribute = listblockatribute[i].split(",")
+                    for atrtibute in blockatribute:
+                        if atrtibute.find("price")!=-1:
+                            price=atrtibute.split("=")[1]
+                        elif atrtibute.find("amount")!=-1:
+                            amount=atrtibute.split("=")[1]
+                        elif atrtibute.find("discount")!=-1:
+                            discount=atrtibute.split("=")[1]
+                    try:
+                        price
+                    except:
+                        price = random.randrange(1000, 10000)
+                    try:
+                        amount
+                    except:
+                        amount = random.randrange(1, 100)
+                    try:
+                        discount
+                    except:
+                        discount = random.random()
 
-                try:
-                    price
-                except:
-                    price=random.randrange(1000,10000)
-                try:
-                    amount
-                except:
-                    amount=random.randrange(1,100)
-                try:
-                    discount
-                except:
-                    discount=random.random()
-                for x in range(len(blockatribute)):
-                    createSeller(price, amount, discount)
+                    if headcreated:
+                        seller.addBlock(price,amount,discount)
+                    else:
+                        seller.genBlock(price,amount,discount)
+                        headcreated = True
 
         if len(sellerslist) == 0:
             numsellers = genAmountSellers()
@@ -87,10 +95,9 @@ def readConfig():
             if rowoflist.find("numrandombidders") != -1:
                 numrandombidders = rowoflist.split("=")
                 numrandombidders = int(numrandombidders[1])
-                if int(numrandombidders) < 1:
-                    continue
-                for x in range(numrandombidders):
-                    createBidder()
+                if int(numrandombidders) > 0:
+                    for x in range(numrandombidders):
+                        createBidder()
 
 
 
@@ -134,7 +141,7 @@ def readConfig():
         return str(check)[0:4]
 
     # If there is no config file, one gets generated and saved with a mathcing checksum
-
+"""
     except:
         config = open('config.txt', "w")
         seed = genSeed()
@@ -145,7 +152,7 @@ def readConfig():
                 numrandomsellers))
         check = (seed * numrandomsellers * numrandombidders)
         return str(check)[0:4]
-
+"""
 
 def genSeed():
     rng = random.randrange(0, 10000)
@@ -219,18 +226,17 @@ def createBidder(**kwargs):
     # creates number of sellers
 
 
-def createSeller(price,amount,discount):
-    seller=Sellers.Sellers(len(sellerslist))
-    seller.genBlock(price,amount,discount)
-    sellerslist.append(seller)
 
 def createRandomSeller():
         price = random.randrange(1000, 10000)
         amount = random.randrange(1, 100)
         discount = random.random()
-        createSeller(price,amount,discount)
-
+        seller = Sellers.Sellers(len(sellerslist))
+        seller.genBlock(price, amount, discount)
+        sellerslist.append(seller)
 # SimEngine.printdata("checksum="+str(checksum)+";"+"pris,data,vinnare,id;1,sten,34,#91;420,lera,2,#54") prints
 
 
 checksum = readConfig()
+print(sellerslist[0])
+print(sellerslist[0].LinkOfBlocks.head.Price)

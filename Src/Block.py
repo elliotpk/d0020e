@@ -1,7 +1,7 @@
 class AuctionBlock:
     def __init__(self, Object = None):
         self.Object = Object
-        self.Units = None
+        self.Amount = None
         self.Price = None
         self.Discount = None
         self.NextBlock = None
