@@ -5,7 +5,7 @@ class Sellers:
 
     def __init__(self,id):
         self.id = id
-        self.auctionId = self.createAuction()
+        self.auctionId = self.createAuction(id)
         self.LinkOfBlocks = Block.LinkOfBlocks()
 
     def createAuction(self):
