@@ -1,6 +1,6 @@
 class AuctionBlock:
-    def __init__(self, Object = None):
-        self.Object = Object
+    def __init__(self):
+        self.Object = None
         self.Amount = None
         self.Price = None
         self.Discount = None
@@ -39,7 +39,7 @@ class LinkOfBlocks:
         return self.size
 
     def add(self, Object):
-        newBlock = AuctionBlock(Object)
+        newBlock = Object
         currentBlock = self.head
         while currentBlock.NextBlock != None:
             currentBlock = currentBlock.NextBlock
@@ -49,10 +49,11 @@ class LinkOfBlocks:
     def display(self):
         Blocks = []
         currentBlock = self.head
+        Blocks.append(currentBlock)
         while currentBlock.NextBlock != None:
             currentBlock = currentBlock.NextBlock
-            Blocks.append(currentBlock.Object)
-        print(Blocks)
+            Blocks.append(currentBlock)
+        return Blocks
 
 
 

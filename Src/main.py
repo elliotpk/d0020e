@@ -14,6 +14,7 @@ def readConfig():
     #try:
         config = open("config.txt", "r")
         text = config.read()
+        config.close()
         line = text.split("\n")
 
         # Set the seed for all random numbers generated
@@ -28,7 +29,6 @@ def readConfig():
             seed
         except:
             seed = genSeed()
-            config.close()
             config = open("config.txt", "a")
             config.write("seed=" + str(seed))
             config.close()
@@ -38,9 +38,9 @@ def readConfig():
             rowoflist = rowoflist.replace(" ", "")
             if rowoflist.find("numrandomseller") != -1:
                 numsellers = rowoflist.split("=")
-                number = numsellers[1]
-                if int(number) > 0:
-                    for x in range(int(number)):
+                numsellers = numsellers[1]
+                if int(numsellers) > 0:
+                    for x in range(int(numsellers)):
                         createRandomSeller()
 
             elif rowoflist.find("seller") != -1 and rowoflist.find("numrandomseller") == -1:
@@ -73,7 +73,7 @@ def readConfig():
                     try:
                         discount
                     except:
-                        discount = random.random()
+                        discount = random.randrange(0,100)
 
                     if headcreated:
                         seller.addBlock(price,amount,discount)
@@ -83,11 +83,16 @@ def readConfig():
 
         if len(sellerslist) == 0:
             numsellers = genAmountSellers()
-            config.close()
             config = open("config.txt", "a")
-            config.write("numrandomsellers=" + str(numsellers))
+            config.write("numrandomsellers=" + str(numsellers)+"\n")
             config.close()
 
+        sum=0
+        for sellers in sellerslist:
+            blocklist=sellers.LinkOfBlocks.display()
+            for block in blocklist:
+                sum=sum+int(block.Amount)
+        print(sum)
         for rowoflist in line:
             rowoflist = rowoflist.replace(" ", "")
 
@@ -128,16 +133,18 @@ def readConfig():
                     # id,amount,needs,behaviour,marketprice
                 createBidder(namn=namn, amount=amount, needs=need, behaviour=behaviour, marketprice=marketprice)
 
-        config.close()
+
 
         if len(bidderslist)==0:
             numrandombidders = genNumBuyers()
             config = open("config.txt", "a")
-            config.write("numrandombidders=" + str(numrandombidders))
+            config.write("numrandombidders=" + str(numrandombidders)+"\n")
             config.close()
 
         # returns a checksum for comparisons
-        check = (seed * numsellers * numrandombidders)
+        numsellers=len(sellerslist)
+        numbuyers=len(bidderslist)
+        check = (seed * numsellers * numbuyers)
         return str(check)[0:4]
 
     # If there is no config file, one gets generated and saved with a mathcing checksum
@@ -152,8 +159,8 @@ def readConfig():
                 numrandomsellers))
         check = (seed * numrandomsellers * numrandombidders)
         return str(check)[0:4]
-"""
 
+"""
 def genSeed():
     rng = random.randrange(0, 10000)
     random.seed(rng)
@@ -230,7 +237,7 @@ def createBidder(**kwargs):
 def createRandomSeller():
         price = random.randrange(1000, 10000)
         amount = random.randrange(1, 100)
-        discount = random.random()
+        discount = random.randrange(0,100)
         seller = Sellers.Sellers(len(sellerslist))
         seller.genBlock(price, amount, discount)
         sellerslist.append(seller)
@@ -238,5 +245,3 @@ def createRandomSeller():
 
 
 checksum = readConfig()
-print(sellerslist[0])
-print(sellerslist[0].LinkOfBlocks.head.Price)
