@@ -31,12 +31,15 @@ def getRoomInfo(room_id:str, username:str, order:str):
     Can order the list by time (order = 'time') or bid amount (order = 'bid')
     """
     r = requests.get(API_URL+"/rooms/"+room_id, auth=(username, ''), timeout=TIME_OUT)
+    if(r.status_code != 200):
+        print("Error")
+        return
+
     json_obj = r.json()                                                                     
     value = json_obj["Bids"]
-    print(value)
     output = []
     for entry in value:
-        output.append({"user" : entry["sender"]["val"][0], "value" : entry["text"]["val"][0]})
+        output.append({"room_id" : room_id, "user" : entry["sender"]["val"][0], "value" : entry["text"]["val"][0]})
     sort = False
     if(order == "bid"):
         sort = True
