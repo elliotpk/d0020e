@@ -66,12 +66,3 @@ class LinkOfBlocks:
             currentBlock = currentBlock.NextBlock
             Blocks.append(currentBlock.Object)
         print(Blocks)
-
-AuctionList = LinkOfBlocks()
-
-AuctionList.add("Guitars")
-AuctionList.add("Bears")
-
-AuctionList.display()
-
-print(AuctionList.get_size())
