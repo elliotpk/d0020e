@@ -1,35 +1,27 @@
 import APILink
 import random
-
+import Block
 class Sellers:
 
     def __init__(self,id):
         self.id = id
-        self.hasAuction = False
-        self.blockList = Block
+        self.auctionId = self.createAuction()
+        self.LinkOfBlocks = Block.LinkOfBlocks()
 
     def createAuction(self):
-        #Api call create auction
-        self.hasAuction = True
+        try:
+            roomid=APILink.createAuction(str(self.id),"Seller",10)
+        except:
+            roomid=None
+        return roomid
 
-    def genBlockList(self,blocks):
-        List = []
-        for x in range(blocks):
-            price=random.randrange(10,100)
-            amount=random.randrange(10,100)
-            List.append(Block(price,amount))
-        for x in range(len(List)):
-            try:
-                List[x].nextblock=List[x+1]
-            except:
-                List[x].nextblock=None
-        self.blockList = List[0]
+    def genBlock(self,price,amount,discount):
+        block=Block.AuctionBlock()
+        block.set_price(price)
+        block.set_amount(amount)
+        block.set_discount(discount)
+        self.LinkOfBlocks.add(block)
 
 
-class Block:
 
-    def __init__(self,price,amount):
-        self.price = price
-        self.amount = amount
-        self.nextblock = Block
 

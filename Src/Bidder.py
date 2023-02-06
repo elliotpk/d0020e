@@ -94,4 +94,4 @@ def test():
   print("Bidder 3: changes aggressiveness: ", bidder3.behaviour["adaptiveAggressiveness"](3, 2, 3, 1))
   print("Bidder 3: new aggressiveness: ", bidder3.behaviour["aggressiveness"])
 
-test()
+#test()
