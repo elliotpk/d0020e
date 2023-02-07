@@ -91,7 +91,7 @@ class Bidder:
     if(bestBid == None or bestAuction == None):
       return None
     else:
-      return {'id' : bestAuction.auctionId, 'user':self.id, 'top_bid' : bestBid}
+      return {'id' : bestAuction.auctionID, 'user' : self.id, 'top_bid' : bestBid}
     
 
 class Auction:
