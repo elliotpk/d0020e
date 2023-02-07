@@ -91,8 +91,8 @@ def referenceCalculator(blocklist, buyers):
                             i = i + 1
                 permAndComb = permAndComb + 1
         permNum = permNum + 1  # For testing
-        #print("Permutation number ", permNum, "Combination number ", permAndComb)
-        if (permNum > len(blocklist)**2): # Due to the way permutations are listed in the permutation-function this will have tested all relevant possibilities when the lists have also been rotated.
+        print("Permutation number ", permNum, "Combination number ", permAndComb)
+        if (permNum > len(blocklist)/2): # Due to the way permutations are listed in the permutation-function this will have tested all relevant possibilities when the lists have also been rotated.
             break
         
     print("Permutation number ", permNum, "Combination number ", permAndComb)
@@ -117,7 +117,6 @@ def tupleRotatorLister(tup):
 # Find all possible ways to split the blocks between the buyers (including one "buyer" for unbought blocks)
 # Assumes that only the "unbought" blocks can be empty since every buyer should have a demand
 def splitfinder(blocklist, numBuyers):
-    
     possibleSplits = []
     for breakpoints in combinations(range(1, len(blocklist)+1), numBuyers):  # Combinatorics: find all places to place splitpoints between groups
         possibilityN = []
@@ -140,7 +139,7 @@ def validCombination(Combination, buyers):
     
     buyerIndex = 0
     for buyerBoughts in possibleCombination:
-        demand = buyers[buyerIndex].needs
+        demand = buyers[buyerIndex].needs.amount
         for block in buyerBoughts:
             demand = demand - block.get_amount()
         if(demand > 0):
@@ -200,6 +199,14 @@ def findDiscount(block, boughtBlocks, foundPrevBlocks = 0):
             block = block.next()
             foundPrevBlocks = foundPrevBlocks - 1
         return discount
+
+def getAllBlocks(sellerlist):
+    blocklist = []
+    for seller in sellerlist:
+        SellerBlocklist=seller.LinkOfBlocks.display()
+        for block in SellerBlocklist:
+            blocklist.append(block)
+    return blocklist
             
 
 def demo():

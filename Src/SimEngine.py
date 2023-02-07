@@ -44,6 +44,7 @@ class SimEngine():
         if(not self.addBuyers(self.buyers)):                # Error checking if adding buyers to auctions went well
             return False
 
+
     def simStart(self):
         ""
         #Round Start

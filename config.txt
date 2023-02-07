@@ -1,0 +1,4 @@
+seed=765
+numrandomsellers=10
+numrandombidders=4
+seller=price=54->->->->->->->->
