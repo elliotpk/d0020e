@@ -1,6 +1,7 @@
 class AuctionBlock:
-    def __init__(self, Object = None):
-        self.Object = Object
+    #
+    def __init__(self):
+        self.Object = None
         self.Units = None
         self.Price = None
         self.Discount = None
@@ -30,29 +31,30 @@ class AuctionBlock:
 
     def set_nextBlock(self, NextBlock):
         self.NextBlock = NextBlock
-        
+
     def set_prevBlock(self, prevBlock):
         self.prevBlock = prevBlock
-        
+
     def prev(self):
         return self.prevBlock
-    
+
     def next(self):
         return self.NextBlock
-    
+
     def __repr__(self) -> str:
         return self.Object
+
 
 class LinkOfBlocks:
     def __init__(self):
         self.head = AuctionBlock()
-        self.size = 0   
+        self.size = 0
 
     def get_size(self):
         return self.size
 
     def add(self, Object):
-        newBlock = AuctionBlock(Object)
+        newBlock = Object
         currentBlock = self.head
         while currentBlock.NextBlock != None:
             currentBlock = currentBlock.NextBlock
@@ -62,16 +64,8 @@ class LinkOfBlocks:
     def display(self):
         Blocks = []
         currentBlock = self.head
+        Blocks.append(currentBlock)
         while currentBlock.NextBlock != None:
             currentBlock = currentBlock.NextBlock
-            Blocks.append(currentBlock.Object)
-        print(Blocks)
-
-AuctionList = LinkOfBlocks()
-
-AuctionList.add("Guitars")
-AuctionList.add("Bears")
-
-AuctionList.display()
-
-print(AuctionList.get_size())
+            Blocks.append(currentBlock)
+        return Blocks

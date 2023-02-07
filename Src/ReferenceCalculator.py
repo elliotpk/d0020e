@@ -310,7 +310,7 @@ def demo():
     
     #print(tupleRotatorLister((block1, block2, block3, block4, block5)))
     
-demo()
+# demo()
 
     
 # TODO: Comprehensive testing and making things nicer and more modular
