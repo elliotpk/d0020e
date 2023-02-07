@@ -34,7 +34,7 @@ def getRoomInfo(room_id:str, username:str, order:str):
     if(r.status_code != 200):
         print("Error")
         return
-
+        
     json_obj = r.json()                                                                     
     value = json_obj["Bids"]
     output = []
