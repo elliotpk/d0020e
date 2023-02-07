@@ -55,6 +55,9 @@ def readConfig():
                     print("no ->")
                     listblockatribute=block
                 for i in range(len(listblockatribute)):
+                    price = None
+                    amount = None
+                    discount = None
                     blockatribute = listblockatribute[i].split(",")
                     for attribute in blockatribute:
                         if attribute.find("price")!=-1:
@@ -63,17 +66,11 @@ def readConfig():
                             amount=int(attribute.split("=")[1])
                         elif attribute.find("discount")!=-1:
                             discount=int(attribute.split("=")[1])
-                    try:
-                        price
-                    except:
+                    if price == None:
                         price = random.randrange(1000, 10000)
-                    try:
-                        amount
-                    except:
+                    if amount == None:
                         amount = random.randrange(1, 100)
-                    try:
-                        discount
-                    except:
+                    if discount == None:
                         discount = random.randrange(0,100)
 
                     if headcreated:
