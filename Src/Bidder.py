@@ -76,21 +76,29 @@ class Bidder:
         self.currentAuctions = len(self.auctionList)
   
   def bidUpdate(self, input):
-    for auction in self.auctionList:
-      if(auction.auctionID == input["room_id"]):
-        auction.price = input["value"]
+    self.winnerAuctions = 0
+    for dictionary in input:
+      for auction in self.auctionList:
+        if(dictionary["user"] == self.id):
+          self.winningAuctions =+ 1
+        if(auction.auctionID == dictionary["room_id"]):
+          auction.price = dictionary["value"]
+          auction.winner = dictionary["user"]
 
     bestBid, bestAuction = self.bid()
+    if(bestAuction.winner == self.id):
+      return None
     if(bestBid == None or bestAuction == None):
-      return []
+      return None
     else:
-      return [bestBid, bestAuction]
+      return {'id' : bestAuction.auctionId, 'user':self.id, 'top_bid' : bestBid}
     
 
 class Auction:
   def __init__(self, auctionID, price):
     self.auctionID = auctionID
     self.price = price
+    self.winner = None
 
 class Needs:
     def __init__(self, amount, type):
