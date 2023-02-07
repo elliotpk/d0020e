@@ -1,7 +1,8 @@
 import random
 import SimEngine
 import Sellers
-import Bidder
+from Bidder import *
+from ReferenceCalculator import *
 
 global bidderslist
 bidderslist = []
@@ -55,13 +56,13 @@ def readConfig():
                     listblockatribute=block
                 for i in range(len(listblockatribute)):
                     blockatribute = listblockatribute[i].split(",")
-                    for atrtibute in blockatribute:
-                        if atrtibute.find("price")!=-1:
-                            price=atrtibute.split("=")[1]
-                        elif atrtibute.find("amount")!=-1:
-                            amount=atrtibute.split("=")[1]
-                        elif atrtibute.find("discount")!=-1:
-                            discount=atrtibute.split("=")[1]
+                    for attribute in blockatribute:
+                        if attribute.find("price")!=-1:
+                            price=int(attribute.split("=")[1])
+                        elif attribute.find("amount")!=-1:
+                            amount=int(attribute.split("=")[1])
+                        elif attribute.find("discount")!=-1:
+                            discount=int(attribute.split("=")[1])
                     try:
                         price
                     except:
@@ -84,7 +85,7 @@ def readConfig():
         if len(sellerslist) == 0:
             numsellers = genAmountSellers()
             config = open("config.txt", "a")
-            config.write("numrandomsellers=" + str(numsellers)+"\n")
+            config.write("\nnumrandomsellers=" + str(numsellers)+"\n")
             config.close()
 
         sum=0
@@ -212,7 +213,7 @@ def createBidder(**kwargs):
         else:
             raise
     except:
-        need = Bidder.Needs(random.randrange(10, 200), "Stenmalm")
+        need = Needs(random.randrange(10, 200), "Stenmalm")
     try:
         if kwargs["marketprice"] != None:
             marketprice = kwargs["marketprice"]
@@ -226,10 +227,10 @@ def createBidder(**kwargs):
         else:
             raise
     except:
-        behaviour = Bidder.Behaviour.randomBehaviour()
+        behaviour = Behaviour.randomBehaviour()
         i = None
     # id, currentamount, needs, behaviour, marketPrice
-    bidderslist.append(Bidder.Bidder(namn, amount, need, marketprice, behaviour))
+    bidderslist.append(Bidder(namn, amount, need, marketprice, behaviour))
     # creates number of sellers
 
 
@@ -242,6 +243,5 @@ def createRandomSeller():
         seller.genBlock(price, amount, discount)
         sellerslist.append(seller)
 # SimEngine.printdata("checksum="+str(checksum)+";"+"pris,data,vinnare,id;1,sten,34,#91;420,lera,2,#54") prints
-
-
 checksum = readConfig()
+print(referenceCalculator(getAllBlocks(sellerslist), bidderslist))

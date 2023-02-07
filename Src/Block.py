@@ -35,6 +35,9 @@ class AuctionBlock:
     def set_prevBlock(self, prevBlock):
         self.prevBlock = prevBlock
 
+    def set_Object(self, object):
+        self.Object = object
+
     def prev(self):
         return self.prevBlock
 
@@ -42,7 +45,7 @@ class AuctionBlock:
         return self.NextBlock
 
     def __repr__(self) -> str:
-        return self.Object
+        return "{" + str(self.Price) + " " + str(self.Amount) + " " + str(self.Discount) + "}"
 
 
 class LinkOfBlocks:
@@ -59,6 +62,7 @@ class LinkOfBlocks:
         while currentBlock.NextBlock != None:
             currentBlock = currentBlock.NextBlock
         currentBlock.NextBlock = newBlock
+        currentBlock.NextBlock.prevBlock = currentBlock
         self.size += 1
 
     def display(self):
