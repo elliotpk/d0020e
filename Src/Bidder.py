@@ -34,10 +34,10 @@ class Bidder:
       if self.behaviour["bid"](auction.price, self.marketPrice, self.currentAmount) and self.behaviour["onlyBidMaxAmount"]:
         return self.currentAmount, auction
       else:
-        bid = int(min(auction.price * (1 + self.behaviour["aggressiveness"] * random.uniform(0, 1)), self.currentAmount))
+        bid = int(min(auction.price * (1 + self.behaviour["aggressiveness"] * random.uniform(0.4, 0.6)), self.currentAmount))
         
         # Print for testing purposes:
-        print("<from bid(self)> bid: ",bid,"  |  bestBid: ", bestBid, "  |  auction: ", auction.auctionID)
+        print("<from bid()> bid: ", bid, "  |  bestBid: ", bestBid, "  |  auction: ", auction.auctionID)
         
         # Checks if the bidder can bid and if it wants to bid if the market price is over the generated bid.
         if self.behaviour["bid"](auction.price, self.marketPrice, self.currentAmount) and (self.marketPrice > bid and not self.behaviour["bidOverMarketPrice"]):
@@ -76,7 +76,7 @@ class Bidder:
         self.currentAuctions = len(self.auctionList)
   
   def bidUpdate(self, input):
-    self.winnerAuctions = 0
+    self.winningAuctions = 0
     for dictionary in input:
       for auction in self.auctionList:
         if(dictionary["user"] == self.id):
@@ -91,6 +91,7 @@ class Bidder:
     if(bestBid == None or bestAuction == None):
       return None
     else:
+      self.winningAuctions =+ 1
       return {'id' : bestAuction.auctionID, 'user' : self.id, 'top_bid' : bestBid}
     
 
@@ -192,4 +193,30 @@ def test():
     print("Bidder 1 bids ", bestBid2, " on auction ", bestAuction2.auctionID)
 
 
+def demo():
+  bidder = Bidder(123, 20000, Needs(10, "steel beams"), 15000, Behaviour.B)
+  print("Created a bidder: ID:", bidder.id, "| amount:", bidder.currentAmount, "| needs:", bidder.needs.amount, bidder.needs.type, "| market price:", bidder.marketPrice, "| Behaviour:", bidder.behaviour["behaviour"])
+  print("Current auctions (before participating):", bidder.currentAuctions)
+  bidder.addAuction(Auction(1, 13000))
+  bidder.addAuction(Auction(2, 8500))
+  bidder.addAuction(Auction(3, 11000))
+  bidder.addAuction(Auction(4, 9000))
+  bidder.addAuction(Auction(5, 10000))
+  print("Current auctions (after entering 5 auctions):", bidder.currentAuctions)
+
+  #print("participating in 5 auctions, 4 auctions lost and 1 current bid")
+  #print("Bidder", bidder.id, ": changes aggressiveness from:", bidder.behaviour["aggressiveness"], "to", bidder.behaviour["adaptiveAggressiveness"](5, 4, 1))
+    
+  bestBid, bestAuction = bidder.bid()
+
+  if(bestBid == None or bestAuction == None):
+    print("Bidder", bidder.id, "doesn't bid in any auction, the price is over market value.")
+  else:
+    bidder.setWinningAuctions(1)
+    bidder.setCurrentAmount(bidder.currentAmount - bestBid)
+    print("Bidder", bidder.id, "bid ", bestBid, " in auction ", bestAuction.auctionID,"| Amount left:", bidder.currentAmount)
+
+
 #test()
+
+#demo()
