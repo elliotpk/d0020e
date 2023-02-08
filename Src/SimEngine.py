@@ -2,20 +2,6 @@ import APILink as link
 from Sellers import Sellers
 import random
 from DumbBidder import DumbBidder
-#roundnumber = get from main
-#actualnumber = loop
-
-#class SimEngine
-
-#initActuion
-
-#run until actual=roundnumber
-#Api.data
-#send data to list of bidders for
-#prosses bidders
-#send to api
-#actual++
-
 
 import os
 def printdata(string):
