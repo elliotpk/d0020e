@@ -91,6 +91,10 @@ def readConfig():
                     seller.genBlock(price, amount, discount)
                     headcreated = True
 
+        elif rowoflist.find("budget%")!=-1:
+            lowbudget = int(rowoflist.split("budget%=")[1])/100
+            print(lowbudget)
+
     if len(sellerslist) == 0:
         numsellers = genAmountSellers()
         config = open("config.txt", "a")
@@ -102,7 +106,7 @@ def readConfig():
         blocklist = sellers.LinkOfBlocks.display()
         for block in blocklist:
             sum = sum + int(block.Amount)
-    budget = sum
+    totalbudget = sum
     for rowoflist in line:
         rowoflist = rowoflist.replace(" ", "")
 
@@ -115,10 +119,8 @@ def readConfig():
             behaviour = None
             marketprice = None
             for i in range(len(rowoflist)):
-                print(rowoflist[i])
                 namn = len(bidderslist) + 200
                 rowoflist[i] = rowoflist[i].split("bidder=")[1]
-                print(rowoflist[i])
                 if rowoflist[i].find("amount=") != -1:
                     rowoflist[i] = rowoflist[i].split("amount=")[1]
                     amount = rowoflist[i]
@@ -131,12 +133,17 @@ def readConfig():
                 elif rowoflist[i].find("marketprice=") != -1:
                     rowoflist[i] = rowoflist[i].split("marketprice=")[1]
                     marketprice = rowoflist[i]
-                # id,amount,needs,behaviour,marketprice
-            print(namn, amount, need, behaviour, marketprice, budget)
-            newBudget = createBidder(namn=namn, amount=amount, needs=need, behaviour=behaviour,
-                                     marketprice=marketprice, budget=budget)
-            print(newBudget)
-            budget = newBudget
+                try:
+                    lowbudget
+                except:
+                    ranodomprocent = random.random()
+                    lowbudget = totalbudget * ranodomprocent
+                    config = open("config.txt", "a")
+                    config.write("\n" + "budget%="+ str(int(ranodomprocent)))
+                    config.close()
+                # id,amount,needs,behaviour,marketprice,totalbudget,lowbudget
+            newBudget = createBidder(namn=namn, amount=amount, needs=need, behaviour=behaviour, marketprice=marketprice, budget=totalbudget, lowbudget=lowbudget)
+            totalbudget = totalbudget-newBudget
 
     for rowoflist in line:
         rowoflist = rowoflist.replace(" ", "")
@@ -145,11 +152,19 @@ def readConfig():
         if rowoflist.find("numrandombidders") != -1:
             numrandombidders = rowoflist.split("=")
             numrandombidders = int(numrandombidders[1])
+            newbudget = totalbudget/numrandombidders
+            try:
+                lowbudget
+            except:
+                ranodomprocent = random.random()
+                lowbudget = totalbudget * ranodomprocent
+                config = open("config.txt","a")
+                config.write("\n"+"budget%="+str(int(ranodomprocent)))
+                config.close()
             if int(numrandombidders) > 0:
                 for x in range(numrandombidders):
-                    print(budget)
-                    newBudget = createBidder(budget=budget)
-                    budget = newBudget
+                    totalbudget = totalbudget-createBidder(budget=newbudget, lowbudget=lowbudget)
+
 
     if len(bidderslist) == 0:
         numrandombidders = genNumBuyers()
@@ -196,59 +211,42 @@ def genNumBuyers():
 
 # creates bidders from config or random if no value was given
 def createBidder(**kwargs):
-    try:
-        if kwargs["budget"] == None:
-            raise
-    except:
+    if kwargs["budget"] == None:
         kwargs["budget"] = random.randrange(0, 100)
+
     try:
-        if kwargs["namn"] != None:
-            namn = kwargs["namn"]
-        else:
-            raise
+        namn=kwargs["namn"]
     except:
         namn = len(bidderslist)
+
     try:
-        if kwargs["amount"] != None:
-            amount = kwargs["amount"]
-        else:
-            raise
+        amount = kwargs["amount"]
     except:
         amount = random.randrange(10, 200)
+
     try:
-        print(kwargs["needs"])
-        if kwargs["needs"] != None:
-            need = kwargs["needs"]
-        else:
-            raise
+        need = Needs(int(kwargs["needs"]), "stenmalm")
     except:
-        if int(kwargs["budget"]) < 10:
+        if int(kwargs["budget"]) < 0:
             raise Exception("cant be more demand then supply")
         else:
-            need = Needs(random.randrange(10, int(kwargs["budget"])), "Stenmalm")
+            need = Needs(random.randrange(int(kwargs["budget"] * kwargs["lowbudget"])-1, int(kwargs["budget"])), "Stenmalm")
+
     try:
-        if kwargs["marketprice"] != None:
-            marketprice = kwargs["marketprice"]
-        else:
-            raise
+        marketprice = kwargs["marketprice"]
     except:
         marketprice = random.randrange(1000, 10000)
+
     try:
-        if kwargs["behaviour"] != None:
-            behaviour = kwargs["behaviour"]
-        else:
-            print("cant be more demand then supply")
-            raise Exception("cant be more demand then supply")
+        behaviour = kwargs["behaviour"]
     except:
         behaviour = Behaviour.randomBehaviour()
-    if int(kwargs["budget"]) - need.amount < 0:
-        raise ["cant be more demand then supply"]
 
-    newBudget = int(kwargs["budget"]) - int(need.amount)
+
 
     # id, currentamount, needs, behaviour, marketPrice
     bidderslist.append(Bidder(namn, amount, need, marketprice, behaviour))
-    return newBudget
+    return need.amount
 
     # creates number of sellers
 
@@ -265,8 +263,15 @@ def createRandomSeller():
 # SimEngine.printdata("checksum="+str(checksum)+";"+"pris,data,vinnare,id;1,sten,34,#91;420,lera,2,#54") prints
 checksum = readConfig()
 sum = 0
+for x in bidderslist:
+    sum = sum + x.needs.amount
+    print(x.needs.amount)
+
+print(sum , "sum of demand")
+sumseller = 0
 for x in sellerslist:
     list = x.LinkOfBlocks.display()
     for i in list:
-        sum = sum + i.Amount
-print(sum)
+        sumseller = sumseller+ i.Amount
+print(sumseller , "sum of supply")
+print(sum/sumseller)
