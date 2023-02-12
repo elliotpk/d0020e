@@ -1,6 +1,7 @@
 import Behaviour
 import random
 
+
 class Bidder:
   def __init__(self, id, amount, needs, marketPrice, behaviour):
     self.id = id

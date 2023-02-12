@@ -79,7 +79,7 @@ def readConfig():
                 if price == None:
                     price = random.randrange(1000, 10000)
                 if amount == None:
-                    amount = random.randrange(1, 100)
+                    amount = random.randrange(100, 1000)
                 if discount == None:
                     discount = random.randrange(0, 100)
 
@@ -116,7 +116,7 @@ def readConfig():
             behaviour = None
             marketprice = None
             for i in range(len(rowoflist)):
-                namn = len(bidderslist) + 200
+                namn = "Buyer",len(bidderslist) + 200
                 rowoflist[i] = rowoflist[i].split("bidder=")[1]
                 if rowoflist[i].find("amount=") != -1:
                     rowoflist[i] = rowoflist[i].split("amount=")[1]
@@ -156,7 +156,7 @@ def readConfig():
             behaviour = None
             marketprice = None
             for i in range(len(rowoflist)):
-                namn = len(bidderslist)
+                namn = "Buyer",len(bidderslist)
                 if rowoflist[i].find("amount=") != -1:
                     rowoflist[i] = rowoflist[i].split("amount=")[1]
                     amount = rowoflist[i]
@@ -215,17 +215,10 @@ def genAmountSellers():
 
 def genNumBuyers():
     numbuyers = random.randrange(0, 100)
-    createBidder()
+    for x in range(numbuyers):
+        createBidder()
     return numbuyers
 
-
-# main() call on setup, reference, simengine
-
-# setup() setup all
-
-# printseed()
-
-# Graphs()
 
 
 # creates bidders from config or random if no value was given
@@ -248,7 +241,7 @@ def createBidder(**kwargs):
     try:
         namn=kwargs["namn"]
     except:
-        namn=len(bidderslist)
+        namn="Buyer",len(bidderslist)
     try:
         need = Needs(int(kwargs["needs"]), "stenmalm")
     except:
@@ -276,7 +269,7 @@ def createBidder(**kwargs):
 
 def createRandomSeller():
     price = random.randrange(1000, 10000)
-    amount = random.randrange(1, 100)
+    amount = random.randrange(100, 1000)
     discount = random.randrange(0, 100)
     seller = Sellers.Sellers(len(sellerslist))
     seller.genBlock(price, amount, discount)
@@ -284,7 +277,8 @@ def createRandomSeller():
 
 
 checksum = readConfig()
-#aucitonengine = SimEngine(sellerslist,10,bidderslist)
+
+
 
 sum = 0
 for x in bidderslist:
@@ -296,4 +290,8 @@ for x in sellerslist:
     list = x.LinkOfBlocks.display()
     for i in list:
         sumseller = sumseller+ i.Amount
+        x.quantity = i.Amount
 print(sumseller , "sum of supply")
+
+aucitonengine = SimEngine(sellerslist,10,bidderslist)
+aucitonengine.simStart()

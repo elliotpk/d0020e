@@ -6,14 +6,15 @@ class Sellers:
     def __init__(self,id):
         self.id = id
         self.auctionId = None
+        self.quantity = None
         self.LinkOfBlocks = Block.LinkOfBlocks()
 
     def createAuction(self):
         try:
             roomid=APILink.createAuction(str(self.id),"Seller",10)
+            self.auctionId = roomid
         except:
             roomid=None
-            self.auctionId = roomid
         return roomid
 
     def genBlock(self,price,amount,discount):
