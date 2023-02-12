@@ -1,6 +1,6 @@
 import APILink
-import random
 import Block
+
 class Sellers:
 
     def __init__(self,id):

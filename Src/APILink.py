@@ -8,7 +8,7 @@ import json
 
 # Perhaps import this from the config file?
 API_URL = "http://127.0.0.1:5000"
-TIME_OUT = 0                            # Seconds
+TIME_OUT = 3                           # Seconds
 ROOM_DURATION = 40                       # Minutes
 
 def endAuction(room_id:str, username:str, winner:str):
