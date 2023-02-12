@@ -83,8 +83,6 @@ class SimEngine():
             link.endAuction(auction['id'], 'Seller', auction['user'])
             print("User: " + auction['user'] + " has won auction:" + auction['id'] + " for " + str(auction["quantity"]) + " units for " + str(auction["top_bid"]))
             # endAuction is at a very basic stage currently
-            #printdata(auction['top_bid'] + ',N/A,' + auction['user'] + ',' + auction['id'])
-            
 
     def addBuyers(self, Buyers):
         "Create and join all the buyers to all auction rooms"
@@ -109,18 +107,3 @@ class SimEngine():
                 topBid = topBid[0]  
                 temp.append({'id' : seller.auctionId, 'quantity' : seller.quantity, 'user':topBid ['user'] , 'top_bid' : topBid['value']})     # Should contain all the information needed per auction
         return temp
-
-sellerAmount = int(input('How many sellers?\n'))
-limit = int(input('How many rounds?\n'))
-buyerAmount = int(input('How many buyers?\n'))
-
-sellerList = []
-for i in range(sellerAmount):
-    sellerList.append(Sellers('Seller'+str(i), random.randint(100, 500)))
-
-buyerList = []
-for i in range(buyerAmount):
-    buyerList.append(DumbBidder('Buyer'+str(i)))
-
-engine = SimEngine(sellerList, limit, buyerList)
-engine.simStart()
