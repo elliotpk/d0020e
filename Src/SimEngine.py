@@ -1,7 +1,6 @@
 import APILink as link
 from Sellers import Sellers
 import random
-from DumbBidder import DumbBidder
 
 import os
 def printdata(string):
