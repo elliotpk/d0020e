@@ -30,6 +30,3 @@ class Sellers:
         block.set_Object = "Block " + str(price) + " " + str(amount) + " " + str(discount) # For debugging mostly
         self.LinkOfBlocks.add(block)
 
-
-
-
