@@ -2,10 +2,9 @@ from SimEngine import *
 import Sellers
 from Bidder import *
 from ReferenceCalculator import *
+import random
 
-global bidderslist
 bidderslist = []
-global sellerslist
 sellerslist = []
 
 
@@ -29,7 +28,6 @@ def readConfig():
         check = (seed * numrandomsellers * numrandombidders)
         return str(check)[0:4]
 
-
         # Set the seed for all random numbers generated
     for rowoflist in line:
         rowoflist = rowoflist.replace(" ", "")
@@ -48,54 +46,66 @@ def readConfig():
     # reads number of sellers and creates the amount of available material
     for rowoflist in line:
         rowoflist = rowoflist.replace(" ", "")
-        if rowoflist.find("numrandomseller") != -1:
-            numsellers = rowoflist.split("=")
-            numsellers = numsellers[1]
-            if int(numsellers) > 0:
-                for x in range(int(numsellers)):
-                    createRandomSeller()
 
-        elif rowoflist.find("seller") != -1 and rowoflist.find("numrandomseller") == -1:
-            seller = Sellers.Sellers(len(sellerslist))
-            headcreated = False
-            sellerslist.append(seller)
+        if rowoflist.find("seller") != -1:
             block = rowoflist.split("seller=")[1]
-            if block.find("->"):
-                listblockatribute = block.split("->")
+            if block.find("number") != -1:
+                numsellers = int(block.split("number=")[1].split(":")[0])
             else:
-                listblockatribute = block
-            for i in range(len(listblockatribute)):
-                price = None
-                amount = None
-                discount = None
-                blockatribute = listblockatribute[i].split(",")
-                for attribute in blockatribute:
-                    if attribute.find("price") != -1:
-                        price = int(attribute.split("=")[1])
-                    elif attribute.find("amount") != -1:
-                        amount = int(attribute.split("=")[1])
-                    elif attribute.find("discount") != -1:
-                        discount = int(attribute.split("=")[1])
-                if price == None:
-                    price = random.randrange(1000, 10000)
-                if amount == None:
-                    amount = random.randrange(100, 1000)
-                if discount == None:
-                    discount = random.randrange(0, 100)
-
-                if headcreated:
-                    seller.addBlock(price, amount, discount)
+                numsellers = random.randrange(1,15)
+            for x in range(numsellers):
+                block = rowoflist.split(":")[1]
+                if block.find("->") != -1:
+                    listblockatribute = block.split("->")
+                    lenoflist=len(listblockatribute)
                 else:
-                    seller.genBlock(price, amount, discount)
-                    headcreated = True
+                    listblockatribute = []
+                    listblockatribute.append(block)
+                    lenoflist = 1
+                seller = Sellers.Sellers(len(sellerslist))
+                sellerslist.append(seller)
+                headcreated = False
+                for i in range(lenoflist):
+                    price = None
+                    amount = None
+                    discount = None
+                    blockatribute = listblockatribute[i].split(",")
+                    for attribute in blockatribute:
+                        if attribute.find("price") != -1:
+                            price = int(attribute.split("=")[1])
+                        elif attribute.find("amount") != -1:
+                            amount = int(attribute.split("=")[1])
+                        elif attribute.find("discount") != -1:
+                            discount = int(attribute.split("=")[1])
+                    if price == None:
+                        price = random.randrange(1000, 10000)
+                    if amount == None:
+                        amount = random.randrange(100, 1000)
+                    if discount == None:
+                        discount = random.randrange(0, 100)
 
-        elif rowoflist.find("resourcesplit%")!=-1:
-            lowbudget = int(rowoflist.split("resourcesplit%=")[1])/100
+                    if headcreated:
+                        seller.addBlock(price, amount, discount)
+                    else:
+                        seller.genBlock(price, amount, discount)
+                        headcreated = True
+
+        elif rowoflist.find("resourceusage%") != -1:
+            resourceusage = int(rowoflist.split("resourceusage%=")[1]) / 100
+
+    try:
+        resourceusage
+    except:
+        ranodomprocent = random.random()
+        resourceusage = ranodomprocent
+        config = open("config.txt", "a")
+        config.write("\n" + "resourceusage%=" + str(int(ranodomprocent * 100)))
+        config.close()
 
     if len(sellerslist) == 0:
         numsellers = genAmountSellers()
         config = open("config.txt", "a")
-        config.write("\nnumrandomsellers=" + str(numsellers))
+        config.write("\nseller=" + "number="+str(numsellers))
         config.close()
 
     sum = 0
@@ -103,20 +113,20 @@ def readConfig():
         blocklist = sellers.LinkOfBlocks.display()
         for block in blocklist:
             sum = sum + int(block.Amount)
-    totalbudget = sum
+    totalbudget = sum * resourceusage
     for rowoflist in line:
         rowoflist = rowoflist.replace(" ", "")
 
         # reads demands for buyers
         if rowoflist.find("bidder") != -1 and rowoflist.find("numrandombidders") == -1:
             rowoflist = rowoflist.split(",")
-            namn=None
+            namn = None
             amount = None
             need = None
             behaviour = None
             marketprice = None
             for i in range(len(rowoflist)):
-                namn = "Buyer",len(bidderslist) + 200
+                namn = "Buyer", len(bidderslist) + 200
                 rowoflist[i] = rowoflist[i].split("bidder=")[1]
                 if rowoflist[i].find("amount=") != -1:
                     rowoflist[i] = rowoflist[i].split("amount=")[1]
@@ -130,17 +140,11 @@ def readConfig():
                 elif rowoflist[i].find("marketprice=") != -1:
                     rowoflist[i] = rowoflist[i].split("marketprice=")[1]
                     marketprice = rowoflist[i]
-                try:
-                    lowbudget
-                except:
-                    ranodomprocent = random.random()
-                    lowbudget = totalbudget * ranodomprocent
-                    config = open("config.txt", "a")
-                    config.write("\n" + "resourcesplit%="+ str(int(ranodomprocent*100)))
-                    config.close()
-                # id,amount,needs,behaviour,marketprice,totalbudget,lowbudget
-            spentbudget = createBidder(namn=namn, amount=amount, needs=need, behaviour=behaviour, marketprice=marketprice, budget=totalbudget, lowbudget=lowbudget)
-            totalbudget = totalbudget-spentbudget
+
+                # id,amount,needs,behaviour,marketprice,totalbudget,resourceusage
+            spentbudget = createBidder(namn=namn, amount=amount, needs=need, behaviour=behaviour,
+                                       marketprice=marketprice, budget=totalbudget)
+            totalbudget = totalbudget - spentbudget
 
     for rowoflist in line:
         rowoflist = rowoflist.replace(" ", "")
@@ -150,13 +154,13 @@ def readConfig():
             numrandombidders = rowoflist.split("numrandombidders=")
             numrandombidders = int(numrandombidders[1])
             rowoflist = rowoflist.split(",")
-            namn=None
+            namn = None
             amount = None
             need = None
             behaviour = None
             marketprice = None
             for i in range(len(rowoflist)):
-                namn = "Buyer",len(bidderslist)
+                namn = "Buyer", len(bidderslist)
                 if rowoflist[i].find("amount=") != -1:
                     rowoflist[i] = rowoflist[i].split("amount=")[1]
                     amount = rowoflist[i]
@@ -169,26 +173,36 @@ def readConfig():
                 elif rowoflist[i].find("marketprice=") != -1:
                     rowoflist[i] = rowoflist[i].split("marketprice=")[1]
                     marketprice = rowoflist[i]
-            try:
-                lowbudget
-            except:
-                ranodomprocent = random.random()
-                lowbudget = totalbudget/numrandombidders * ranodomprocent
-                config = open("config.txt","a")
-                config.write("\n"+"resourcesplit%="+str(int(ranodomprocent*100)))
-                config.close()
+
             if int(numrandombidders) > 0:
+                demands = []
+                try:
+                    if need == None:
+                        raise
+                    for x in range(numrandombidders):
+                        demands.append(need)
+                except:
+                    # generate random procentual usage for each bidder to match the total budget
+                    procentdemands = []
+                    sumdemands = 0
+                    for x in range(numrandombidders):
+                        rng = random.randrange(10, 100)  # can specify range of upper and lower demands here in %
+                        sumdemands = sumdemands + rng
+                        procentdemands.append(rng)
+                    for x in procentdemands:
+                        x = x / (sumdemands)
+                        x = x * totalbudget
+                        demands.append(x)
                 for x in range(numrandombidders):
-                    splitbudget = (totalbudget) / (numrandombidders - x)
-                    spentbudget = createBidder(namn=namn, amount=amount, needs=need, behaviour=behaviour, marketprice=marketprice, budget=splitbudget, lowbudget=lowbudget)
+                    demand = demands[x]
+                    spentbudget = createBidder(namn=namn, amount=amount, needs=demand, behaviour=behaviour,
+                                               marketprice=marketprice, budget=totalbudget)
                     totalbudget = totalbudget - spentbudget
-
-
 
     if len(bidderslist) == 0:
         numrandombidders = genNumBuyers()
         config = open("config.txt", "a")
-        config.write("\n"+"numrandombidders=" + str(numrandombidders))
+        config.write("\n" + "numrandombidders=" + str(numrandombidders))
         config.close()
 
     # returns a checksum for comparisons
@@ -196,8 +210,6 @@ def readConfig():
     numbuyers = len(bidderslist)
     check = (seed * numsellers * numbuyers)
     return str(check)[0:4]
-
-
 
 
 def genSeed():
@@ -220,17 +232,12 @@ def genNumBuyers():
     return numbuyers
 
 
-
 # creates bidders from config or random if no value was given
 def createBidder(**kwargs):
     try:
         kwargs["budget"]
     except:
         kwargs["budget"] = random.randrange(0, 100)
-    try:
-        kwargs["lowbudget"]
-    except:
-        kwargs["lowbudget"]=0.5
     try:
         if kwargs["amount"] != None:
             amount = kwargs["amount"]
@@ -239,16 +246,17 @@ def createBidder(**kwargs):
     except:
         amount = random.randrange(10, 200)
     try:
-        namn=kwargs["namn"]
+        namn = kwargs["namn"]
     except:
-        namn="Buyer",len(bidderslist)
+        namn = "Buyer", len(bidderslist)
     try:
         need = Needs(int(kwargs["needs"]), "stenmalm")
     except:
         if int(kwargs["budget"]) < 0:
             raise Exception("cant be more demand then supply")
         else:
-            need = Needs(random.randrange(int(kwargs["budget"] * kwargs["lowbudget"])-1, int(kwargs["budget"])), "Stenmalm")
+            print("random need")
+            need = Needs(random.randrange(int(kwargs["budget"] * 0.7), int(kwargs["budget"])), "Stenmalm")
     try:
         marketprice = kwargs["marketprice"]
     except:
@@ -257,8 +265,6 @@ def createBidder(**kwargs):
         behaviour = kwargs["behaviour"]
     except:
         behaviour = Behaviour.randomBehaviour()
-
-
 
     # id, currentamount, needs, behaviour, marketPrice
     bidderslist.append(Bidder(namn, amount, need, marketprice, behaviour))
@@ -278,20 +284,23 @@ def createRandomSeller():
 
 checksum = readConfig()
 
-
-
 sum = 0
 for x in bidderslist:
     sum = sum + x.needs.amount
 
-print(sum , "sum of demand")
+print(sum, "sum of demand")
+
+#for x in sellerslist:
+#    print(x.LinkOfBlocks.display())
+
+
 sumseller = 0
 for x in sellerslist:
     list = x.LinkOfBlocks.display()
     for i in list:
-        sumseller = sumseller+ i.Amount
+        sumseller = sumseller + i.Amount
         x.quantity = i.Amount
-print(sumseller , "sum of supply")
+print(sumseller, "sum of supply")
 
-aucitonengine = SimEngine(sellerslist,10,bidderslist)
-aucitonengine.simStart()
+# aucitonengine = SimEngine(sellerslist,10,bidderslist)
+# aucitonengine.simStart()
