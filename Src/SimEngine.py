@@ -1,4 +1,5 @@
 import APILink as link
+from Bidder import *
 from Sellers import Sellers
 import random
 
@@ -46,7 +47,7 @@ class SimEngine():
             # Send updated auction list to buyers and wait for their decision
             newBids = []
             for buyer in self.buyers:
-                temp = buyer.update(self.auctions)
+                temp = buyer.bidUpdate(self.auctions)
                 newBids.append(temp)
 
             finished = []
