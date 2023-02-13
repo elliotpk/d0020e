@@ -23,20 +23,22 @@ pris,data,vinnare,id
 #print(Api.data) print to csv-file
 
 class SimEngine():
-    def __init__(self, sellers, roundLimit, buyers):
-        self.roundLimit = roundLimit
+    def __init__(self, sellers, buyers):
+        END_THRESHOLD = 2                                                           # How many rounds of inactive to keep an auction running for
         self.sellers = sellers
         self.Buyers = buyers
-        self.auctions = self.createAuctionList(self.sellers)    # Create a list of all auctions
+        self.auctions = self.createAuctionList(self.sellers, self.auctionStatus)    # Create a list of all auctions
+        self.auctionStatus = self.createAuctionStatus(self.auctions)                # Used to keep track of when a bid has not been placed recently (within x loops)
+        self.finished = []                                                          # Auctions which have ended are placed here
         self.buyers = buyers
-        if(not self.addBuyers(self.buyers)):                # Error checking if adding buyers to auctions went well
+        if(not self.addBuyers(self.buyers)):                                        # Error checking if adding buyers to auctions went well
             return None
 
 
     def simStart(self):
-        ""
+        "Start the simulation"
         #Round Start
-        for i in range(self.roundLimit):
+        while(len(self.auctions) > 0):
             # Update the auction list with current values
             for auction in self.auctions:
                 info = link.getRoomInfo(auction['id'], "Seller", 'bid')[0]   # Get highest bid in the auctions, auth is 'Seller' for all auctions in the current implementation
@@ -57,32 +59,34 @@ class SimEngine():
                     t = next((item for item in buyers if item["id"] == auction["id"]), None)                  # Extracts all the bids for each auction ID
                     if(t != None):
                         bids.append(t)
-                sort = sorted(bids, key=lambda i:int(i['value']), reverse=True)                         # Sorts the list of bids by amount
+                sort = sorted(bids, key=lambda i:int(i['value']), reverse=True)                               # Sorts the list of bids by amount
+                # !! Pass the list "sort" to the datamanagement class here !!
                 max_bid = sort[0]['value']
-                for i in range(len(sort)-1, 0, -1):                                                     # Removes duplicate top bids, maybe not necessary could perhaps be done more efficiently
+                top = []
+                for i in range(len(sort), 0, -1):                                                             # Pick out any potential ties for the top bid to randomize which one gets submitted
                     if(int(sort[i]['value']) == int(max_bid)):
-                        sort.pop(i)
+                        top.append(sort.pop(i))
                 print("New top bid of: "+ str(sort[0]['value']) +" submitted for auction: " + auction['id'] + " by user: " + sort[0]['user'])
-                finished.append(sort)
+                finished.append(random.choice(top))                                                           # random.choice selects a random auction from the list
 
             for id in finished:
                 for bid in id:
                     r = link.placeBid(bid['id'], bid['user'], bid['value'])
                     if(not r):
                         print('Error when placing the bid for user: ' + bid['user'] + ' to auction: ' + bid['id'])
-            input("-----------------------")
-            # Call data management somewhere in the loop to save data per round basis
         
         # Update the auction list with the final result
         for auction in self.auctions:
             info = link.getRoomInfo(auction['id'], "Seller", 'bid')[0]
             auction['top_bid'] = info['value']
             auction['user'] = info['user']
-        # Decide the winners for all the auctions and save the results
-        for auction in self.auctions:
-            link.endAuction(auction['id'], 'Seller', auction['user'])
-            print("User: " + auction['user'] + " has won auction:" + auction['id'] + " for " + str(auction["quantity"]) + " units for " + str(auction["top_bid"]))
-            # endAuction is at a very basic stage currently
+
+    def endAuction(self, auction):
+        "Called to end the specific auction"
+        link.endAuction(auction['id'], 'Seller', auction['user'])
+        self.finished.append(auction)
+        print("User: " + auction['user'] + " has won auction:" + auction['id'] + " for " + str(auction["quantity"]) + " units for " + str(auction["top_bid"]))
+
 
     def addBuyers(self, Buyers):
         "Create and join all the buyers to all auction rooms"
@@ -92,7 +96,7 @@ class SimEngine():
                     print("Error adding user: " + buyer.id + " to roomID + " + room + ", aborting")
                     return False
     
-    def createAuctionList(self, sellers):
+    def createAuctionList(self, seller):
         "Creates a list which contains the necessary information about the auctions"
         temp = []
         topBid = 0
@@ -107,3 +111,9 @@ class SimEngine():
                 topBid = topBid[0]  
                 temp.append({'id' : seller.auctionId, 'quantity' : seller.quantity, 'user':topBid ['user'] , 'top_bid' : topBid['value']})     # Should contain all the information needed per auction
         return temp
+    
+    def createAuctionStatus(self, auctionList):
+        "Creates a list with auction ID and how many loops since latest bid"
+        result = []
+        for auction in auctionList:
+            result.append({'id':auction['id'], 'val' : 0})                  # Default 0 meaning auction just submitted
