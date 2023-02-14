@@ -1,5 +1,7 @@
 import Behaviour
 import random
+# Matplotlib imported for testing only
+import matplotlib.pyplot as plt 
 
 
 class Bidder:
@@ -10,6 +12,7 @@ class Bidder:
     self.needs = needs
     self.marketPrice = marketPrice
     self.behaviour = behaviour
+    self.currentItems = 0
 
     # Bidders know this info about auctions
     self.auctionsLost = 0
@@ -27,7 +30,7 @@ class Bidder:
     self.behaviour["aggressiveness"] = self.behaviour["adaptiveAggressiveness"](self.currentAuctions, self.auctionsLost, self.auctionBids)
     # Variables to keep track on the best bid for a certain auction
     bestBid = 0
-    bestAuction = Auction(0,0)
+    bestAuction = Auction(0,0,0)
 
     # Analyze all the auctions
     for auction in self.auctionList:
@@ -49,7 +52,40 @@ class Bidder:
             bestAuction = auction
         else:
           continue
-    if(bestBid == 0 or (bestAuction.auctionID == 0 and bestAuction.price == 0)):
+    if(bestBid == 0 or (bestAuction.auctionID == 0 and bestAuction.price == 0 and bestAuction.quantity == 0)):
+      return None, None
+    else:
+      return bestBid, bestAuction
+  
+  # New bid function (Work In Progress)
+  def bid2(self):
+    # Update the aggressiveness of the behaviour
+    self.behaviour["aggressiveness"] = self.behaviour["adaptiveAggressiveness"](self.currentAuctions, self.auctionsLost, self.auctionBids)
+    # Variables to keep track on the best bid for a certain auction
+    bestBid = 0
+    bestAuction = Auction(0,0,0)
+
+    # Analyze all the auctions
+    for auction in self.auctionList:
+      # If a bidder only wants to bid max, it will do it in the first auction
+      if self.behaviour["bid"](auction.price, self.marketPrice, self.currentAmount) and self.behaviour["onlyBidMaxAmount"]:
+        return self.currentAmount, auction
+      else:
+        bid = int(min(auction.price * (1 + self.behaviour["aggressiveness"] * random.uniform(0.4, 0.6)), self.currentAmount))
+        
+        # Print for testing purposes:
+        print("<from bid()> bid: ", bid, "  |  bestBid: ", bestBid, "  |  auction: ", auction.auctionID)
+        
+        # Checks if the bidder can bid and if it wants to bid if the market price is over the generated bid.
+        if self.behaviour["bid"](auction.price, self.marketPrice, self.currentAmount) and (self.marketPrice > bid and not self.behaviour["bidOverMarketPrice"]):
+          if(bestBid < bid and bestBid > 0):
+            continue
+          else:
+            bestBid = bid
+            bestAuction = auction
+        else:
+          continue
+    if(bestBid == 0 or (bestAuction.auctionID == 0 and bestAuction.price == 0 and bestAuction.quantity == 0)):
       return None, None
     else:
       return bestBid, bestAuction
@@ -97,9 +133,10 @@ class Bidder:
     
 
 class Auction:
-  def __init__(self, auctionID, price):
+  def __init__(self, auctionID, price, quantity):
     self.auctionID = auctionID
     self.price = price
+    self.quantity = quantity
     self.winner = None
 
 class Needs:
@@ -125,8 +162,8 @@ def test():
      bidder1.behaviour["bid"](14000, bidder1.marketPrice, bidder1.currentAmount)
     ):
     print("Current auctions Bidder 1 (before participating): ",bidder1.currentAuctions)
-    bidder1.addAuction(Auction(1, 14000))
-    bidder1.addAuction(Auction(2, 13000))
+    bidder1.addAuction(Auction(1, 14000, 55))
+    bidder1.addAuction(Auction(2, 13000, 55))
     print("Bidder 1 enters 2 auctions: ", bidder1.auctionList,", current auctions: ",bidder1.currentAuctions)
     bidder1.setWinningAuctions(1)
     bidder1.setCurrentAmount(0)
@@ -166,13 +203,13 @@ def test():
   print("-----------------------------------------------------------------")
 
   print("Testing the bid function with multiple auction strategies (Bidder 3): ")
-  bidder3.addAuction(Auction(1, 14000))
-  bidder3.addAuction(Auction(2, 13000))
-  bidder3.addAuction(Auction(3, 11000))
-  bidder3.addAuction(Auction(4, 12000))
+  bidder3.addAuction(Auction(1, 14000, 55))
+  bidder3.addAuction(Auction(2, 13000, 55))
+  bidder3.addAuction(Auction(3, 11000, 55))
+  bidder3.addAuction(Auction(4, 12000, 55))
 
   for auction in bidder3.auctionList:
-    print("Bidder 3 participates in auction ", auction.auctionID ,"  |  auction price: ", auction.price, "  |  market price: ", bidder3.marketPrice) 
+    print("Bidder 3 participates in auction ", auction.auctionID ,"  |  auction price: ", auction.price, "  |  auction quantity: ", auction.quantity) 
   bestBid, bestAuction = bidder3.bid()
   if(bestBid == None or bestAuction == None):
     print("Bidder 3 doesn't bid in any auction, the price is over market value.")
@@ -180,44 +217,37 @@ def test():
     print("Bidder 3 bids ", bestBid, " on auction ", bestAuction.auctionID)
 
   print("Testing the bid function with multiple auction strategies (Bidder 1): ")
-  bidder1.addAuction(Auction(1, 14000))
-  bidder1.addAuction(Auction(2, 13000))
-  bidder1.addAuction(Auction(3, 11000))
-  bidder1.addAuction(Auction(4, 12000))
+  bidder1.addAuction(Auction(1, 14000, 55))
+  bidder1.addAuction(Auction(2, 13000, 55))
+  bidder1.addAuction(Auction(3, 11000, 55))
+  bidder1.addAuction(Auction(4, 12000, 55))
 
   for auction in bidder1.auctionList:
-    print("Bidder 1 participates in auction ", auction.auctionID ,"  |  auction price: ", auction.price, "  |  market price: ", bidder1.marketPrice) 
+    print("Bidder 1 participates in auction ", auction.auctionID ,"  |  auction price: ", auction.price, "  |  auction quantity: ", auction.quantity) 
   bestBid2, bestAuction2 = bidder1.bid()
   if(bestBid2 == None or bestAuction2 == None):
     print("Bidder 1 doesn't bid in any auction.")
   else:
     print("Bidder 1 bids ", bestBid2, " on auction ", bestAuction2.auctionID)
 
+  print("-----------------------------------------------------------------")
 
-def demo():
-  bidder = Bidder(123, 20000, Needs(10, "steel beams"), 15000, Behaviour.B)
-  print("Created a bidder: ID:", bidder.id, "| amount:", bidder.currentAmount, "| needs:", bidder.needs.amount, bidder.needs.type, "| market price:", bidder.marketPrice, "| Behaviour:", bidder.behaviour["behaviour"])
-  print("Current auctions (before participating):", bidder.currentAuctions)
-  bidder.addAuction(Auction(1, 13000))
-  bidder.addAuction(Auction(2, 8500))
-  bidder.addAuction(Auction(3, 11000))
-  bidder.addAuction(Auction(4, 9000))
-  bidder.addAuction(Auction(5, 10000))
-  print("Current auctions (after entering 5 auctions):", bidder.currentAuctions)
+  print("Testing normal distribution of the marketPriceFactor() function:")
+  
+  print(Behaviour.B["marketPriceFactor"](1, 0.15))
+  print(bidder2.behaviour["marketPriceFactor"](1, 0.15))
 
-  #print("participating in 5 auctions, 4 auctions lost and 1 current bid")
-  #print("Bidder", bidder.id, ": changes aggressiveness from:", bidder.behaviour["aggressiveness"], "to", bidder.behaviour["adaptiveAggressiveness"](5, 4, 1))
-    
-  bestBid, bestAuction = bidder.bid()
 
-  if(bestBid == None or bestAuction == None):
-    print("Bidder", bidder.id, "doesn't bid in any auction, the price is over market value.")
-  else:
-    bidder.setWinningAuctions(1)
-    bidder.setCurrentAmount(bidder.currentAmount - bestBid)
-    print("Bidder", bidder.id, "bid ", bestBid, " in auction ", bestAuction.auctionID,"| Amount left:", bidder.currentAmount)
-
+def testNormalDistributionGraph():
+  print("Normal distribution test (graph):")
+  meanValue = 0
+  meanValueList = []
+  for i in range(1000):
+    meanValue = random.normalvariate(1, 0.15)
+    meanValueList.append(meanValue)
+  plt.hist(meanValueList, bins=200) 
+  plt.show()
 
 #test()
+#testNormalDistributionGraph()
 
-#demo()

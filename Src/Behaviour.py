@@ -20,6 +20,11 @@ def changeAggressiveness(behaviour, value):
   behaviour["aggressiveness"] = value
   return value
 
+# This function returns a factor that is used for bidding based on the market price.
+# It uses a normal distribution since it's more common to bid in certain scenarios.
+def marketPriceFactor(aggressiveness, mean, standardDeviation):
+  return aggressiveness*random.normalvariate(mean, standardDeviation)
+
 # Very aggressive behaviour, always bids max amount.
 # The aggressiveness stays the same for this behaviour.
 # Can bid over the market value, but not over the maximum amount.
@@ -39,7 +44,9 @@ A = {
          False if (price > currentAmount) else
          # Can bid over market value
          True if (price > marketPrice) else 
-         (price < currentAmount)
+         (price < currentAmount),
+  "marketPriceFactor": lambda mean, standardDeviation:
+                       marketPriceFactor(A["aggressiveness"], mean, standardDeviation)
 }
 
 # Medium aggressive behaviour.
@@ -62,7 +69,9 @@ B = {
          False if (price > currentAmount) else 
          # Can't bid over market value
          False if (price > marketPrice) else
-         (price < currentAmount)
+         (price < currentAmount),
+  "marketPriceFactor": lambda mean, standardDeviation:
+                       marketPriceFactor(B["aggressiveness"], mean, standardDeviation)
 } 
 
 # Minimal and passive bidding behaviour.
@@ -85,5 +94,7 @@ C = {
          False if (price > currentAmount) else 
          # Can't bid over market value
          False if (price > marketPrice) else
-         (price < currentAmount)
+         (price < currentAmount),
+  "marketPriceFactor": lambda mean, standardDeviation:
+                       marketPriceFactor(C["aggressiveness"], mean, standardDeviation)
 } 
