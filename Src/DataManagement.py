@@ -85,6 +85,6 @@ class DataManagement:
                 
 
 
-D = DataManagement()
+#D = DataManagement()
 
-D.userTest()
+#D.userTest()
