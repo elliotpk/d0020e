@@ -22,8 +22,9 @@ def changeAggressiveness(behaviour, value):
 
 # This function returns a factor that is used for bidding based on the market price.
 # It uses a normal distribution since it's more common to bid in certain scenarios.
-def marketPriceFactor(aggressiveness, mean, standardDeviation):
-  return aggressiveness*random.normalvariate(mean, standardDeviation)
+def marketPriceFactor(behaviour, aggressiveness, mean, standardDeviation):
+  behaviour["marketPriceFactor"] = aggressiveness*random.normalvariate(mean, standardDeviation)
+  return behaviour["marketPriceFactor"]
 
 # Very aggressive behaviour, always bids max amount.
 # The aggressiveness stays the same for this behaviour.
@@ -45,8 +46,9 @@ A = {
          # Can bid over market value
          True if (price > marketPrice) else 
          (price < currentAmount),
-  "marketPriceFactor": lambda mean, standardDeviation:
-                       marketPriceFactor(A["aggressiveness"], mean, standardDeviation)
+  "marketPriceFactor": 0.9,
+  "marketPriceFactorUpdate": lambda mean, standardDeviation:
+                       marketPriceFactor(B, B["aggressiveness"], mean, standardDeviation)
 }
 
 # Medium aggressive behaviour.
@@ -70,8 +72,9 @@ B = {
          # Can't bid over market value
          False if (price > marketPrice) else
          (price < currentAmount),
-  "marketPriceFactor": lambda mean, standardDeviation:
-                       marketPriceFactor(B["aggressiveness"], mean, standardDeviation)
+  "marketPriceFactor": 0.5,
+  "marketPriceFactorUpdate": lambda mean, standardDeviation:
+                       marketPriceFactor(B, B["aggressiveness"], mean, standardDeviation)
 } 
 
 # Minimal and passive bidding behaviour.
@@ -95,6 +98,7 @@ C = {
          # Can't bid over market value
          False if (price > marketPrice) else
          (price < currentAmount),
-  "marketPriceFactor": lambda mean, standardDeviation:
-                       marketPriceFactor(C["aggressiveness"], mean, standardDeviation)
+  "marketPriceFactor": 0.2,
+  "marketPriceFactorUpdate": lambda mean, standardDeviation:
+                       marketPriceFactor(C, C["aggressiveness"], mean, standardDeviation)
 } 
