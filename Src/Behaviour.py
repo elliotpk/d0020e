@@ -22,8 +22,12 @@ def changeAggressiveness(behaviour, value):
 
 # This function returns a factor that is used for bidding based on the market price.
 # It uses a normal distribution since it's more common to bid in certain scenarios.
+# Note: if the factor is 0 or negavtive, the calculation repeats until it's positive,
+# therefore avoid large standard deviation integers for accurate normal distribution results.
 def marketPriceFactor(behaviour, aggressiveness, mean, standardDeviation):
   behaviour["marketPriceFactor"] = aggressiveness*random.normalvariate(mean, standardDeviation)
+  while behaviour["marketPriceFactor"] <= 0 :
+    behaviour["marketPriceFactor"] = aggressiveness*random.normalvariate(mean, standardDeviation)
   return behaviour["marketPriceFactor"]
 
 # Very aggressive behaviour, always bids max amount.
