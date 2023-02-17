@@ -3,14 +3,16 @@ import random
 # Matplotlib imported for testing only
 import matplotlib.pyplot as plt 
 
-
+###### amount should maybe be an amount taken from behaviour ######
 class Bidder:
   def __init__(self, id, amount, needs, marketPrice, behaviour):
     self.id = id
     self.initAmount = amount
     self.currentAmount = self.initAmount
     self.needs = needs
-    self.marketPrice = marketPrice
+    # Bidders will somewhat know the market price based on normal distribution (mean, standardDeviation)
+    self.marketPrice = marketPrice*random.normalvariate(1, 0.03)
+    print("<init Class Bidder> Bidder ",self.id, " knows the market price: ", self.marketPrice)
     self.behaviour = behaviour
     self.currentItems = 0
     self.marketPriceFactor = behaviour["marketPriceFactor"]
@@ -23,45 +25,12 @@ class Bidder:
     self.winningAuctions = 0
     self.rounds = 0
 
-  # A bidder will return the lowest to bid on an auction and the auction for that bid.
-  # The function loops through all the auctions to find the best auction to bid on.
-  # If the bidder doesn't want to bid, it returns None, None.
-  # Note: it doesn't set the current amount to a new value currently.
-  def bid(self):
-    # Update the aggressiveness of the behaviour
-    self.behaviour["aggressiveness"] = self.behaviour["adaptiveAggressiveness"](self.currentAuctions, self.auctionsLost, self.auctionBids)
-    # Variables to keep track on the best bid for a certain auction
-    bestBid = 0
-    bestAuction = Auction(0,0,0)
-
-    # Analyze all the auctions
-    for auction in self.auctionList:
-      # If a bidder only wants to bid max, it will do it in the first auction
-      if self.behaviour["bid"](auction.price, self.marketPrice, self.currentAmount) and self.behaviour["onlyBidMaxAmount"]:
-        return self.currentAmount, auction
-      else:
-        bid = int(min(auction.price * (1 + self.behaviour["aggressiveness"] * random.uniform(0.4, 0.6)), self.currentAmount))
-        
-        # Print for testing purposes:
-        print("<from bid()> bid: ", bid, "  |  bestBid: ", bestBid, "  |  auction: ", auction.auctionId)
-        
-        # Checks if the bidder can bid and if it wants to bid if the market price is over the generated bid.
-        if self.behaviour["bid"](auction.price, self.marketPrice, self.currentAmount) and (self.marketPrice > bid and not self.behaviour["bidOverMarketPrice"]):
-          if(bestBid < bid and bestBid > 0):
-            continue
-          else:
-            bestBid = bid
-            bestAuction = auction
-        else:
-          continue
-    if(bestBid == 0 or (bestAuction.auctionId == 0 and bestAuction.price == 0 and bestAuction.quantity == 0)):
-      return None, None
-    else:
-      return bestBid, bestAuction
   
   # New bid function (Work In Progress)
   # Returns a list of all the auctions that the bidder can bid on
-  def bid2(self):
+  # Note: it doesn't set the current amount to a new value currently.
+  ############# self.behaviour["bidOverMarketPrice"] and a value of a range, can turn on/off if market price matters in the simulation or not ##############
+  def bid(self):
     # Update the aggressiveness of the behaviour
     self.behaviour["aggressiveness"] = self.behaviour["adaptiveAggressiveness"](self.currentAuctions, self.auctionsLost, self.auctionBids)
     # Variables to keep track on the best bid for a certain auction
@@ -120,58 +89,51 @@ class Bidder:
   
   def updateMarketFactor(self, mean, standardDeviation):
     self.marketPriceFactor = self.behaviour["marketPriceFactorUpdate"](mean, standardDeviation)
-  
-  # Returns None or a dictionary with info about the best bid (lowest bid) on an auction, work in progress
+
+  # Returns a list of dictionaries with info about how the bidder bids, work in progress
+  ###### delete quantity from return                             ###### --done--
+  ###### function, wins auction, need to know the Needs          ######
+  ###### should be able to reset current items, winning auctions ######
   def bidUpdate(self, input):
     self.winningAuctions = 0
     for dictionary in input:
       for auction in self.auctionList:
         if(dictionary["user"] == self.id):
           self.winningAuctions =+ 1
-        if(auction.auctionId == dictionary["room_id"]):
-          auction.price = dictionary["value"]
+        if(auction.auctionId == dictionary["id"]):
+          auction.price = dictionary["top_bid"]
           auction.winner = dictionary["user"]
           auction.quantity = dictionary["quantity"]
 
-    bestBid, bestAuction = self.bid()
-    if(bestAuction.winner == self.id):
-      return None
-    if(bestBid == None or bestAuction == None):
-      return None
-    if(bestAuction.quantity > self.currentItems):
-      self.winningAuctions =+ 1
-      self.currentItems = self.currentItems + bestAuction.quantity
-      bestAuction.quantity = 0
-      return {'id' : bestAuction.auctionId, 'quantity' : bestAuction.quantity, 'user' : self.id, 'top_bid' : bestBid}
-
-  # Returns a list of dictionaries with info about how the bidder bids, work in progress
-  def bidUpdate2(self, input):
-    self.winningAuctions = 0
-    for dictionary in input:
-      for auction in self.auctionList:
-        if(dictionary["user"] == self.id):
-          self.winningAuctions =+ 1
-        if(auction.auctionId == dictionary["room_id"]):
-          auction.price = dictionary["value"]
-          auction.winner = dictionary["user"]
-          auction.quantity = dictionary["quantity"]
-
-    bidList = self.bid2()
+    bidList = self.bid()
+    print("bidList: ", bidList)
     returnList = []
     # bid[0] = bid <int>, bid[1] = auction <Auction>
     for bid in bidList:
       if(bid[1].winner == self.id):
+        print("<bidUpdate()> winner")
         continue
       if(bid[0] == None or bid[1] == None):
+        print("<bidUpdate()> None")
         continue
-      if(bid[1].quantity > self.currentItems):
+      if(self.checkWinner(bid[0], bid[1])):
+        print("<bidUpdate()> append to list")
         self.winningAuctions =+ 1
+        bid[1].winner = self.id
         self.currentItems = self.currentItems + bid[1].quantity
-        bid[1].quantity = 0
-        returnList.append({'id' : bid[1].auctionId, 'quantity' : bid[1].quantity, 'user' : self.id, 'top_bid' : bid[0]})
+        returnList.append({'id' : bid[1].auctionId, 'user' : self.id, 'top_bid' : bid[0]})
     return returnList 
-    
+  
+  # Checks if the bidder won the auction, work in progress
+  def checkWinner(self, bid, auction):
+    isWinner = False
+    if(bid < auction.price and bid > 0):
+      isWinner = False
+    else:
+      isWinner = True
+    return isWinner
 
+######### Auction class isn't needed maybe. ##########
 class Auction:
   def __init__(self, auctionId, price, quantity):
     self.auctionId = auctionId
@@ -192,84 +154,6 @@ def test():
   bidder3 = Bidder(3, 150000, Needs(55, "steel beam"), 15000, Behaviour.C)
 
   print("Created 3 bidders with behaviour type A, B and C respectively.")
-
-  # Bidder 1 participates in 2 auctions:
-  # Bidder 1 will bid the max amount in one of the auctions because of desperate behaviour.
-  # Bidder 1 can bid because the price is lower than the maximum amount that the bidder have.
-  print("-----------------------------------------------------------------")
-  print("Test if Bidder 1 bids the max amount in 1 of 2 auctions:")
-  if(bidder1.behaviour["onlyBidMaxAmount"] == True
-     and
-     bidder1.behaviour["bid"](14000, bidder1.marketPrice, bidder1.currentAmount)
-    ):
-    print("Current auctions Bidder 1 (before participating): ",bidder1.currentAuctions)
-    bidder1.addAuction(Auction(1, 14000, 55))
-    bidder1.addAuction(Auction(2, 13000, 55))
-    print("Bidder 1 enters 2 auctions: ", bidder1.auctionList,", current auctions: ",bidder1.currentAuctions)
-    bidder1.setWinningAuctions(1)
-    bidder1.setCurrentAmount(0)
-    print("Bidder", bidder1.id, "bid the max amount in 1 auction.")
-  else:
-    print("Bidder ",bidder1.id," didn't bid in any auction.")
-  # Restore the initial amount and removes the 2 auctions.
-  bidder1.setCurrentAmount(bidder1.initAmount)
-  bidder1.removeAuction(1)
-  bidder1.removeAuction(2)
-  print("Bidder 1 leaves 2 auctions: ", bidder1.auctionList,", current auctions: ",bidder1.currentAuctions)
-  print("-----------------------------------------------------------------")
-  
-  # Tests that can make a bidder bid differently based on what a bidder knows
-  # about price, market price (15000) and the maximum amount.
-  print("Bid behaviour test if Bidder 1 can bid or not:")
-  # Can bid (TRUE) with behaviour type A:
-  print("bidMax > price > marketPrice: ", bidder1.behaviour["bid"](15001, bidder1.marketPrice, bidder1.currentAmount))
-  print("bidMax > marketPrice > price: ", bidder1.behaviour["bid"](14001, bidder1.marketPrice, bidder1.currentAmount))
-  print("marketPrice > bidMax > price: ", bidder1.behaviour["bid"](14001, bidder1.marketPrice, 14002))
-  # Can't bid (FALSE) with behaviour type A:
-  print("marketPrice > price > bidMax: ", bidder1.behaviour["bid"](14001, bidder1.marketPrice, 10000))
-  print("price > marketPrice > bidMax: ", bidder1.behaviour["bid"](15001, bidder1.marketPrice, 10000))
-  print("price > bidMax > marketPrice: ", bidder1.behaviour["bid"](15002, bidder1.marketPrice, 15000))
-  print("-----------------------------------------------------------------")
-
-  print("Random behaviour selection test:")
-  print("1 random behaviour selection: ", Behaviour.randomBehaviour())
-  # 5 times larger chance to select behaviour B
-  print("1 advanced random behaviour selection: ", Behaviour.randomBehaviourAdvanced([1,5,1], 1))
-  print("-----------------------------------------------------------------")
-
-  print("Tests if Bidder 3 changes the aggressiveness in a scenario of participating in 3 auctions, 2 auctions lost and 1 current bid:")
-  print("Bidder 3: initial aggressiveness: ", bidder3.behaviour["aggressiveness"])
-  print("Bidder 3: changes aggressiveness: ", bidder3.behaviour["adaptiveAggressiveness"](3, 2, 1))
-  print("Bidder 3: new aggressiveness: ", bidder3.behaviour["aggressiveness"])
-  print("-----------------------------------------------------------------")
-
-  print("Testing the bid function with multiple auction strategies (Bidder 3): ")
-  bidder3.addAuction(Auction(1, 14000, 55))
-  bidder3.addAuction(Auction(2, 13000, 55))
-  bidder3.addAuction(Auction(3, 11000, 55))
-  bidder3.addAuction(Auction(4, 12000, 55))
-
-  for auction in bidder3.auctionList:
-    print("Bidder 3 participates in auction ", auction.auctionId ,"  |  auction price: ", auction.price, "  |  auction quantity: ", auction.quantity) 
-  bestBid, bestAuction = bidder3.bid()
-  if(bestBid == None or bestAuction == None):
-    print("Bidder 3 doesn't bid in any auction, the price is over market value.")
-  else:
-    print("Bidder 3 bids ", bestBid, " on auction ", bestAuction.auctionId)
-
-  print("Testing the bid function with multiple auction strategies (Bidder 1): ")
-  bidder1.addAuction(Auction(1, 14000, 55))
-  bidder1.addAuction(Auction(2, 13000, 55))
-  bidder1.addAuction(Auction(3, 11000, 55))
-  bidder1.addAuction(Auction(4, 12000, 55))
-
-  for auction in bidder1.auctionList:
-    print("Bidder 1 participates in auction ", auction.auctionId ,"  |  auction price: ", auction.price, "  |  auction quantity: ", auction.quantity) 
-  bestBid2, bestAuction2 = bidder1.bid()
-  if(bestBid2 == None or bestAuction2 == None):
-    print("Bidder 1 doesn't bid in any auction.")
-  else:
-    print("Bidder 1 bids ", bestBid2, " on auction ", bestAuction2.auctionId)
   print("-----------------------------------------------------------------")
 
   print("Testing normal distribution of the marketPriceFactor() function:")
@@ -285,17 +169,21 @@ def test():
   bidder4.addAuction(Auction(2, 13000, 55))
   bidder4.addAuction(Auction(3, 11000, 55))
   bidder4.addAuction(Auction(4, 12000, 55))
-  
+
+  bidder3.addAuction(Auction(1, 14000, 55))
+  bidder3.addAuction(Auction(2, 13000, 55))
+  bidder3.addAuction(Auction(3, 11000, 55))
+  bidder3.addAuction(Auction(4, 12000, 55))
   # same factor for all bidders with the same type
   #Behaviour.C["marketPriceFactorUpdate"](1, 0.15)
   # different factor for all bidders with the same type
-  bidder4.updateMarketFactor(1, 0.15)
-  bidder3.updateMarketFactor(1, 0.15)
+  bidder4.updateMarketFactor(4, 2.15)
+  bidder3.updateMarketFactor(4, 2.15)
   print("Market price factor bidder 3: ",bidder3.marketPriceFactor)
   print("Market price factor bidder 4: ",bidder4.marketPriceFactor)
   
   print("Bidder ",bidder3.id, " bids on auctions:")
-  bidsList1 = bidder3.bid2()
+  bidsList1 = bidder3.bid()
   if(bidsList1 == []):
     print("Bidder 3 doesn't bid in any auction.")
   else:
@@ -303,12 +191,25 @@ def test():
       print("Bidder 3 can bid ", bid[0] , " on auction ", bid[1].auctionId)
 
   print("Bidder ",bidder4.id, " bids on auctions:")
-  bidsList2 = bidder4.bid2()
+  bidsList2 = bidder4.bid()
   if(bidsList2 == []):
     print("Bidder 4 doesn't bid in any auction.")
   else:
     for bid in bidsList2:
       print("Bidder 4 can bid ", bid[0] , " on auction ", bid[1].auctionId)
+  print("-----------------------------------------------------------------")
+
+  print("Testing the bidUpdate() function:")
+  simList = [{'id' : 1, 'quantity' : 60, 'user':None , 'top_bid' : 14000},
+             {'id' : 2, 'quantity' : 55, 'user':None , 'top_bid' : 13000},
+             {'id' : 3, 'quantity' : 40, 'user':None , 'top_bid' : 11000},
+             {'id' : 4, 'quantity' : 50, 'user':None , 'top_bid' : 12000}]
+
+  bidder3Info = bidder3.bidUpdate(simList)
+  bidder4Info = bidder4.bidUpdate(simList)
+
+  print("Bidder 3 decisions: ", bidder3Info)
+  print("Bidder 4 decisions: ", bidder4Info)
 
 
 def testNormalDistributionGraph():
@@ -321,6 +222,6 @@ def testNormalDistributionGraph():
   plt.hist(valueList, bins=200) 
   plt.show()
 
-test()
+#test()
 #testNormalDistributionGraph()
 

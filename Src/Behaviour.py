@@ -50,9 +50,9 @@ A = {
          # Can bid over market value
          True if (price > marketPrice) else 
          (price < currentAmount),
-  "marketPriceFactor": 0.9,
+  "marketPriceFactor": 1.0,
   "marketPriceFactorUpdate": lambda mean, standardDeviation:
-                       marketPriceFactor(B, B["aggressiveness"], mean, standardDeviation)
+                       marketPriceFactor(A, A["aggressiveness"], mean, standardDeviation)
 }
 
 # Medium aggressive behaviour.
@@ -76,7 +76,7 @@ B = {
          # Can't bid over market value
          False if (price > marketPrice) else
          (price < currentAmount),
-  "marketPriceFactor": 0.5,
+  "marketPriceFactor": 1.0,
   "marketPriceFactorUpdate": lambda mean, standardDeviation:
                        marketPriceFactor(B, B["aggressiveness"], mean, standardDeviation)
 } 
@@ -102,7 +102,7 @@ C = {
          # Can't bid over market value
          False if (price > marketPrice) else
          (price < currentAmount),
-  "marketPriceFactor": 0.2,
+  "marketPriceFactor": 1.0,
   "marketPriceFactorUpdate": lambda mean, standardDeviation:
                        marketPriceFactor(C, C["aggressiveness"], mean, standardDeviation)
 } 
