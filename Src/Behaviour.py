@@ -52,7 +52,9 @@ A = {
          (price < currentAmount),
   "marketPriceFactor": 1.0,
   "marketPriceFactorUpdate": lambda mean, standardDeviation:
-                       marketPriceFactor(A, A["aggressiveness"], mean, standardDeviation)
+                             marketPriceFactor(A, A["aggressiveness"], mean, standardDeviation),
+  "stopBid": lambda marketPrice:
+             marketPrice*(1 + A["aggressiveness"])
 }
 
 # Medium aggressive behaviour.
@@ -78,7 +80,9 @@ B = {
          (price < currentAmount),
   "marketPriceFactor": 1.0,
   "marketPriceFactorUpdate": lambda mean, standardDeviation:
-                       marketPriceFactor(B, B["aggressiveness"], mean, standardDeviation)
+                             marketPriceFactor(B, B["aggressiveness"], mean, standardDeviation),
+  "stopBid": lambda marketPrice:
+             marketPrice*(1 + B["aggressiveness"])
 } 
 
 # Minimal and passive bidding behaviour.
@@ -95,7 +99,7 @@ C = {
                             changeAggressiveness(C, 0.2) if(auctions > 2 and auctionsLost > 1 and currentBids >= 0) else
                             changeAggressiveness(C, 0.2) if(auctions == 1 and currentBids > 10) else
                             changeAggressiveness(C, C["aggressiveness"]),
-  "bidOverMarketPrice": False,
+  "bidOverMarketPrice": True,
   "bid": lambda price, marketPrice, currentAmount:
          # Can't bid over budget
          False if (price > currentAmount) else 
@@ -104,5 +108,7 @@ C = {
          (price < currentAmount),
   "marketPriceFactor": 1.0,
   "marketPriceFactorUpdate": lambda mean, standardDeviation:
-                       marketPriceFactor(C, C["aggressiveness"], mean, standardDeviation)
+                             marketPriceFactor(C, C["aggressiveness"], mean, standardDeviation),
+  "stopBid": lambda marketPrice:
+             marketPrice*(1 + C["aggressiveness"])
 } 

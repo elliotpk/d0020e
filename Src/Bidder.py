@@ -16,6 +16,9 @@ class Bidder:
     self.behaviour = behaviour
     self.currentItems = 0
     self.marketPriceFactor = behaviour["marketPriceFactor"]
+    # Stops the bidders from bidding over a certain value based on market price and aggressiveness (code is also added in Behaviour.py)
+    ##### not implemented yet #####
+    self.stopBid = self.marketPrice*(1 + self.behaviour["aggressiveness"])
 
     # Bidders know this info about auctions
     self.auctionsLost = 0
@@ -29,6 +32,7 @@ class Bidder:
   # New bid function (Work In Progress)
   # Returns a list of all the auctions that the bidder can bid on
   # Note: it doesn't set the current amount to a new value currently.
+  ############# Currently, it doesn't append bids higher than the previous auction #############
   ############# self.behaviour["bidOverMarketPrice"] and a value of a range, can turn on/off if market price matters in the simulation or not ##############
   def bid(self):
     # Update the aggressiveness of the behaviour
@@ -48,10 +52,10 @@ class Bidder:
         genBid = int(min(auction.price * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor), self.currentAmount))
         
         # Print for testing purposes:
-        print("<from bid2()> genBid: ", genBid, "  |  tempBid: ", tempBid, "  |  auction: ", auction.auctionId)
+        print("<from bid()> genBid: ", genBid, "  |  tempBid: ", tempBid, "  |  auction: ", auction.auctionId)
         
         # Checks if the bidder can bid and if it wants to bid if the market price is over the generated bid.
-        if self.behaviour["bid"](auction.price, self.marketPrice, self.currentAmount) and (self.marketPrice > genBid and not self.behaviour["bidOverMarketPrice"]):
+        if self.behaviour["bid"](auction.price, self.marketPrice, self.currentAmount) and ((self.marketPrice > genBid and not self.behaviour["bidOverMarketPrice"]) or (self.behaviour["stopBid"](self.marketPrice) > genBid)):
           if(tempBid < genBid and tempBid > 0):
             continue
           else:
@@ -91,10 +95,15 @@ class Bidder:
     self.marketPriceFactor = self.behaviour["marketPriceFactorUpdate"](mean, standardDeviation)
 
   # Returns a list of dictionaries with info about how the bidder bids, work in progress
+  # Input example: simList = [{'id' : 1, 'quantity' : 60, 'user':None , 'top_bid' : 14000},
+  #                           {'id' : 2, 'quantity' : 55, 'user':None , 'top_bid' : 13000},
+  #                           {'id' : 3, 'quantity' : 40, 'user':None , 'top_bid' : 11000},
+  #                           {'id' : 4, 'quantity' : 50, 'user':None , 'top_bid' : 12000}]
   ###### delete quantity from return                             ###### --done--
   ###### function, wins auction, need to know the Needs          ######
   ###### should be able to reset current items, winning auctions ######
   def bidUpdate(self, input):
+    satisfiedNeed = 0
     self.winningAuctions = 0
     for dictionary in input:
       for auction in self.auctionList:
@@ -106,33 +115,29 @@ class Bidder:
           auction.quantity = dictionary["quantity"]
 
     bidList = self.bid()
-    print("bidList: ", bidList)
+    print("<bidUpdate()> bidList: ", bidList)
     returnList = []
     # bid[0] = bid <int>, bid[1] = auction <Auction>
     for bid in bidList:
       if(bid[1].winner == self.id):
-        print("<bidUpdate()> winner")
+        print("<bidUpdate()> winner of auction ",bid[1].auctionId)
+        self.winningAuctions =+ 1
+        bid[1].winner = self.id
+        satisfiedNeed = satisfiedNeed + bid[1].quantity
         continue
       if(bid[0] == None or bid[1] == None):
         print("<bidUpdate()> None")
         continue
-      if(self.checkWinner(bid[0], bid[1])):
+      elif(0 < (self.needs.amount - satisfiedNeed)):
         print("<bidUpdate()> append to list")
-        self.winningAuctions =+ 1
-        bid[1].winner = self.id
-        self.currentItems = self.currentItems + bid[1].quantity
+        
+        #self.currentItems = self.currentItems + bid[1].quantity
+        #self.needs.amount = self.needs.amount - self.currentItems
         returnList.append({'id' : bid[1].auctionId, 'user' : self.id, 'top_bid' : bid[0]})
-    return returnList 
-  
-  # Checks if the bidder won the auction, work in progress
-  def checkWinner(self, bid, auction):
-    isWinner = False
-    if(bid < auction.price and bid > 0):
-      isWinner = False
-    else:
-      isWinner = True
-    return isWinner
 
+    return returnList 
+
+  
 ######### Auction class isn't needed maybe. ##########
 class Auction:
   def __init__(self, auctionId, price, quantity):
@@ -209,7 +214,17 @@ def test():
   bidder4Info = bidder4.bidUpdate(simList)
 
   print("Bidder 3 decisions: ", bidder3Info)
+  #print("Bidder 3 needs: ", bidder3.needs.amount)
+  print("Bidder 3 stopBid: ", bidder3.behaviour["stopBid"](bidder3.marketPrice))
   print("Bidder 4 decisions: ", bidder4Info)
+  #print("Bidder 4 needs: ", bidder4.needs.amount)
+  print("Bidder 4 stopBid: ", bidder4.behaviour["stopBid"](bidder4.marketPrice))
+
+  # Testing a second input list:
+  #simList2 = simList
+  #for auction in simList2:
+  #  if(auction["id"] != None):
+  #    auction["quantity"] = 0
 
 
 def testNormalDistributionGraph():
