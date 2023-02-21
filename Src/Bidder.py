@@ -55,7 +55,9 @@ class Bidder:
         print("<from bid()> genBid: ", genBid, "  |  tempBid: ", tempBid, "  |  auction: ", auction.auctionId)
         
         # Checks if the bidder can bid and if it wants to bid if the market price is over the generated bid.
-        if self.behaviour["bid"](auction.price, self.marketPrice, self.currentAmount) and ((self.marketPrice > genBid and not self.behaviour["bidOverMarketPrice"]) or (self.behaviour["stopBid"](self.marketPrice) > genBid)):
+        if(self.behaviour["bid"](auction.price, self.marketPrice, self.currentAmount)
+        and
+        ((self.marketPrice > genBid and not self.behaviour["bidOverMarketPrice"]) or (self.behaviour["stopBid"](self.marketPrice) > genBid))): ##### stopBid logic doesn't work
           if(tempBid < genBid and tempBid > 0):
             continue
           else:
@@ -100,41 +102,50 @@ class Bidder:
   #                           {'id' : 3, 'quantity' : 40, 'user':None , 'top_bid' : 11000},
   #                           {'id' : 4, 'quantity' : 50, 'user':None , 'top_bid' : 12000}]
   ###### delete quantity from return                             ###### --done--
-  ###### function, wins auction, need to know the Needs          ######
-  ###### should be able to reset current items, winning auctions ######
+  ###### function, wins auction, need to know the Needs          ###### --Maybe works now?--
+  ###### should be able to reset current items, winning auctions ###### --Maybe works now?--
   def bidUpdate(self, input):
     satisfiedNeed = 0
+    self.currentItems = 0
     self.winningAuctions = 0
     for dictionary in input:
-      for auction in self.auctionList:
-        if(dictionary["user"] == self.id):
+      if(dictionary["user"] == self.id):
           self.winningAuctions =+ 1
+          satisfiedNeed = satisfiedNeed + dictionary["quantity"]
+      for auction in self.auctionList:
         if(auction.auctionId == dictionary["id"]):
           auction.price = dictionary["top_bid"]
           auction.winner = dictionary["user"]
           auction.quantity = dictionary["quantity"]
 
+    print ("<bidUpdate()> (before bid) Bidder", self.id,"self.needs.amount: ", self.needs.amount, "satisfiedNeed: ", satisfiedNeed)
+    self.currentItems = self.needs.amount - satisfiedNeed
     bidList = self.bid()
-    print("<bidUpdate()> bidList: ", bidList)
+    print("<bidUpdate()> (after bid) bidList: ", bidList)
+
     returnList = []
     # bid[0] = bid <int>, bid[1] = auction <Auction>
     for bid in bidList:
       if(bid[1].winner == self.id):
         print("<bidUpdate()> winner of auction ",bid[1].auctionId)
-        self.winningAuctions =+ 1
         bid[1].winner = self.id
-        satisfiedNeed = satisfiedNeed + bid[1].quantity
+        #satisfiedNeed = satisfiedNeed + bid[1].quantity
         continue
       if(bid[0] == None or bid[1] == None):
         print("<bidUpdate()> None")
         continue
-      elif(0 < (self.needs.amount - satisfiedNeed)):
-        print("<bidUpdate()> append to list")
-        
+      elif(0 < self.currentItems):
+        print("<bidUpdate()> append bid on auction", bid[1].auctionId, "to list")
         #self.currentItems = self.currentItems + bid[1].quantity
         #self.needs.amount = self.needs.amount - self.currentItems
         returnList.append({'id' : bid[1].auctionId, 'user' : self.id, 'top_bid' : bid[0]})
 
+    for auction in self.auctionList:
+      print("<bidUpdate()> Bidder", self.id, " auction list info: ",
+            "id: ", auction.auctionId,
+            "price: ", auction.price,
+            "quantity: ", auction.quantity,
+            "winner: ", auction.winner)
     return returnList 
 
   
@@ -145,12 +156,12 @@ class Auction:
     self.price = price
     self.quantity = quantity
     self.winner = None
-    self.round = 0
+    self.round = 0 # not used at the moment
 
 class Needs:
-    def __init__(self, amount, type):
-        self.amount = amount
-        self.type = type
+  def __init__(self, amount, type):
+    self.amount = amount
+    self.type = type
 
 # Testing method for testing different behaviours
 def test():
@@ -220,12 +231,6 @@ def test():
   #print("Bidder 4 needs: ", bidder4.needs.amount)
   print("Bidder 4 stopBid: ", bidder4.behaviour["stopBid"](bidder4.marketPrice))
 
-  # Testing a second input list:
-  #simList2 = simList
-  #for auction in simList2:
-  #  if(auction["id"] != None):
-  #    auction["quantity"] = 0
-
 
 def testNormalDistributionGraph():
   print("Normal distribution test (graph):")
@@ -236,6 +241,7 @@ def testNormalDistributionGraph():
     valueList.append(value)
   plt.hist(valueList, bins=200) 
   plt.show()
+
 
 #test()
 #testNormalDistributionGraph()
