@@ -93,6 +93,7 @@ class Bidder:
     self.marketPriceFactor = self.behaviour["marketPriceFactorUpdate"](mean, standardDeviation)
 
   # Returns a list of dictionaries with info about how the bidder bids, work in progress
+  # Note: currently it can bid on many auctions even if it just needs a small amount to fulfill the needs
   # Input example: simList = [{'id' : 1, 'quantity' : 60, 'user':None , 'top_bid' : 14000},
   #                           {'id' : 2, 'quantity' : 55, 'user':None , 'top_bid' : 13000},
   #                           {'id' : 3, 'quantity' : 40, 'user':None , 'top_bid' : 11000},
