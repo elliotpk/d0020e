@@ -32,7 +32,6 @@ class Bidder:
   # New bid function (Work In Progress)
   # Returns a list of all the auctions that the bidder can bid on
   # Note: it doesn't set the current amount to a new value currently.
-  ############# Currently, it doesn't append bids higher than the previous auction #############
   ############# self.behaviour["bidOverMarketPrice"] and a value of a range, can turn on/off if market price matters in the simulation or not ##############
   def bid(self):
     # Update the aggressiveness of the behaviour
@@ -58,12 +57,9 @@ class Bidder:
         if(self.behaviour["bid"](auction.price, self.marketPrice, self.currentAmount)
         and
         ((self.marketPrice > genBid and not self.behaviour["bidOverMarketPrice"]) or (self.behaviour["stopBid"](self.marketPrice) > genBid))): ##### stopBid logic doesn't work
-          if(tempBid < genBid and tempBid > 0):
-            continue
-          else:
-            tempBid = genBid
-            tempAuction = auction
-            allBidsList.append((tempBid, tempAuction))
+          tempBid = genBid
+          tempAuction = auction
+          allBidsList.append((tempBid, tempAuction))
         else:
           continue
     if(tempBid == 0 or (tempAuction.auctionId == 0 and tempAuction.price == 0 and tempAuction.quantity == 0)):
@@ -129,15 +125,12 @@ class Bidder:
       if(bid[1].winner == self.id):
         print("<bidUpdate()> winner of auction ",bid[1].auctionId)
         bid[1].winner = self.id
-        #satisfiedNeed = satisfiedNeed + bid[1].quantity
         continue
       if(bid[0] == None or bid[1] == None):
         print("<bidUpdate()> None")
         continue
       elif(0 < self.currentItems):
         print("<bidUpdate()> append bid on auction", bid[1].auctionId, "to list")
-        #self.currentItems = self.currentItems + bid[1].quantity
-        #self.needs.amount = self.needs.amount - self.currentItems
         returnList.append({'id' : bid[1].auctionId, 'user' : self.id, 'top_bid' : bid[0]})
 
     for auction in self.auctionList:
