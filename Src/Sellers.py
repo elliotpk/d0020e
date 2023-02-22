@@ -27,7 +27,7 @@ class Sellers:
         block=Block.AuctionBlock()
         block.set_price(price)
         block.set_amount(amount)
-        block.set_discount(discount)
         block.set_Object = "Block " + str(price) + " " + str(amount) + " " + str(discount) # For debugging mostly
         self.LinkOfBlocks.add(block)
+        block.set_discount(discount + block.prev().get_discount())
 

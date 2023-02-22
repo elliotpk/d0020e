@@ -62,9 +62,10 @@ def referenceCalculator_old(blocklist, buyers):
     #Make all of this modular so that the Fairness Index is easily switched to something else.
 
 
-# blocklist: All the blocks together in a list, can be created by using getAllBlocks for a list of sellers.
+# sellerlist: A list of the sellers, is immediately converted to a long list of all of their blocks.
 # buyers: A list of buyers.
-def referenceCalculator(blocklist, buyers):
+def referenceCalculator(sellerlist, buyers):
+    blocklist = getAllBlocks(sellerlist)
     bestRajJainCostFairness = -1
     bestData = []
     permNum = 0 # For testing
@@ -90,6 +91,7 @@ def referenceCalculator(blocklist, buyers):
                         while i < len(combination):
                             bestData.append(combination[i])
                             i = i + 1
+                    print(formatCombination(combination,buyers,sellerlist,averageCostsForBuyers,RajJainCostFairness))
                 permAndComb = permAndComb + 1 # For testing
         permNum = permNum + 1
         print("Permutation number ", permNum, "Combination number ", permAndComb)
@@ -98,7 +100,7 @@ def referenceCalculator(blocklist, buyers):
         
     print("Permutation number ", permNum, "Combination number ", permAndComb)
     print(bestData)    # For testing 
-    return bestRajJainCostFairness, averageCostsForBuyers/len(buyers)
+    return bestRajJainCostFairness, sum(averageCostsForBuyers)/len(buyers)
 
 
 # Helper function that takes in a list and returns a list of all rotations of that list.
@@ -181,7 +183,7 @@ def averageCost(boughtBlocks):
     totAmount = 0
     for block in boughtBlocks:
         discount = findDiscount(block,boughtBlocks)
-        sum = sum + (block.get_amount() * (block.get_price() - discount))
+        sum = sum + (block.get_amount() * (block.get_price() * (1-(discount/100))))
         totAmount = totAmount + block.get_amount()
     return sum / totAmount
 
@@ -209,6 +211,36 @@ def getAllBlocks(sellerlist):
         for block in SellerBlocklist:
             blocklist.append(block)
     return blocklist
+
+def formatCombination(combination, buyerslist, sellerlist, averageCosts, rajJainFairness):
+    outstring = "Buyers,"
+
+    i = 1
+    for seller in sellerlist:
+        outstring = outstring + "Seller " + str(i) + ","
+        i = i + 1
+
+    outstring = outstring + "AveragePrice, AverageDistance, RaijJainFairness\n"
+
+    i = 1
+    for buyer in buyerslist:
+        outstring = outstring + "Buyer " + str(i) + ","
+        for seller in sellerlist:
+            for blockset in combination:
+                for block in blockset:
+                    if block in seller.LinkOfBlocks.display():
+                        outstring = outstring + " [$=" + str(round(block.get_price() * (1-(findDiscount(block,combination)/100)))) + " x=" + str(block.get_amount()) + " d=" + "dist" + "]"
+            outstring = outstring + ","
+        outstring = outstring + str(averageCosts[i-1]) + "," + "avgDist" + "," + str(rajJainFairness)
+        outstring = outstring + "\n"
+        i = i + 1
+    
+    return outstring
+
+
+
+    
+
             
 
 def demo():

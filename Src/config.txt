@@ -1,0 +1,4 @@
+seed=7956
+resourceusage%=57
+seller=number=3,randomchainlength=true:
+bidder=number=18,copy=False:

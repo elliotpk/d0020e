@@ -365,3 +365,4 @@ print(len(sellerslist))
 # aucitonengine = SimEngine(sellerslist,10,bidderslist)
 
 #DataManagement.dataCollector(seed,sellerslist,bidderslist,resourceusage,sum,sumseller,checksum)
+print(referenceCalculator(sellerslist, bidderslist))
