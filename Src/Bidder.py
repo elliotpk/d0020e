@@ -12,21 +12,19 @@ class Bidder:
     self.needs = needs
     # Bidders will somewhat know the market price based on normal distribution (mean, standardDeviation)
     self.marketPrice = marketPrice*random.normalvariate(1, 0.03)
-    print("<init Class Bidder> Bidder ",self.id, " knows the market price: ", self.marketPrice)
+    #print("<init Class Bidder> Bidder ",self.id, " knows the market price: ", self.marketPrice)
     self.behaviour = behaviour
-    self.currentItems = 0
     self.marketPriceFactor = behaviour["marketPriceFactor"]
     # Stops the bidders from bidding over a certain value based on market price and aggressiveness (code is also added in Behaviour.py)
-    ##### not implemented yet #####
     self.stopBid = self.marketPrice*(1 + self.behaviour["aggressiveness"])
 
     # Bidders know this info about auctions
-    self.auctionsLost = 0
-    self.auctionBids = 0
+    self.auctionsLost = 0 # not used
+    self.auctionBids = 0 # not used
     self.auctionList = []
-    self.currentAuctions = len(self.auctionList)
+    self.currentAuctions = len(self.auctionList) # not used
     self.winningAuctions = 0
-    self.rounds = 0
+    self.rounds = 0 # not used
 
   
   # New bid function (Work In Progress)
@@ -51,12 +49,15 @@ class Bidder:
         genBid = int(min(auction.price * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor), self.currentAmount))
         
         # Print for testing purposes:
-        print("<from bid()> genBid: ", genBid, "  |  tempBid: ", tempBid, "  |  auction: ", auction.auctionId)
+        #print("<from bid()> genBid: ", genBid, "  |  tempBid: ", tempBid, "  |  stopBid: ",self.behaviour["stopBid"](self.marketPrice), "  |  auction: ", auction.auctionId)
         
         # Checks if the bidder can bid and if it wants to bid if the market price is over the generated bid.
         if(self.behaviour["bid"](auction.price, self.marketPrice, self.currentAmount)
-        and
-        ((self.marketPrice > genBid and not self.behaviour["bidOverMarketPrice"]) or (self.behaviour["stopBid"](self.marketPrice) > genBid))): ##### stopBid logic doesn't work
+           and
+           ((self.marketPrice > genBid and not self.behaviour["bidOverMarketPrice"]) or (self.behaviour["stopBid"](self.marketPrice) > genBid and self.behaviour["bidOverMarketPrice"]))
+           or
+           self.behaviour["bidOverMarketPrice"]
+        ):
           tempBid = genBid
           tempAuction = auction
           allBidsList.append((tempBid, tempAuction))
@@ -92,19 +93,46 @@ class Bidder:
   def updateMarketFactor(self, mean, standardDeviation):
     self.marketPriceFactor = self.behaviour["marketPriceFactorUpdate"](mean, standardDeviation)
 
+  # A new bidUpdate() that doesn't use the Auction class, work in progress.
+  def bidUpdate2(self, input):
+    satisfiedNeed = 0
+    currentItems = 0
+    self.winningAuctions = 0
+
+    for dictionary in input:
+      if(dictionary["user"] == self.id):
+          self.winningAuctions =+ 1
+          satisfiedNeed = satisfiedNeed + dictionary["quantity"]
+
+    currentItems = self.needs.amount - satisfiedNeed
+    bidList = self.bid()
+    returnList = []
+    
+    ##### Must change this below and probably change the bid() function to work without the Auction class #####
+    # bid[0] = bid <int>, bid[1] = auction <Auction>
+    for bid in bidList:
+      if(bid[1].winner == self.id):
+        bid[1].winner = self.id
+        continue
+      elif(0 < currentItems):
+        returnList.append({'id' : bid[1].auctionId, 'user' : self.id, 'top_bid' : bid[0]})
+
+    return returnList 
+
   # Returns a list of dictionaries with info about how the bidder bids, work in progress
   # Note: currently it can bid on many auctions even if it just needs a small amount to fulfill the needs
-  # Input example: simList = [{'id' : 1, 'quantity' : 60, 'user':None , 'top_bid' : 14000},
-  #                           {'id' : 2, 'quantity' : 55, 'user':None , 'top_bid' : 13000},
-  #                           {'id' : 3, 'quantity' : 40, 'user':None , 'top_bid' : 11000},
-  #                           {'id' : 4, 'quantity' : 50, 'user':None , 'top_bid' : 12000}]
-  ###### delete quantity from return                             ###### --done--
   ###### function, wins auction, need to know the Needs          ###### --Maybe works now?--
   ###### should be able to reset current items, winning auctions ###### --Maybe works now?--
   def bidUpdate(self, input):
     satisfiedNeed = 0
-    self.currentItems = 0
+    currentItems = 0
     self.winningAuctions = 0
+    self.currentAuctions = 0
+    self.auctionList = []
+
+    for dictionary in input:
+      self.addAuction(Auction(dictionary["id"], dictionary["top_bid"], dictionary["quantity"]))
+
     for dictionary in input:
       if(dictionary["user"] == self.id):
           self.winningAuctions =+ 1
@@ -115,31 +143,18 @@ class Bidder:
           auction.winner = dictionary["user"]
           auction.quantity = dictionary["quantity"]
 
-    print ("<bidUpdate()> (before bid) Bidder", self.id,"self.needs.amount: ", self.needs.amount, "satisfiedNeed: ", satisfiedNeed)
-    self.currentItems = self.needs.amount - satisfiedNeed
+    currentItems = self.needs.amount - satisfiedNeed
     bidList = self.bid()
-    print("<bidUpdate()> (after bid) bidList: ", bidList)
-
     returnList = []
-    # bid[0] = bid <int>, bid[1] = auction <Auction>
+
+    # bid[0] = bid <Int>, bid[1] = auction <Auction>
     for bid in bidList:
       if(bid[1].winner == self.id):
-        print("<bidUpdate()> winner of auction ",bid[1].auctionId)
         bid[1].winner = self.id
         continue
-      if(bid[0] == None or bid[1] == None):
-        print("<bidUpdate()> None")
-        continue
-      elif(0 < self.currentItems):
-        print("<bidUpdate()> append bid on auction", bid[1].auctionId, "to list")
+      elif(0 < currentItems):
         returnList.append({'id' : bid[1].auctionId, 'user' : self.id, 'top_bid' : bid[0]})
 
-    for auction in self.auctionList:
-      print("<bidUpdate()> Bidder", self.id, " auction list info: ",
-            "id: ", auction.auctionId,
-            "price: ", auction.price,
-            "quantity: ", auction.quantity,
-            "winner: ", auction.winner)
     return returnList 
 
   
@@ -162,68 +177,34 @@ def test():
   bidder1 = Bidder(1, 150000, Needs(55, "steel beam"), 15000, Behaviour.A)
   bidder2 = Bidder(2, 150000, Needs(55, "steel beam"), 15000, Behaviour.B)
   bidder3 = Bidder(3, 150000, Needs(55, "steel beam"), 15000, Behaviour.C)
-
-  print("Created 3 bidders with behaviour type A, B and C respectively.")
-  print("-----------------------------------------------------------------")
-
-  print("Testing normal distribution of the marketPriceFactor() function:")
-  
-  print(Behaviour.B["marketPriceFactorUpdate"](1, 0.15))
-  print(bidder2.behaviour["marketPriceFactorUpdate"](1, 0.15))
-  print("-----------------------------------------------------------------")
-
-  print("Testing the bid2() function and marketPriceFactor:")
-  print("Creating bidder 4 (everything is the same as bidder 3, except the ID)")
   bidder4 = Bidder(4, 150000, Needs(55, "steel beam"), 15000, Behaviour.C)
-  bidder4.addAuction(Auction(1, 14000, 55))
-  bidder4.addAuction(Auction(2, 13000, 55))
-  bidder4.addAuction(Auction(3, 11000, 55))
-  bidder4.addAuction(Auction(4, 12000, 55))
 
-  bidder3.addAuction(Auction(1, 14000, 55))
-  bidder3.addAuction(Auction(2, 13000, 55))
-  bidder3.addAuction(Auction(3, 11000, 55))
-  bidder3.addAuction(Auction(4, 12000, 55))
-  # same factor for all bidders with the same type
-  #Behaviour.C["marketPriceFactorUpdate"](1, 0.15)
-  # different factor for all bidders with the same type
-  bidder4.updateMarketFactor(4, 2.15)
-  bidder3.updateMarketFactor(4, 2.15)
-  print("Market price factor bidder 3: ",bidder3.marketPriceFactor)
-  print("Market price factor bidder 4: ",bidder4.marketPriceFactor)
-  
-  print("Bidder ",bidder3.id, " bids on auctions:")
-  bidsList1 = bidder3.bid()
-  if(bidsList1 == []):
-    print("Bidder 3 doesn't bid in any auction.")
-  else:
-    for bid in bidsList1:
-      print("Bidder 3 can bid ", bid[0] , " on auction ", bid[1].auctionId)
-
-  print("Bidder ",bidder4.id, " bids on auctions:")
-  bidsList2 = bidder4.bid()
-  if(bidsList2 == []):
-    print("Bidder 4 doesn't bid in any auction.")
-  else:
-    for bid in bidsList2:
-      print("Bidder 4 can bid ", bid[0] , " on auction ", bid[1].auctionId)
+  print("Created 3 bidders with behaviour type A, B and C respectively and an extra bidder with type C.")
   print("-----------------------------------------------------------------")
 
   print("Testing the bidUpdate() function:")
-  simList = [{'id' : 1, 'quantity' : 60, 'user':None , 'top_bid' : 14000},
+  simList = [{'id' : 1, 'quantity' : 60, 'user':None , 'top_bid' : 16000},
              {'id' : 2, 'quantity' : 55, 'user':None , 'top_bid' : 13000},
              {'id' : 3, 'quantity' : 40, 'user':None , 'top_bid' : 11000},
              {'id' : 4, 'quantity' : 50, 'user':None , 'top_bid' : 12000}]
 
+  bidder1.updateMarketFactor(4, 2.15)
+  bidder3.updateMarketFactor(4, 2.15)
+  bidder4.updateMarketFactor(4, 2.15)           
+
+  bidder1Info = bidder1.bidUpdate(simList)
   bidder3Info = bidder3.bidUpdate(simList)
   bidder4Info = bidder4.bidUpdate(simList)
 
+  print("Bidder 1 decisions: ", bidder1Info)
+  #print("Bidder 1 needs: ", bidder1.needs.amount)
+  #print("Bidder 1 stopBid: ", bidder1.behaviour["stopBid"](bidder1.marketPrice))
   print("Bidder 3 decisions: ", bidder3Info)
   #print("Bidder 3 needs: ", bidder3.needs.amount)
-  print("Bidder 3 stopBid: ", bidder3.behaviour["stopBid"](bidder3.marketPrice))
+  #print("Bidder 3 stopBid: ", bidder3.behaviour["stopBid"](bidder3.marketPrice))
   print("Bidder 4 decisions: ", bidder4Info)
   #print("Bidder 4 needs: ", bidder4.needs.amount)
-  print("Bidder 4 stopBid: ", bidder4.behaviour["stopBid"](bidder4.marketPrice))
+  #print("Bidder 4 stopBid: ", bidder4.behaviour["stopBid"](bidder4.marketPrice))
 
 
 def testNormalDistributionGraph():

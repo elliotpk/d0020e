@@ -99,7 +99,7 @@ C = {
                             changeAggressiveness(C, 0.2) if(auctions > 2 and auctionsLost > 1 and currentBids >= 0) else
                             changeAggressiveness(C, 0.2) if(auctions == 1 and currentBids > 10) else
                             changeAggressiveness(C, C["aggressiveness"]),
-  "bidOverMarketPrice": True,
+  "bidOverMarketPrice": False,
   "bid": lambda price, marketPrice, currentAmount:
          # Can't bid over budget
          False if (price > currentAmount) else 
