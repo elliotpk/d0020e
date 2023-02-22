@@ -21,9 +21,8 @@ class Bidder:
     # Bidders know this info about auctions
     self.auctionsLost = 0 # not used
     self.auctionBids = 0 # not used
-    self.auctionList = []
-    self.currentAuctions = len(self.auctionList) # not used
-    self.winningAuctions = 0
+    self.currentAuctions = 0 # not used, is currently len(input) in bid(self, input) used by bidUpdate(self, input)
+    self.winningAuctions = 0 # is only incrementing in bidUpdate(), but isn't used anywhere
     self.rounds = 0 # not used
 
   
@@ -108,8 +107,6 @@ class Bidder:
 
     currentItems = self.needs.amount - satisfiedNeed
     bidList = self.bid(input)
-    #print("Bidder",self.id ," current winner in auction", bidList[0][1]["id"],"is ", bidList[0][1]["user"])
-    #print("bidList: ", bidList)
     returnList = []
 
     # bid[0] = bid <int>, bid[1] = auction <dictionary>
