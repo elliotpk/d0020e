@@ -31,28 +31,27 @@ class Bidder:
   # Returns a list of all the auctions that the bidder can bid on
   # Note: it doesn't set the current amount to a new value currently.
   ############# self.behaviour["bidOverMarketPrice"] and a value of a range, can turn on/off if market price matters in the simulation or not ##############
-  def bid(self):
-    # Update the aggressiveness of the behaviour
-    self.behaviour["aggressiveness"] = self.behaviour["adaptiveAggressiveness"](self.currentAuctions, self.auctionsLost, self.auctionBids)
+  def bid(self, input):
+    # Update the aggressiveness of the behaviour (doesn't get new values for auctionsLost or auctionBids currently)
+    self.behaviour["aggressiveness"] = self.behaviour["adaptiveAggressiveness"](len(input), self.auctionsLost, self.auctionBids)
     # Variables to keep track on the best bid for a certain auction
     tempBid = 0
-    tempAuction = Auction(0,0,0)
+    tempAuction = {}
     allBidsList = []
 
-    # Analyze all the auctions
-    for auction in self.auctionList:
+    for auction in input:
       # If a bidder only wants to bid max, it will do it in the first auction
-      if self.behaviour["bid"](auction.price, self.marketPrice, self.currentAmount) and self.behaviour["onlyBidMaxAmount"]:
+      if self.behaviour["bid"](auction["top_bid"], self.marketPrice, self.currentAmount) and self.behaviour["onlyBidMaxAmount"]:
         allBidsList.append((self.currentAmount, auction))
         return allBidsList
       else:
-        genBid = int(min(auction.price * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor), self.currentAmount))
+        genBid = int(min(auction["top_bid"] * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor), self.currentAmount))
         
         # Print for testing purposes:
-        #print("<from bid()> genBid: ", genBid, "  |  tempBid: ", tempBid, "  |  stopBid: ",self.behaviour["stopBid"](self.marketPrice), "  |  auction: ", auction.auctionId)
+        #print("<from bid()> genBid: ", genBid, "  |  tempBid: ", tempBid, "  |  stopBid: ",self.behaviour["stopBid"](self.marketPrice), "  |  auction: ", auction["id"])
         
         # Checks if the bidder can bid and if it wants to bid if the market price is over the generated bid.
-        if(self.behaviour["bid"](auction.price, self.marketPrice, self.currentAmount)
+        if(self.behaviour["bid"](auction["top_bid"], self.marketPrice, self.currentAmount)
            and
            ((self.marketPrice > genBid and not self.behaviour["bidOverMarketPrice"]) or (self.behaviour["stopBid"](self.marketPrice) > genBid and self.behaviour["bidOverMarketPrice"]))
            or
@@ -63,7 +62,7 @@ class Bidder:
           allBidsList.append((tempBid, tempAuction))
         else:
           continue
-    if(tempBid == 0 or (tempAuction.auctionId == 0 and tempAuction.price == 0 and tempAuction.quantity == 0)):
+    if(tempBid == 0 or (tempAuction["id"] == 0 and tempAuction["top_bid"] == 0 and tempAuction["quantity"] == 0)):
       return []
     else:
       return allBidsList
@@ -93,79 +92,34 @@ class Bidder:
   def updateMarketFactor(self, mean, standardDeviation):
     self.marketPriceFactor = self.behaviour["marketPriceFactorUpdate"](mean, standardDeviation)
 
-  # A new bidUpdate() that doesn't use the Auction class, work in progress.
-  def bidUpdate2(self, input):
-    satisfiedNeed = 0
-    currentItems = 0
-    self.winningAuctions = 0
-
-    for dictionary in input:
-      if(dictionary["user"] == self.id):
-          self.winningAuctions =+ 1
-          satisfiedNeed = satisfiedNeed + dictionary["quantity"]
-
-    currentItems = self.needs.amount - satisfiedNeed
-    bidList = self.bid()
-    returnList = []
-    
-    ##### Must change this below and probably change the bid() function to work without the Auction class #####
-    # bid[0] = bid <int>, bid[1] = auction <Auction>
-    for bid in bidList:
-      if(bid[1].winner == self.id):
-        bid[1].winner = self.id
-        continue
-      elif(0 < currentItems):
-        returnList.append({'id' : bid[1].auctionId, 'user' : self.id, 'top_bid' : bid[0]})
-
-    return returnList 
-
-  # Returns a list of dictionaries with info about how the bidder bids, work in progress
+  # Returns a list of dictionaries with info about how the bidder bids
   # Note: currently it can bid on many auctions even if it just needs a small amount to fulfill the needs
   ###### function, wins auction, need to know the Needs          ###### --Maybe works now?--
   ###### should be able to reset current items, winning auctions ###### --Maybe works now?--
   def bidUpdate(self, input):
+    self.winningAuctions = 0
     satisfiedNeed = 0
     currentItems = 0
-    self.winningAuctions = 0
-    self.currentAuctions = 0
-    self.auctionList = []
-
-    for dictionary in input:
-      self.addAuction(Auction(dictionary["id"], dictionary["top_bid"], dictionary["quantity"]))
 
     for dictionary in input:
       if(dictionary["user"] == self.id):
           self.winningAuctions =+ 1
           satisfiedNeed = satisfiedNeed + dictionary["quantity"]
-      for auction in self.auctionList:
-        if(auction.auctionId == dictionary["id"]):
-          auction.price = dictionary["top_bid"]
-          auction.winner = dictionary["user"]
-          auction.quantity = dictionary["quantity"]
 
     currentItems = self.needs.amount - satisfiedNeed
-    bidList = self.bid()
+    bidList = self.bid(input)
+    #print("Bidder",self.id ," current winner in auction", bidList[0][1]["id"],"is ", bidList[0][1]["user"])
+    #print("bidList: ", bidList)
     returnList = []
 
-    # bid[0] = bid <Int>, bid[1] = auction <Auction>
+    # bid[0] = bid <int>, bid[1] = auction <dictionary>
     for bid in bidList:
-      if(bid[1].winner == self.id):
-        bid[1].winner = self.id
+      if(bid[1]["user"] == self.id):
         continue
       elif(0 < currentItems):
-        returnList.append({'id' : bid[1].auctionId, 'user' : self.id, 'top_bid' : bid[0]})
+        returnList.append({'id' : bid[1]["id"], 'user' : self.id, 'top_bid' : bid[0]})
 
     return returnList 
-
-  
-######### Auction class isn't needed maybe. ##########
-class Auction:
-  def __init__(self, auctionId, price, quantity):
-    self.auctionId = auctionId
-    self.price = price
-    self.quantity = quantity
-    self.winner = None
-    self.round = 0 # not used at the moment
 
 class Needs:
   def __init__(self, amount, type):
