@@ -51,7 +51,7 @@ def referenceCalculator_old(blocklist, buyers):
         
     #splitfinder to find all combinations of all permutations 
     
-    #test the validity of all the combinations (not buying a block with a previous block unbought, demand fullfilled
+    #test the validity of all the combinations (not buying a block with a previous block unbought, demand fullfilled)
     
     #for the valid combinations: calculate the average price each buyer paid and place these in a list
     
@@ -62,13 +62,14 @@ def referenceCalculator_old(blocklist, buyers):
     #Make all of this modular so that the Fairness Index is easily switched to something else.
 
 
-# blocklist: All the blocks together in a list (since the linked block class is not yet finished. Either one later changes the code to use these instead or adds a funtion to convert the linked list to an ordinary one)
+# blocklist: All the blocks together in a list, can be created by using getAllBlocks for a list of sellers.
 # buyers: A list of buyers.
 def referenceCalculator(blocklist, buyers):
     bestRajJainCostFairness = -1
     bestData = []
     permNum = 0 # For testing
     permAndComb = 0
+    averageCostsForBuyers = []
     
     for permutation in permutations(blocklist):
         for rotationOfPermutation in tupleRotatorLister(permutation):
@@ -89,15 +90,16 @@ def referenceCalculator(blocklist, buyers):
                         while i < len(combination):
                             bestData.append(combination[i])
                             i = i + 1
-                permAndComb = permAndComb + 1
-        permNum = permNum + 1  # For testing
+                permAndComb = permAndComb + 1 # For testing
+        permNum = permNum + 1
         print("Permutation number ", permNum, "Combination number ", permAndComb)
-        if (permNum > len(blocklist)/2): # Due to the way permutations are listed in the permutation-function this will have tested all relevant possibilities when the lists have also been rotated.
+        if (permNum > len(blocklist)/2): # Due to the way permutations are listed in the permutation-function this will have tested all relevant possibilities given that the lists have also been rotated.
             break
         
     print("Permutation number ", permNum, "Combination number ", permAndComb)
     print(bestData)    # For testing 
-    return bestRajJainCostFairness
+    return bestRajJainCostFairness, averageCostsForBuyers/len(buyers)
+
 
 # Helper function that takes in a list and returns a list of all rotations of that list.
 def tupleRotatorLister(tup):
@@ -173,7 +175,7 @@ def rajJainFairness(metricList):
     fairnessIndex = numerator / denominator
     return fairnessIndex
 
-# Feed this function a valid set of blocks for a seller to buy and it will return the average cost paid
+# Feed this function a valid set of blocks for a buyer to buy and it will return the average cost paid
 def averageCost(boughtBlocks):
     sum = 0
     totAmount = 0
