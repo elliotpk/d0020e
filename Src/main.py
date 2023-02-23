@@ -61,17 +61,13 @@ def readConfig():
             for x in numbidder:
                 if x.find("number=") != -1:
                     numbidder = int(x.split("number=")[1])
-        else:
-            numbidder = random.randrange(1,15)
+
         if rowoflist.find("seller") != -1:
             block = rowoflist.split("seller=")[1]
-            if block.find("number") != -1:
-                numsellers = block.split(":")[0].split(",")
-                for x in numsellers:
-                    if x.find("number=") != -1:
-                        numsellers = x.split("number=")[1]
-            else:
-                numsellers = random.randrange(1, 15)
+            numsellers = block.split(":")[0].split(",")
+            for x in numsellers:
+                if x.find("number=") != -1:
+                    numsellers = x.split("number=")[1]
             randomchainlength = block.split(":")[0].split(",")
             for x in randomchainlength:
                 if x.find("randomchainlength=") != -1:
