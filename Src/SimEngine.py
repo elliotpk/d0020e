@@ -28,7 +28,7 @@ class SimEngine():
         self.slot_size = 2                                                          # How many auctions per "time slot", config??
         self.sellers = sellers
         self.Buyers = buyers
-        self.auctions = self.createAuctionList(self.sellers, self.auctionStatus)    # Create a list of all auctions
+        self.auctions = self.createAuctionList(self.sellers)                        # Create a list of all auctions
         self.auctionStatus = self.createAuctionStatus(self.auctions)                # Used to keep track of when a bid has not been placed recently (within x loops)
         self.auctionSlot = []                                                       # Holds all the auctions currently available to the bidders
         self.finishedAuctions = []                                                  # Auctions which have ended are placed here
@@ -52,7 +52,12 @@ class SimEngine():
             newBids = []
             for buyer in self.buyers:
                 temp = buyer.bidUpdate(self.auctionSlot)
+                if (len(temp) == 0):
+                    continue
                 newBids.append(temp)
+            if(len(newBids) == 0):
+                self.updateStatus([])
+                continue
 
             finished = []
             for auction in self.auctionSlot:
@@ -61,21 +66,23 @@ class SimEngine():
                     t = next((item for item in buyers if item["id"] == auction["id"]), None)                  # Extracts all the bids for each auction ID
                     if(t != None):
                         bids.append(t)
-                sort = sorted(bids, key=lambda i:int(i['value']), reverse=True)                               # Sorts the list of bids by amount
+                sort = sorted(bids, key=lambda i:int(i['top_bid']), reverse=True)                               # Sorts the list of bids by amount
+                if (len(sort) == 0): continue
                 # !! Pass the list "sort" to the datamanagement class here, before we pick out the top bids only !!
-                max_bid = sort[0]['value']
+                max_bid = sort[0]['top_bid']
                 top = []
-                for i in range(len(sort), 0, -1):                                                             # Pick out any potential ties for the top bid to randomize which one gets submitted
-                    if(int(sort[i]['value']) == int(max_bid)):
+                for i in range(len(sort)-1, -1, -1):                                                             # Pick out any potential ties for the top bid to randomize which one gets submitted
+                    if(int(sort[i]['top_bid']) == int(max_bid)):
                         top.append(sort.pop(i))
-                print("New top bid of: "+ str(sort[0]['value']) +" submitted for auction: " + auction['id'] + " by user: " + sort[0]['user'])
-                finished.append(random.choice(top))                                                           # random.choice selects a random auction from the list
+                if(len(top) == 0 and len(sort) == 1):
+                    finished.append(sort[0])
+                else:
+                    finished.append(random.choice(top))                                                           # random.choice selects a random auction from the list
 
-            for id in finished:
-                for bid in id:
-                    r = link.placeBid(bid['id'], bid['user'], bid['value'])
-                    if(not r):
-                        print('Error when placing the bid for user: ' + bid['user'] + ' to auction: ' + bid['id'])
+            for bid in finished:
+                r = link.placeBid(bid['id'], bid['user'], bid['top_bid'])
+                if(not r):
+                    print('Error when placing the bid for user: ' + bid['user'] + ' to auction: ' + bid['id'])
             
             self.updateStatus(finished)
         
@@ -89,7 +96,9 @@ class SimEngine():
         for i in range(self.slot_size):
             if(len(self.auctions) == 0):
                 break
-            self.auctionSlot.append(random.choice(self.auctions))
+            item = random.choice(self.auctions)
+            i = self.auctions.index(item)
+            self.auctionSlot.append(self.auctions.pop(i))
 
     def updateStatus(self, auctions):
         auctionIDs = [d.get('id') for d in auctions]                                                        # Find all the auction IDs present in the list "auctions"
@@ -98,18 +107,23 @@ class SimEngine():
             item = next(iter, None)
             if(item == None):                                                                               # End the while loop when iterator has nothing more left
                 break
-            i = self.auctionStatus.index(item)
-            if(self.auctionStatus[i]['val'] == 0):                                                          # If the max round duration is exceeded we end the auction
-                end = self.auctionSlot.pop(i)                                                               # Remove the entry from the auctionstatus list and end the auction                                                          
-                self.endAuction(end)                                                                        
-            else:                                                                                           # Otherwise we decrement the max round duration counter
-                self.auctionStatus[i]['val'] -= 1
+            for auction in self.auctionStatus:
+                if(auction['id'] == item['id']):
+                    if(auction['val'] == 0):                                                                # If the max round duration is exceeded we end the auction
+                        for slotAuction in self.auctionSlot:
+                            if(slotAuction['id'] == auction['id']):
+                                i = self.auctionSlot.index(slotAuction)
+                                end = self.auctionSlot.pop(i)                                                       # Remove the entry from the auctionstatus list and end the auction                                                          
+                                self.endAuction(end)                                                                        
+                    else:                                                                                   # Otherwise we decrement the max round duration counter
+                        auction['val'] -= 1
+                        break
+
 
     def endAuction(self, auction):
         "Called to end the specific auction"
         link.endAuction(auction['id'], 'Seller', auction['user'])
         self.finishedAuctions.append(auction)
-        self.auctions.remove(auction)
         print("User: " + auction['user'] + " has won auction:" + auction['id'] + " for " + str(auction["quantity"]) + " units for " + str(auction["top_bid"]))
 
 
@@ -141,4 +155,5 @@ class SimEngine():
         "Creates a list with auction ID and how many loops since latest bid"
         result = []
         for auction in auctionList:
-            result.append({'id':auction['id'], 'val' : 0})                  # Default 0 meaning auction just submitted
+            result.append({'id':auction['id'], 'val' : self.end_threshold})                  # Default self.end_threshold meaning auction just submitted
+        return result
