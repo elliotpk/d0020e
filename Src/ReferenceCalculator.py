@@ -67,7 +67,7 @@ def referenceCalculator_old(blocklist, buyers):
 def referenceCalculator(sellerlist, buyers):
     blocklist = getAllBlocks(sellerlist)
     bestRajJainCostFairness = -1
-    bestData = []
+    bestData = ""
     permNum = 0 # For testing
     permAndComb = 0
     averageCostsForBuyers = []
@@ -85,13 +85,10 @@ def referenceCalculator(sellerlist, buyers):
                     RajJainCostFairness = rajJainFairness(averageCostsForBuyers)
                     if (RajJainCostFairness > bestRajJainCostFairness):
                         bestRajJainCostFairness = RajJainCostFairness
-                        bestData.append(averageCostsForBuyers)
-                        bestData.append(permAndComb)
+                        bestData = bestData + "\nPermutation " + str(permNum) + " Combination " + str(permAndComb) + "\n"
+                        bestData = bestData + formatCombination(combination,buyers,sellerlist,averageCostsForBuyers,RajJainCostFairness)
                         i = 0
-                        while i < len(combination):
-                            bestData.append(combination[i])
-                            i = i + 1
-                    print(formatCombination(combination,buyers,sellerlist,averageCostsForBuyers,RajJainCostFairness))
+                    #print(formatCombination(combination,buyers,sellerlist,averageCostsForBuyers,RajJainCostFairness))
                 permAndComb = permAndComb + 1 # For testing
         permNum = permNum + 1
         print("Permutation number ", permNum, "Combination number ", permAndComb)
@@ -212,24 +209,28 @@ def getAllBlocks(sellerlist):
             blocklist.append(block)
     return blocklist
 
+# Takes in data that is assumed to be relevant for analysis and formats this as a CSV file.
+# combination = a valid way of distributing blocks among the buyers (with one extra "buyer" for the "unbought" blocks).
+# All the input data is attainable inside the referenceCalculator function.
 def formatCombination(combination, buyerslist, sellerlist, averageCosts, rajJainFairness):
-    outstring = "Buyers,"
+    combinationWithoutUnboughts = combination.copy()
+    unboughts = combinationWithoutUnboughts.pop() # Reference to unbought blocks saved in case this is interesting in the future
 
+    outstring = "Buyers,"  # Column creation
     i = 1
     for seller in sellerlist:
         outstring = outstring + "Seller " + str(i) + ","
         i = i + 1
-
     outstring = outstring + "AveragePrice, AverageDistance, RaijJainFairness\n"
 
+    # Each field in the intersection of a seller column and a buyer row is filled with the blocks purchased from that seller by that buyer. 
     i = 1
-    for buyer in buyerslist:
+    for blockset in combinationWithoutUnboughts:
         outstring = outstring + "Buyer " + str(i) + ","
         for seller in sellerlist:
-            for blockset in combination:
-                for block in blockset:
-                    if block in seller.LinkOfBlocks.display():
-                        outstring = outstring + " [$=" + str(round(block.get_price() * (1-(findDiscount(block,combination)/100)))) + " x=" + str(block.get_amount()) + " d=" + "dist" + "]"
+            for block in blockset:
+                if block in seller.LinkOfBlocks.display():
+                    outstring = outstring + r" [$=" + str(round(block.get_price() * (1-(findDiscount(block,combinationWithoutUnboughts)/100)))) + " x=" + str(block.get_amount()) + " d=" + "dist" + "]"
             outstring = outstring + ","
         outstring = outstring + str(averageCosts[i-1]) + "," + "avgDist" + "," + str(rajJainFairness)
         outstring = outstring + "\n"
