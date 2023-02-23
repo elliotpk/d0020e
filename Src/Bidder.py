@@ -46,6 +46,10 @@ class Bidder:
       else:
         genBid = int(min(auction["top_bid"] * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor), self.currentAmount))
         
+        # If top bid starts with 0, then the bidders will bid 1/5 of the market price or what is left in their current amount.
+        if(genBid == 0):
+          genBid = int(min((self.marketPrice/5) * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor), self.currentAmount))
+
         # Print for testing purposes:
         #print("<from bid()> genBid: ", genBid, "  |  tempBid: ", tempBid, "  |  stopBid: ",self.behaviour["stopBid"](self.marketPrice), "  |  auction: ", auction["id"])
         
@@ -61,7 +65,7 @@ class Bidder:
           allBidsList.append((tempBid, tempAuction))
         else:
           continue
-    if(tempBid == 0 or (tempAuction["id"] == 0 and tempAuction["top_bid"] == 0 and tempAuction["quantity"] == 0)):
+    if(tempBid < 0 or (tempAuction["id"] == 0 and tempAuction["top_bid"] == 0 and tempAuction["quantity"] == 0)):
       return []
     else:
       return allBidsList
@@ -138,14 +142,16 @@ def test():
              {'id' : 2, 'quantity' : 55, 'user':None , 'top_bid' : 13000},
              {'id' : 3, 'quantity' : 40, 'user':None , 'top_bid' : 11000},
              {'id' : 4, 'quantity' : 50, 'user':None , 'top_bid' : 12000}]
+  simList2 = [{'id': '63f6c3df7b6103af971aba61', 'quantity': 441, 'user': 'N/A', 'top_bid': 0},
+              {'id': '63f6c3e07b6103af971aba63', 'quantity': 411, 'user': 'N/A', 'top_bid': 0}]
 
   bidder1.updateMarketFactor(4, 2.15)
   bidder3.updateMarketFactor(4, 2.15)
-  bidder4.updateMarketFactor(4, 2.15)           
+  bidder4.updateMarketFactor(4, 2.15)
 
-  bidder1Info = bidder1.bidUpdate(simList)
-  bidder3Info = bidder3.bidUpdate(simList)
-  bidder4Info = bidder4.bidUpdate(simList)
+  bidder1Info = bidder1.bidUpdate(simList2)
+  bidder3Info = bidder3.bidUpdate(simList2)
+  bidder4Info = bidder4.bidUpdate(simList2)
 
   print("Bidder 1 decisions: ", bidder1Info)
   #print("Bidder 1 needs: ", bidder1.needs.amount)
