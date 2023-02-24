@@ -5,10 +5,8 @@ import matplotlib.pyplot as plt
 
 ###### amount should maybe be an amount taken from behaviour ######
 class Bidder:
-  def __init__(self, id, amount, needs, marketPrice, behaviour):
+  def __init__(self, id, needs, marketPrice, behaviour):
     self.id = id
-    self.initAmount = amount
-    self.currentAmount = self.initAmount
     self.needs = needs
     # Bidders will somewhat know the market price based on normal distribution (mean, standardDeviation)
     self.marketPrice = marketPrice*random.normalvariate(1, 0.03)
@@ -16,7 +14,7 @@ class Bidder:
     self.marketPriceFactor = behaviour["marketPriceFactor"]
     # Stops the bidders from bidding over a certain value based on market price and aggressiveness (code is also added in Behaviour.py)
     self.stopBid = self.marketPrice*(1 + self.behaviour["aggressiveness"])
-    print("<init Class Bidder> Bidder ",self.id, " knows the market price: ", self.marketPrice, " and stopBid is: ", self.stopBid)
+    #print("<init Class Bidder> Bidder ",self.id, " knows the market price: ", self.marketPrice, " and stopBid is: ", self.stopBid)
 
     # Bidders know this info about auctions
     self.auctionsLost = 0 # not used
@@ -39,19 +37,17 @@ class Bidder:
     allBidsList = []
 
     for auction in input:
-      genBid = int(min(auction["top_bid"] * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor), self.currentAmount))
+      genBid = int(auction["top_bid"] * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor))
       
       # If top bid starts with 0, then the bidders will bid 1/5 of the market price or what is left in their current amount.
       if(genBid == 0):
-        genBid = int(min((self.marketPrice/5) * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor), self.currentAmount))
+        genBid = int((self.marketPrice/5) * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor))
 
       # Print for testing purposes:
-      #print("<from bid()> genBid: ", genBid, "  |  tempBid: ", tempBid, "  |  stopBid: ",self.behaviour["stopBid"](self.marketPrice), "  |  auction: ", auction["id"])
+      #print("<from bid()> Bidder",self.id, "genBid: ", genBid, "  |  tempBid: ", tempBid, "  |  stopBid: ",self.behaviour["stopBid"](self.marketPrice), "  |  auction: ", auction["id"])
       
       # Checks if the bidder can bid and if it wants to bid if the market price is over the generated bid.
-      if(self.behaviour["bid"](auction["top_bid"], self.marketPrice, self.currentAmount)
-          and
-          ((self.marketPrice > genBid and not self.behaviour["bidOverMarketPrice"]) or (self.stopBid > genBid and self.behaviour["bidOverMarketPrice"]))
+      if(((self.marketPrice > genBid and not self.behaviour["bidOverMarketPrice"]) or (self.stopBid > genBid and self.behaviour["bidOverMarketPrice"]))
           or
           self.behaviour["bidOverMarketPrice"]
       ):
@@ -109,10 +105,10 @@ class Needs:
 
 # Testing method for testing different behaviours
 def test():
-  bidder1 = Bidder(1, 150000, Needs(55, "steel beam"), 15000, Behaviour.A)
-  bidder2 = Bidder(2, 150000, Needs(55, "steel beam"), 15000, Behaviour.B)
-  bidder3 = Bidder(3, 150000, Needs(55, "steel beam"), 15000, Behaviour.C)
-  bidder4 = Bidder(4, 150000, Needs(55, "steel beam"), 15000, Behaviour.C)
+  bidder1 = Bidder(1, Needs(55, "steel beam"), 15000, Behaviour.A)
+  bidder2 = Bidder(2, Needs(55, "steel beam"), 15000, Behaviour.B)
+  bidder3 = Bidder(3, Needs(55, "steel beam"), 15000, Behaviour.C)
+  bidder4 = Bidder(4, Needs(55, "steel beam"), 15000, Behaviour.C)
 
   print("Created 3 bidders with behaviour type A, B and C respectively and an extra bidder with type C.")
   print("-----------------------------------------------------------------")
@@ -122,7 +118,7 @@ def test():
              {'id' : 2, 'quantity' : 55, 'user':None , 'top_bid' : 13000},
              {'id' : 3, 'quantity' : 40, 'user':None , 'top_bid' : 11000},
              {'id' : 4, 'quantity' : 50, 'user':None , 'top_bid' : 12000}]
-  simList2 = [{'id': '63f6c3df7b6103af971aba61', 'quantity': 441, 'user': 'N/A', 'top_bid': 0},
+  simList2 = [{'id': '63f6c3df7b6103af971aba61', 'quantity': 441, 'user': 'N/A', 'top_bid': 16000},
               {'id': '63f6c3e07b6103af971aba63', 'quantity': 411, 'user': 'N/A', 'top_bid': 0}]
 
   bidder1.updateMarketFactor(4, 2.15)

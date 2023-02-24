@@ -43,12 +43,6 @@ A = {
                             changeAggressiveness(A, A["aggressiveness"]) if(auctions == 1 and currentBids > 10) else
                             changeAggressiveness(A, A["aggressiveness"]),
   "bidOverMarketPrice": True,
-  "bid": lambda price, marketPrice, currentAmount:
-         # Can't bid over budget
-         False if (price > currentAmount) else
-         # Can bid over market value
-         True if (price > marketPrice) else 
-         (price < currentAmount),
   "marketPriceFactor": 1.0,
   "marketPriceFactorUpdate": lambda mean, standardDeviation:
                              marketPriceFactor(A, A["aggressiveness"], mean, standardDeviation),
@@ -70,12 +64,6 @@ B = {
                             changeAggressiveness(B, 0.6) if(auctions == 1 and currentBids > 10) else
                             changeAggressiveness(B, B["aggressiveness"]),
   "bidOverMarketPrice": False,
-  "bid": lambda price, marketPrice, currentAmount:
-         # Can't bid over budget
-         False if (price > currentAmount) else 
-         # Can't bid over market value
-         False if (price > marketPrice) else
-         (price < currentAmount),
   "marketPriceFactor": 1.0,
   "marketPriceFactorUpdate": lambda mean, standardDeviation:
                              marketPriceFactor(B, B["aggressiveness"], mean, standardDeviation),
@@ -97,12 +85,6 @@ C = {
                             changeAggressiveness(C, 0.2) if(auctions == 1 and currentBids > 10) else
                             changeAggressiveness(C, C["aggressiveness"]),
   "bidOverMarketPrice": False,
-  "bid": lambda price, marketPrice, currentAmount:
-         # Can't bid over budget
-         False if (price > currentAmount) else 
-         # Can't bid over market value
-         False if (price > marketPrice) else
-         (price < currentAmount),
   "marketPriceFactor": 1.0,
   "marketPriceFactorUpdate": lambda mean, standardDeviation:
                              marketPriceFactor(C, C["aggressiveness"], mean, standardDeviation),
