@@ -8,12 +8,17 @@ import json
 
 # Perhaps import this from the config file?
 API_URL = "http://127.0.0.1:5000"
-TIME_OUT = 0                            # Seconds
-ROOM_DURATION = 40                       # Minutes
+TIME_OUT = 1                            # Seconds
+ROOM_DURATION = 5                       # Minutes
 
 def endAuction(room_id:str, username:str, winner:str):
     "Used to decide on a winner for the auction, username needs to be the admin for the auction and winner the username of the person who won"
     r = requests.post(API_URL+"/rooms/"+room_id+"/end", auth=(username, ''), data={"winner":winner})
+    return r.text
+
+def getWinner(room_id:str, username:str):
+    "Used to get the winner of an auction after it has ended"
+    r = requests.get(API_URL+"/rooms/"+room_id+"/end", auth=(username, ''))
     return r.text
 
 def placeBid(room_id:str, username:str, value:int):
@@ -38,13 +43,16 @@ def getRoomInfo(room_id:str, username:str, order:str):
     json_obj = r.json()                                                                     
     value = json_obj["Bids"]
     output = []
-    for entry in value:
-        output.append({"room_id" : room_id, "user" : entry["sender"]["val"][0], "value" : entry["text"]["val"][0]})
+    if(len(value) == 0):
+        output.append({"room_id" : room_id, "user" : 'N/A', "value" : 0})   # Incase there are no bids in the auction, usually when simulation has just started
+    else:
+        for entry in value:
+            output.append({"room_id" : room_id, "user" : entry["sender"]["val"][0], "value" : entry["text"]["val"][0]})
     sort = False
     if(order == "bid"):
         sort = True
 
-    return sorted(output, key=lambda i:i["value"], reverse=sort)
+    return sorted(output, key=lambda i:int(i['value']), reverse=sort)
 
 def addUser(room_id:str, username:str):
     r = requests.get(API_URL+"/rooms/"+room_id+"/join", auth=(username, ''), timeout=TIME_OUT)

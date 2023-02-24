@@ -2,7 +2,7 @@ class AuctionBlock:
     #
     def __init__(self):
         self.Object = None
-        self.Units = None
+        self.Amount = None
         self.Price = None
         self.Discount = None
         self.NextBlock = None
