@@ -23,7 +23,7 @@ def changeAggressiveness(behaviour, value):
 # This function returns a factor that is used for bidding based on the market price.
 # It uses a normal distribution since it's more common to bid in certain scenarios.
 # Note: if the factor is 0 or negavtive, the calculation repeats until it's positive,
-# therefore avoid large standard deviation integers for accurate normal distribution results.
+# therefore avoid standard deviation integers close to 1/2 of the mean value for accurate normal distribution results.
 def marketPriceFactor(behaviour, aggressiveness, mean, standardDeviation):
   behaviour["marketPriceFactor"] = aggressiveness*random.normalvariate(mean, standardDeviation)
   while behaviour["marketPriceFactor"] <= 0 :
@@ -35,7 +35,6 @@ def marketPriceFactor(behaviour, aggressiveness, mean, standardDeviation):
 # Can bid over the market value, but not over the maximum amount.
 A = {
   "behaviour": "A",
-  "onlyBidMaxAmount": True,
   "aggressiveness": 0.9,
   "adaptiveAggressiveness": lambda auctions, auctionsLost, currentBids:
                             changeAggressiveness(A, A["aggressiveness"]) if(auctions > 4 and auctionsLost > 3 and currentBids >= 0) else
@@ -63,7 +62,6 @@ A = {
 # Doesn't bid if it's over the market value or over the maximum amount.
 B = {
   "behaviour": "B",
-  "onlyBidMaxAmount": False,
   "aggressiveness": 0.5,
   "adaptiveAggressiveness": lambda auctions, auctionsLost, currentBids:
                             changeAggressiveness(B, 0.8) if(auctions > 4 and auctionsLost > 3 and currentBids >= 0) else
@@ -91,7 +89,6 @@ B = {
 # Doesn't bid if it's over the market value or over the maximum amount.
 C = {
   "behaviour": "C",
-  "onlyBidMaxAmount": False,
   "aggressiveness": 0.1,
   "adaptiveAggressiveness": lambda auctions, auctionsLost, currentBids:
                             changeAggressiveness(C, 0.6) if(auctions > 4 and auctionsLost > 3 and currentBids >= 0) else

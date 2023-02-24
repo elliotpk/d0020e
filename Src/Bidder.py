@@ -12,11 +12,11 @@ class Bidder:
     self.needs = needs
     # Bidders will somewhat know the market price based on normal distribution (mean, standardDeviation)
     self.marketPrice = marketPrice*random.normalvariate(1, 0.03)
-    #print("<init Class Bidder> Bidder ",self.id, " knows the market price: ", self.marketPrice)
     self.behaviour = behaviour
     self.marketPriceFactor = behaviour["marketPriceFactor"]
     # Stops the bidders from bidding over a certain value based on market price and aggressiveness (code is also added in Behaviour.py)
     self.stopBid = self.marketPrice*(1 + self.behaviour["aggressiveness"])
+    print("<init Class Bidder> Bidder ",self.id, " knows the market price: ", self.marketPrice, " and stopBid is: ", self.stopBid)
 
     # Bidders know this info about auctions
     self.auctionsLost = 0 # not used
@@ -39,58 +39,38 @@ class Bidder:
     allBidsList = []
 
     for auction in input:
-      # If a bidder only wants to bid max, it will do it in the first auction
-      if self.behaviour["bid"](auction["top_bid"], self.marketPrice, self.currentAmount) and self.behaviour["onlyBidMaxAmount"]:
-        allBidsList.append((self.currentAmount, auction))
-        return allBidsList
-      else:
-        genBid = int(min(auction["top_bid"] * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor), self.currentAmount))
-        
-        # If top bid starts with 0, then the bidders will bid 1/5 of the market price or what is left in their current amount.
-        if(genBid == 0):
-          genBid = int(min((self.marketPrice/5) * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor), self.currentAmount))
+      genBid = int(min(auction["top_bid"] * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor), self.currentAmount))
+      
+      # If top bid starts with 0, then the bidders will bid 1/5 of the market price or what is left in their current amount.
+      if(genBid == 0):
+        genBid = int(min((self.marketPrice/5) * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor), self.currentAmount))
 
-        # Print for testing purposes:
-        #print("<from bid()> genBid: ", genBid, "  |  tempBid: ", tempBid, "  |  stopBid: ",self.behaviour["stopBid"](self.marketPrice), "  |  auction: ", auction["id"])
-        
-        # Checks if the bidder can bid and if it wants to bid if the market price is over the generated bid.
-        if(self.behaviour["bid"](auction["top_bid"], self.marketPrice, self.currentAmount)
-           and
-           ((self.marketPrice > genBid and not self.behaviour["bidOverMarketPrice"]) or (self.behaviour["stopBid"](self.marketPrice) > genBid and self.behaviour["bidOverMarketPrice"]))
-           or
-           self.behaviour["bidOverMarketPrice"]
-        ):
-          tempBid = genBid
-          tempAuction = auction
-          allBidsList.append((tempBid, tempAuction))
-        else:
+      # Print for testing purposes:
+      #print("<from bid()> genBid: ", genBid, "  |  tempBid: ", tempBid, "  |  stopBid: ",self.behaviour["stopBid"](self.marketPrice), "  |  auction: ", auction["id"])
+      
+      # Checks if the bidder can bid and if it wants to bid if the market price is over the generated bid.
+      if(self.behaviour["bid"](auction["top_bid"], self.marketPrice, self.currentAmount)
+          and
+          ((self.marketPrice > genBid and not self.behaviour["bidOverMarketPrice"]) or (self.stopBid > genBid and self.behaviour["bidOverMarketPrice"]))
+          or
+          self.behaviour["bidOverMarketPrice"]
+      ):
+        # Bidders won't bid if the top bid is over the stop bid
+        if(auction["top_bid"] > self.stopBid):
           continue
+        # Limits the maximum bid to be stop bid
+        if(self.stopBid < genBid):
+          tempBid = int(self.stopBid)
+        else:
+          tempBid = genBid
+        tempAuction = auction
+        allBidsList.append((tempBid, tempAuction))
+      else:
+        continue
     if(tempBid < 0 or (tempAuction["id"] == 0 and tempAuction["top_bid"] == 0 and tempAuction["quantity"] == 0)):
       return []
     else:
       return allBidsList
-
-  def setCurrentAmount(self, amount):
-    self.currentAmount = amount
-
-  def setWinningAuctions(self, winningAuctions):
-    self.winningAuctions = winningAuctions
-
-  def setAuctionsLost(self, auctionsLost):
-    self.auctionsLost = auctionsLost
-
-  def setAuctionBids(self, auctionBids):
-    self.auctionBids = auctionBids
-
-  def addAuction(self, auction):
-    self.auctionList.append(auction)
-    self.currentAuctions = len(self.auctionList)
-
-  def removeAuction(self, auctionId):
-    for auction in self.auctionList:
-      if(auction.auctionId == auctionId):
-        self.auctionList.remove(auction)
-        self.currentAuctions = len(self.auctionList)
   
   def updateMarketFactor(self, mean, standardDeviation):
     self.marketPriceFactor = self.behaviour["marketPriceFactorUpdate"](mean, standardDeviation)
