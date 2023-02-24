@@ -1,4 +1,5 @@
 seed=765
-numrandomsellers=10
+numrandomsellers=5
 numrandombidders=4
 seller=price=54->->->->->->->->
+bidder=marketprice=10,needs=2
