@@ -8,7 +8,7 @@ class DataManagement:
     def __init__(self):
         self.DataList = None
         self.string = ""
-        self.stringlist = ["id,quantity,user,top_bid"]
+        self.stringlist = []
         self.finished = False
 
 
@@ -21,29 +21,57 @@ class DataManagement:
 
     def stringMaker(self, list):
         self.DataList = list
+        self.stringlist = ["id,quantity,user,top_bid"]
 
         for item in self.DataList:
             self.string += item["id"] + "," + str(item["quantity"]) + "," + item["user"] + "," + str(item["top_bid"])
             self.temp(self.string)
-        self.printdata()
-        #self.printdata(self.string)
+        #while self.finished:
+            #self.printdata()
+        self.printdata(testtype = "testE")
+
+    def dataCollector(self, seed, sellerslist, bidderslist, resourceusage, sum, sumseller, checksum):
+        
+        self.stringlist = [str(seed) + "," + str(sellerslist) + "," + str(bidderslist) + "," + str(resourceusage) + "," + str(sum) + "," + str(sumseller) + "," + str(sumseller) + "," + str(checksum)]
+        self.string = seed + "," + str(sellerslist) + "," + str(bidderslist) + "," + resourceusage + "," + str(sum) + "," + str(sumseller) + "," + str(sumseller) + "," + str(checksum)
+        self.temp(self.string)
+        self.printdata(testtype = "testJ")
+        self.stringlist = []
+
+        for item in sellerslist:
+            self.string = str(item)
+            self.temp(self.string)
+            self.string = ""
+
+        print(self.stringlist)
+        self.printdata(testtype = "testJseller")
+        self.stringlist = []
+
+        for item in bidderslist:
+            self.string = str(item)
+            self.temp(self.string)
+            self.string = ""
+
+        print(self.stringlist)
+        self.printdata(testtype = "testJbidder")
+        self.stringlist = []
+
+        #for item in bidder
 
 
-    def printdata(self):
-        #list = stringlist
+    def printdata(self, testtype):
         #spara data före print
         #prints the results into a csv file and labels the different runs into a new csv file
         testnr = 0
-        while (os.path.exists('test'+str(testnr)+'.csv')):
+        while (os.path.exists(testtype+str(testnr)+'.csv')):
             testnr=testnr+1
         print(testnr)
-        print(self.stringlist)
-        mkcsv = open('test'+str(testnr)+'.csv','w')
+        mkcsv = open(testtype+str(testnr)+'.csv','w')
         for string in self.stringlist:
             for row in string.split(' '):
                 mkcsv.write(row+"\n")
-        #for row in stringlist.split(','): 
         mkcsv.close()
+        self.stringlist = []
 
     """"
     pris,data,vinnare,id
@@ -52,8 +80,20 @@ class DataManagement:
     """
     #print(Api.data) print to csv-file
 
+    def testOutJ(self):
+
+        self.seed = "Exempel"
+        self.sellerslist = ["Hubert", "Bart", "Jakob", "Kasper"]
+        self.bidderslist = ["Kenneth", "Per", "Olof", "Eskil"]
+        self.resourceusage = "0.3"
+        self.sum = 1000
+        self.sumseller = 7000
+        self.checksum = 2500
+
+        self.dataCollector(self.seed, self.sellerslist, self.bidderslist, self.resourceusage, self.sum, self.sumseller, self.checksum)
+
     
-    def testOut(self):
+    def testOutE(self):
 
         auctionId = "100001"
         quantity = 5
@@ -82,6 +122,6 @@ class DataManagement:
        
 D = DataManagement()
 
-D.testOut()
+D.testOutE()
 
 
