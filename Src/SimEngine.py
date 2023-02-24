@@ -91,6 +91,7 @@ class SimEngine():
             info = link.getRoomInfo(auction['id'], "Seller", 'bid')[0]
             auction['top_bid'] = info['value']
             auction['user'] = info['user']
+        self.saveData()
 
     def updateAuctionSlot(self):
         for i in range(self.slot_size):
@@ -113,7 +114,7 @@ class SimEngine():
                         for slotAuction in self.auctionSlot:
                             if(slotAuction['id'] == auction['id']):
                                 i = self.auctionSlot.index(slotAuction)
-                                end = self.auctionSlot.pop(i)                                                       # Remove the entry from the auctionstatus list and end the auction                                                          
+                                end = self.auctionSlot.pop(i)                                               # Remove the entry from the auctionstatus list and end the auction                                                          
                                 self.endAuction(end)                                                                        
                     else:                                                                                   # Otherwise we decrement the max round duration counter
                         auction['val'] -= 1
@@ -155,5 +156,16 @@ class SimEngine():
         "Creates a list with auction ID and how many loops since latest bid"
         result = []
         for auction in auctionList:
-            result.append({'id':auction['id'], 'val' : self.end_threshold})                  # Default self.end_threshold meaning auction just submitted
+            result.append({'id':auction['id'], 'val' : self.end_threshold})                  # If threshold value goes below 0 we end the auction
         return result
+
+    def saveData(self):
+        output = "RoomID, Quantity, Winner, Price \n"
+        for auction in self.finishedAuctions:
+            output += auction['id'] + ',' + auction['quantity'] + ',' + auction['user'] + ',' + auction['top_bid'] + '\n'
+        num = 0
+        while(os.path.exists('test'+str(num)+'.csv')):
+            num += 1
+        f = open('test'+str(num)+'.csv')
+        f.write(output)
+        f.close()
