@@ -120,8 +120,8 @@ class DataManagement:
 
         self.stringMaker(list)
        
-D = DataManagement()
+#D = DataManagement()
 
-D.testOutE()
+#D.testOutE()
 
 

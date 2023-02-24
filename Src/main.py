@@ -110,10 +110,11 @@ def readConfig():
             seller = Sellers.Sellers(len(sellerslist))
             sellerslist.append(seller)
             headcreated = False
+            discount = None
             for i in range(int(blocklen[x])):
                 price = None
                 supply = None
-                discount = None
+                discountbool = True
                 try:
                     blockinfo = blockatribute.split("[")[1].split("]")[0].split(",")
                 except:
@@ -132,6 +133,7 @@ def readConfig():
                         blockatribute = blockatribute.replace(",supply=" + str(supply), "")
                         blockatribute = blockatribute.replace("supply=" + str(supply), "")
                     elif attribute.find("discount") != -1:
+                        discountbool = False
                         discount = int(attribute.split("discount=")[1])
                         blockatribute = blockatribute.replace(",discount=" + str(discount), "")
                         blockatribute = blockatribute.replace("discount=" + str(discount), "")
@@ -139,21 +141,24 @@ def readConfig():
                     price = random.randrange(1000, 10000)
                 if supply == None:
                     supply = random.randrange(100, 1000)
-                if discount == None:
-                    discount = random.randrange(0, 100)
+                if discountbool:
+                    if i > 0:
+                        discount = discount + random.randrange(0,15)/(i+1)
+                    else:
+                        discount = random.randrange(0, 15)
 
                 if headcreated:
                     seller.addBlock(price, supply, discount)
                 else:
                     seller.genBlock(price, supply, discount)
                     headcreated = True
+
     except:
         if len(sellerslist) == 0:
             numsellers = genAmountSellers()
             config = open("config.txt", "a")
             config.write("\nseller=" + "number=" + str(numsellers) + "," + "randomchainlength=true" + ":")
             config.close()
-
 
 
     try:
@@ -394,4 +399,4 @@ resourceusage = sum / sumseller
 
 # aucitonengine = SimEngine(sellerslist,10,bidderslist)
 
-# DataManagement.dataCollector(seed,sellerslist,bidderslist,resourceusage,sum,sumseller,checksum)
+# DataManagement().dataCollector(seed, sellerslist, bidderslist, resourceusage, sum, sumseller, checksum)
