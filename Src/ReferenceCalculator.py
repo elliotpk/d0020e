@@ -64,10 +64,12 @@ def referenceCalculator_old(blocklist, buyers):
 
 # sellerlist: A list of the sellers, is immediately converted to a long list of all of their blocks.
 # buyers: A list of buyers.
-def referenceCalculator(sellerlist, buyers):
+# outputAllCombinations: 
+def referenceCalculator(sellerlist, buyers, outputAllCombinations = False):
     blocklist = getAllBlocks(sellerlist)
     bestRajJainCostFairness = -1
     bestData = ""
+    allCombinationData = "" # For if one wants to output all the combinations
     permNum = 0 # For testing
     permAndComb = 0
     averageCostsForBuyers = []
@@ -88,6 +90,8 @@ def referenceCalculator(sellerlist, buyers):
                         bestData = bestData + "\nPermutation " + str(permNum) + " Combination " + str(permAndComb) + "\n"
                         bestData = bestData + formatCombination(combination,buyers,sellerlist,averageCostsForBuyers,RajJainCostFairness)
                         i = 0
+                    if (outputAllCombinations):
+                        allCombinationData = allCombinationData + formatCombination(combination,buyers,sellerlist,averageCostsForBuyers,RajJainCostFairness)
                     #print(formatCombination(combination,buyers,sellerlist,averageCostsForBuyers,RajJainCostFairness))
                 permAndComb = permAndComb + 1 # For testing
         permNum = permNum + 1
@@ -97,6 +101,8 @@ def referenceCalculator(sellerlist, buyers):
         
     print("Permutation number ", permNum, "Combination number ", permAndComb)
     print(bestData)    # For testing 
+    if (outputAllCombinations):
+            outputCombinations(allCombinationData, sellerlist)
     return bestRajJainCostFairness, sum(averageCostsForBuyers)/len(buyers)
 
 
@@ -215,13 +221,7 @@ def getAllBlocks(sellerlist):
 def formatCombination(combination, buyerslist, sellerlist, averageCosts, rajJainFairness):
     combinationWithoutUnboughts = combination.copy()
     unboughts = combinationWithoutUnboughts.pop() # Reference to unbought blocks saved in case this is interesting in the future
-
-    outstring = "Buyers,"  # Column creation
-    i = 1
-    for seller in sellerlist:
-        outstring = outstring + "Seller " + str(i) + ","
-        i = i + 1
-    outstring = outstring + "AveragePrice, AverageDistance, RaijJainFairness\n"
+    outstring = ""
 
     # Each field in the intersection of a seller column and a buyer row is filled with the blocks purchased from that seller by that buyer. 
     i = 1
@@ -237,6 +237,24 @@ def formatCombination(combination, buyerslist, sellerlist, averageCosts, rajJain
         i = i + 1
     
     return outstring
+
+def outputCombinations(allCombinationData, sellerlist, filename = "refcalcOutdata.csv"):
+    columns = "Buyers,"  # Column creation
+    i = 1
+    for seller in sellerlist:
+        columns = columns + "Seller " + str(i) + ","
+        i = i + 1
+    columns = columns + "AveragePrice, AverageDistance, RaijJainFairness\n"
+
+    try:
+        outfile = open(filename, "w")
+        outfile.write(columns)
+        outfile.close
+        outfile = open(filename, "a")
+        outfile.write(allCombinationData)
+        outfile.close
+    except:
+        print("RefCalc file error")
 
 
 
