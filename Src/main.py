@@ -143,9 +143,9 @@ def readConfig():
                     supply = random.randrange(100, 1000)
                 if discountbool:
                     if i > 0:
-                        discount = discount + random.randrange(0,15)/(i+1)
+                        discount = discount + random.randrange(0,10)/(i+1)
                     else:
-                        discount = random.randrange(0, 15)
+                        discount = random.randrange(0, 10)
 
                 if headcreated:
                     seller.addBlock(price, supply, discount)
@@ -375,11 +375,14 @@ checksum = readConfig()
 sum = 0
 for x in bidderslist:
     sum = sum + x.needs.amount
-print(sum, "sum of demand")
+    print(x.needs.amount, "demand from bidders")
+print(sum, "sum of demand\n")
 
-
+i = 0
 for x in sellerslist:
-    print(x.LinkOfBlocks.display())
+    #print(x.LinkOfBlocks.display())
+    for i in x.LinkOfBlocks.display():
+        print(i.Amount, "supply in blocks")
 
 
 
@@ -391,10 +394,10 @@ for x in sellerslist:
         sumseller = sumseller + i.Amount
         x.quantity = i.Amount
         sumblocks = sumblocks + 1
-print(sumseller, "sum of supply")
+print(sumseller, "sum of supply\n")
 
-print(sumblocks)
-print(len(bidderslist))
+print(sumblocks, "number of blocks")
+print(len(bidderslist), "number of bidders")
 resourceusage = sum / sumseller
 
 # aucitonengine = SimEngine(sellerslist,10,bidderslist)
