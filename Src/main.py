@@ -40,7 +40,7 @@ def readConfig():
     for rowoflist in line:
         rowoflist = rowoflist.replace(" ", "")
         if rowoflist.find("seed") != -1:
-            seed = int(rowoflist.split("=")[1])
+            seed = int(rowoflist.split("seed=")[1])
             random.seed(seed)
 
     try:
@@ -75,7 +75,7 @@ def readConfig():
         if rowoflist.find("resourceusage%") != -1:
             resourceusage = int(rowoflist.split("resourceusage%=")[1]) / 100
             """    
-            have finished reading the prespecs and will now read real specs
+            have finished reading the prespecs and will now read real seller specs
             """
     try:
         numsellers
@@ -179,6 +179,8 @@ def readConfig():
         for block in blocklist:
             sum = sum + int(block.Amount)
     totalbudget = sum * resourceusage
+    if sum < totalbudget:       #checks if there is more demand then supply
+        raise Exception("Can't be more demand then supply")
 
     for rowoflist in line:
         rowoflist = rowoflist.replace(" ", "")
@@ -378,7 +380,6 @@ for x in bidderslist:
     print(x.needs.amount, "demand from bidders")
 print(sum, "sum of demand\n")
 
-i = 0
 for x in sellerslist:
     #print(x.LinkOfBlocks.display())
     for i in x.LinkOfBlocks.display():
