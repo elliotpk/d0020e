@@ -34,7 +34,7 @@ class DataManagement:
         self.stringlist = ["ID,AuctionID,Quantity,NumOfAuctions"]
         for seller in sellerslist:
             self.string = str(seller.id) + "," + str(seller.auctionId) + "," + str(seller.quantity) + str(seller.LinkOfBlocks.size)
-            self.temp(self.string)
+            self.addToStringlist(self.string)
             self.string = ""
         #print(self.stringlist)
         self.printdata(testtype = "testJseller")
@@ -42,7 +42,7 @@ class DataManagement:
         self.stringlist = ["ID,Needs,Market price,Behaviour"]
         for bidder in bidderslist:
             self.string = str(bidder.id) + "," + str(bidder.needs.amount) + "," + str(bidder.marketPrice) + "," + str(bidder.behavior["behaviour"])
-            self.temp(self.string)
+            self.addToStringlist(self.string)
             self.string = ""
         #print(self.stringlist)
         self.printdata(testtype = "testJbidder")
