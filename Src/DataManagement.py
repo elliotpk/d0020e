@@ -9,15 +9,13 @@ class DataManagement:
         self.DataList = None
         self.string = ""
         self.stringlist = []
-        self.finished = False
 
 
     def simulationDone(self):
         self.stringlist.insert(0,"id,user,bid")
         self.printdata(testtype="testE")
-        self.finished = True
 
-    def temp(self, string):
+    def addToStringlist(self, string):
         self.stringlist.append(string)
         self.string = ""
 
@@ -26,40 +24,28 @@ class DataManagement:
 
         for item in self.DataList:
             self.string += item["id"] + "," + item["user"] + "," + str(item["top_bid"])
-            self.temp(self.string)
+            self.addToStringlist(self.string)
         #while self.finished:
             #self.printdata()
 
 
     def dataCollector(self, seed, sellerslist, bidderslist, resourceusage, sum, sumseller, checksum):
-        
-        """self.stringlist = [str(seed) + "," + str(sellerslist) + "," + str(bidderslist) + "," + str(resourceusage) + "," + str(sum) + "," + str(sumseller) + "," + str(sumseller) + "," + str(checksum)]
-        self.string = seed + "," + str(sellerslist) + "," + str(bidderslist) + "," + resourceusage + "," + str(sum) + "," + str(sumseller) + "," + str(sumseller) + "," + str(checksum)
-        self.temp(self.string)
-        self.printdata(testtype = "testJ")
-        self.stringlist = []"""
 
-        self.stringlist = ["ID" + "," + "AuctionID" + "Quantity" + "," + "NumOfAuctions"]
-
+        self.stringlist = ["ID,AuctionID,Quantity,NumOfAuctions"]
         for seller in sellerslist:
             self.string = str(seller.id) + "," + str(seller.auctionId) + "," + str(seller.quantity) + str(seller.LinkOfBlocks.size)
             self.temp(self.string)
             self.string = ""
-
-        print(self.stringlist)
+        #print(self.stringlist)
         self.printdata(testtype = "testJseller")
         
-        self.stringlist = ["ID" + "," + "Needs" + "," + "Market price" + "," + "Behaviour"]
-
+        self.stringlist = ["ID,Needs,Market price,Behaviour"]
         for bidder in bidderslist:
             self.string = str(bidder.id) + "," + str(bidder.needs.amount) + "," + str(bidder.marketPrice) + "," + str(bidder.behavior["behaviour"])
             self.temp(self.string)
             self.string = ""
-
-        print(self.stringlist)
+        #print(self.stringlist)
         self.printdata(testtype = "testJbidder")
-        self.stringlist = []
-
         #for item in bidder
 
 
