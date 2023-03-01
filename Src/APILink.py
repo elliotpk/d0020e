@@ -47,7 +47,7 @@ def getRoomInfo(room_id:str, username:str, order:str):
         output.append({"room_id" : room_id, "user" : 'N/A', "value" : 0})   # Incase there are no bids in the auction, usually when simulation has just started
     else:
         for entry in value:
-            output.append({"room_id" : room_id, "user" : entry["sender"]["val"][0], "value" : entry["text"]["val"][0]})
+            output.append({"room_id" : room_id, "user" : entry["sender"]["val"][0], "value" : int(entry["text"]["val"][0])})
     sort = False
     if(order == "bid"):
         sort = True
