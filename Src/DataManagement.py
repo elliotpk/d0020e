@@ -39,7 +39,7 @@ class DataManagement:
         #print(self.stringlist)
         self.printdata(testtype = "testJseller")
         
-        self.stringlist = ["ID,Needs,Market price,Behaviour"]
+        self.stringlist = ["ID,Needs,Marketprice,Behaviour"]
         for bidder in bidderslist:
             self.string = str(bidder.id) + "," + str(bidder.needs.amount) + "," + str(bidder.marketPrice) + "," + str(bidder.behavior["behaviour"])
             self.addToStringlist(self.string)
