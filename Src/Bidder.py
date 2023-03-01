@@ -6,6 +6,7 @@ import random
 ###### amount should maybe be an amount taken from behaviour ######
 ###### TODO add timeslot parameter ######
 ###### TODO rounds increase in bidUpdate, add to behaviour (exponential behaviour depending on aggressiveness and rounds) ######
+###### TODO change so that marketPriceFactor changes internally in Bidder ######
 class Bidder:
   def __init__(self, id, needs, marketPrice, behaviour):
     self.id = id
