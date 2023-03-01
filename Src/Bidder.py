@@ -21,6 +21,7 @@ class Bidder:
     self.auctionBids = 0 # not used
     self.currentAuctions = 0 # not used, is currently len(input) in bid(self, input) used by bidUpdate(self, input)
     self.winningAuctions = 0 # is only incrementing in bidUpdate(), but isn't used anywhere
+    self.wonItems = 0
     self.rounds = 0 # not used
 
   
@@ -70,6 +71,9 @@ class Bidder:
   
   def updateMarketFactor(self, mean, standardDeviation):
     self.marketPriceFactor = self.behaviour["marketPriceFactorUpdate"](mean, standardDeviation)
+  
+  def updateWonItems(self, wonItems):
+    self.wonItems += wonItems
 
   # Returns a list of dictionaries with info about how the bidder bids
   # Note: currently it can bid on many auctions even if it just needs a small amount to fulfill the needs
@@ -85,7 +89,7 @@ class Bidder:
           self.winningAuctions =+ 1
           satisfiedNeed = satisfiedNeed + dictionary["quantity"]
 
-    currentItems = self.needs.amount - satisfiedNeed
+    currentItems = self.needs.amount - satisfiedNeed - self.wonItems
     bidList = self.bid(input)
     returnList = []
 
@@ -114,10 +118,10 @@ def test():
   print("-----------------------------------------------------------------")
 
   print("Testing the bidUpdate() function:")
-  simList = [{'id' : 1, 'quantity' : 60, 'user':None , 'top_bid' : 16000},
-             {'id' : 2, 'quantity' : 55, 'user':None , 'top_bid' : 13000},
-             {'id' : 3, 'quantity' : 40, 'user':None , 'top_bid' : 11000},
-             {'id' : 4, 'quantity' : 50, 'user':None , 'top_bid' : 12000}]
+  simList = [{'id' : '1', 'quantity' : 60, 'user':'N/A' , 'top_bid' : 16000},
+             {'id' : '2', 'quantity' : 55, 'user':'N/A' , 'top_bid' : 13000},
+             {'id' : '3', 'quantity' : 40, 'user':'N/A' , 'top_bid' : 11000},
+             {'id' : '4', 'quantity' : 50, 'user':'N/A' , 'top_bid' : 12000}]
   simList2 = [{'id': '63f6c3df7b6103af971aba61', 'quantity': 441, 'user': 'N/A', 'top_bid': 16000},
               {'id': '63f6c3e07b6103af971aba63', 'quantity': 411, 'user': 'N/A', 'top_bid': 0}]
 
