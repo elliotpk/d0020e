@@ -1,5 +1,6 @@
 #Library, module
 import random
+import math
 
 # Returns one random behaviour.
 # Note: new behaviours must be added in the list.
@@ -31,8 +32,8 @@ def marketPriceFactor(behaviour, aggressiveness, mean, standardDeviation):
   return behaviour["marketPriceFactor"]
 
 # Very aggressive behaviour, always bids max amount.
-# The aggressiveness stays the same for this behaviour.
-# Can bid over the market value, but not over the maximum amount.
+# The aggressiveness stays the same for this behaviour currently.
+# Can bid over the market value.
 A = {
   "behaviour": "A",
   "aggressiveness": 0.9,
@@ -42,6 +43,8 @@ A = {
                             changeAggressiveness(A, A["aggressiveness"]) if(auctions > 2 and auctionsLost > 1 and currentBids >= 0) else
                             changeAggressiveness(A, A["aggressiveness"]) if(auctions == 1 and currentBids > 10) else
                             changeAggressiveness(A, A["aggressiveness"]),
+  "roundsBehaviour" : lambda rounds:
+                      math.pow(A["aggressiveness"], rounds),
   "bidOverMarketPrice": True,
   "marketPriceFactor": 1.0,
   "marketPriceFactorUpdate": lambda mean, standardDeviation:
@@ -51,9 +54,9 @@ A = {
 }
 
 # Medium aggressive behaviour.
-# Aggressiveness increases when the auctions lost increases or
-# when there are more than 10 bids in 1 participated auction.
-# Doesn't bid if it's over the market value or over the maximum amount.
+# Aggressiveness increases when there are more auctions to bid on and how many auctions that is lost
+# or when there are more than 10 bids in 1 participated auction.
+# Doesn't bid if it's over the market value.
 B = {
   "behaviour": "B",
   "aggressiveness": 0.5,
@@ -63,6 +66,8 @@ B = {
                             changeAggressiveness(B, 0.6) if(auctions > 2 and auctionsLost > 1 and currentBids >= 0) else
                             changeAggressiveness(B, 0.6) if(auctions == 1 and currentBids > 10) else
                             changeAggressiveness(B, B["aggressiveness"]),
+  "roundsBehaviour" : lambda rounds:
+                      math.pow(B["aggressiveness"], rounds),
   "bidOverMarketPrice": False,
   "marketPriceFactor": 1.0,
   "marketPriceFactorUpdate": lambda mean, standardDeviation:
@@ -72,9 +77,9 @@ B = {
 } 
 
 # Minimal and passive bidding behaviour.
-# Aggressiveness increases when the auctions lost increases or
-# when there are more than 10 bids in 1 participated auction.
-# Doesn't bid if it's over the market value or over the maximum amount.
+# Aggressiveness increases when there are more auctions to bid on and how many auctions that is lost
+# or when there are more than 10 bids in 1 participated auction.
+# Doesn't bid if it's over the market value.
 C = {
   "behaviour": "C",
   "aggressiveness": 0.1,
@@ -84,6 +89,8 @@ C = {
                             changeAggressiveness(C, 0.2) if(auctions > 2 and auctionsLost > 1 and currentBids >= 0) else
                             changeAggressiveness(C, 0.2) if(auctions == 1 and currentBids > 10) else
                             changeAggressiveness(C, C["aggressiveness"]),
+  "roundsBehaviour" : lambda rounds:
+                      math.pow(C["aggressiveness"], rounds),
   "bidOverMarketPrice": False,
   "marketPriceFactor": 1.0,
   "marketPriceFactorUpdate": lambda mean, standardDeviation:

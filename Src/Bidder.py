@@ -1,43 +1,46 @@
 import Behaviour
 import random
 
-###### amount should maybe be an amount taken from behaviour ######
-###### TODO add timeslot parameter ######
+###### TODO add timeslot parameter to use with behaviour ######
 ###### TODO rounds increase in bidUpdate, add to behaviour (exponential behaviour depending on aggressiveness and rounds) ######
 ###### TODO change so that marketPriceFactor changes internally in Bidder ######
 class Bidder:
-  def __init__(self, id, needs, marketPrice, behaviour):
+  def __init__(self, id, needs, timeSlot, behaviour):
     self.id = id
     self.needs = needs
-    # Bidders will somewhat know the market price based on normal distribution (mean, standardDeviation)
-    self.marketPrice = 0
+    self.timeSlot = timeSlot
     self.behaviour = behaviour
-    self.marketPriceFactor = behaviour["marketPriceFactor"]
-    # Stops the bidders from bidding over a certain value based on market price and aggressiveness (code is also added in Behaviour.py)
+    self.marketPrice = 0
     self.stopBid = 0
-    #print("<init Class Bidder> Bidder ",self.id, " knows the market price: ", self.marketPrice, " and stopBid is: ", self.stopBid)
-
+    # Market factor changes how different the amount will be when bidders wants to bid with a mean and standard deviation value.
+    self.updateMarketFactor(1, 0.05)
+    self.marketPriceFactor = self.behaviour["marketPriceFactor"]
+    # Print for testing purposes:
+    #print("marketPriceFactor for bidder", self.id, " is:", self.behaviour["marketPriceFactor"])
+    
     # Bidders know this info about auctions
     self.auctionsLost = 0 # not used
-    self.auctionBids = 0 # not used
-    self.currentAuctions = 0 # not used, is currently len(input) in bid(self, input) used by bidUpdate(self, input)
-    self.winningAuctions = 0 # is only incrementing in bidUpdate(), but isn't used anywhere
+    self.auctionBids = 0
+    self.currentAuctions = 0
+    self.wonAuctions = 0
     self.wonItems = 0
-    self.rounds = 0 # not used, increase in bidUpdate, add to behaviour
+    self.rounds = 0 # increments in bidUpdate(), should also add to behaviour
 
-
+  # Bidders will somewhat know the market price based on normal distribution (mean, standardDeviation).
+  # Then they will stop to bid at a certain value based on the market price and their aggressiveness,
+  # which will also be the maximum bid.
   def setMarketprice(self,price):
     self.marketPrice=price*random.normalvariate(1, 0.03)
     self.stopBid=self.marketPrice*(1 + self.behaviour["aggressiveness"])
+    #print("<setMarketPrice()> Bidder ",self.id, " knows the market price: ", self.marketPrice, " and stopBid is: ", self.stopBid)
   
-  # New bid function (Work In Progress)
-  # Returns a list of all the auctions that the bidder can bid on
-  # Note: it doesn't set the current amount to a new value currently.
+  # Returns a list of all the auctions that the bidder can bid on.
   ############# self.behaviour["bidOverMarketPrice"] and a value of a range, can turn on/off if market price matters in the simulation or not ##############
   def bid(self, input):
-    # Update the aggressiveness of the behaviour (doesn't get new values for auctionsLost or auctionBids currently)
-    self.behaviour["aggressiveness"] = self.behaviour["adaptiveAggressiveness"](len(input), self.auctionsLost, self.auctionBids)
-    # Variables to keep track on the best bid for a certain auction
+    self.currentAuctions = len(input)
+    # Update the aggressiveness of the behaviour.
+    self.behaviour["aggressiveness"] = self.behaviour["adaptiveAggressiveness"](self.currentAuctions, self.auctionsLost, self.auctionBids)
+    # Keeps track on auctions that the bidder wants to bid on that will be added to the list of all the bids that the bidder wants to and can bid on.
     tempBid = 0
     tempAuction = {}
     allBidsList = []
@@ -45,19 +48,18 @@ class Bidder:
     for auction in input:
       genBid = int(auction["top_bid"] * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor))
       
-      # If top bid starts with 0, then the bidders will bid 1/5 of the market price or what is left in their current amount.
+      # If top bid starts with 0, then the bidders will bid 1/5 of the market price multiplied by the aggressiveness and market price factor.
       if(genBid == 0):
         genBid = int((self.marketPrice/5) * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor))
 
       # Print for testing purposes:
       #print("<from bid()> Bidder",self.id, "genBid: ", genBid, "  |  tempBid: ", tempBid, "  |  stopBid: ",self.behaviour["stopBid"](self.marketPrice), "  |  auction: ", auction["id"])
       
-      # Checks if the bidder can bid and if it wants to bid if the market price is over the generated bid.
+      # Checks if the bidder can bid based on its behaviour about bidding over the market price.
       if(((self.marketPrice > genBid and not self.behaviour["bidOverMarketPrice"]) or (self.stopBid > genBid and self.behaviour["bidOverMarketPrice"]))
           or
           self.behaviour["bidOverMarketPrice"]
       ):
-        # Bidders won't bid if the top bid is over the stop bid
         if(auction["top_bid"] > self.stopBid):
           continue
         # Limits the maximum bid to be stop bid
@@ -69,8 +71,10 @@ class Bidder:
         allBidsList.append((tempBid, tempAuction))
       else:
         continue
+    # The bidder won't bid if there is no auctions as input.
     if len(tempAuction) != 0:
-      if(tempBid < 0 or (tempAuction["id"] == '0' and tempAuction["top_bid"] == 0 and tempAuction["quantity"] == 0)):
+      # The bidder won't bid if the auction doesn't have any quantity and a top bid that is 0 or if the bid is negative.
+      if(tempBid < 0 or (tempAuction["top_bid"] == 0 and tempAuction["quantity"] == 0)):
         return []
       else:
         return allBidsList
@@ -82,19 +86,20 @@ class Bidder:
   
   def updateWonItems(self, wonItems):
     self.wonItems += wonItems
+    self.wonAuctions += 1
+
+  def lostAuction(self):
+    self.auctionsLost += 1
 
   # Returns a list of dictionaries with info about how the bidder bids
   # Note: currently it can bid on many auctions even if it just needs a small amount to fulfill the needs
-  ###### function, wins auction, need to know the Needs          ###### --Maybe works now?--
-  ###### should be able to reset current items, winning auctions ###### --Maybe works now?--
   def bidUpdate(self, input):
-    self.winningAuctions = 0
     satisfiedNeed = 0
     currentItems = 0
+    self.rounds += 1
 
     for dictionary in input:
       if(dictionary["user"] == self.id):
-          self.winningAuctions =+ 1
           satisfiedNeed = satisfiedNeed + dictionary["quantity"]
 
     currentItems = self.needs.amount - satisfiedNeed - self.wonItems
@@ -107,6 +112,7 @@ class Bidder:
         continue
       elif(0 < currentItems):
         returnList.append({'id' : bid[1]["id"], 'user' : self.id, 'top_bid' : bid[0]})
+        self.auctionBids += 1
 
     return returnList 
 
@@ -117,10 +123,10 @@ class Needs:
 
 # Testing method for testing different behaviours
 def test():
-  bidder1 = Bidder('1', Needs(55, "steel beam"), 15000, Behaviour.A)
-  bidder2 = Bidder('2', Needs(55, "steel beam"), 15000, Behaviour.B)
-  bidder3 = Bidder('3', Needs(55, "steel beam"), 15000, Behaviour.C)
-  bidder4 = Bidder('4', Needs(55, "steel beam"), 15000, Behaviour.C)
+  bidder1 = Bidder('1', Needs(55, "steel beam"), 0, Behaviour.A)
+  bidder2 = Bidder('2', Needs(55, "steel beam"), 0, Behaviour.B)
+  bidder3 = Bidder('3', Needs(55, "steel beam"), 0, Behaviour.C)
+  bidder4 = Bidder('4', Needs(55, "steel beam"), 0, Behaviour.C)
 
   print("Created 3 bidders with behaviour type A, B and C respectively and an extra bidder with type C.")
   print("-----------------------------------------------------------------")
@@ -133,9 +139,9 @@ def test():
   simList2 = [{'id': '63f6c3df7b6103af971aba61', 'quantity': 441, 'user': 'N/A', 'top_bid': 16000},
               {'id': '63f6c3e07b6103af971aba63', 'quantity': 411, 'user': 'N/A', 'top_bid': 0}]
 
-  bidder1.updateMarketFactor(4, 2.15)
-  bidder3.updateMarketFactor(4, 2.15)
-  bidder4.updateMarketFactor(4, 2.15)
+  bidder1.setMarketprice(15000)
+  bidder3.setMarketprice(15000)
+  bidder4.setMarketprice(15000)
 
   bidder1Info = bidder1.bidUpdate(simList2)
   bidder3Info = bidder3.bidUpdate(simList2)
