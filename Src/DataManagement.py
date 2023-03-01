@@ -13,6 +13,7 @@ class DataManagement:
 
 
     def simulationDone(self):
+        self.stringlist.insert(0,"id,user,bid")
         self.printdata(testtype="testE")
         self.finished = True
 
@@ -22,7 +23,6 @@ class DataManagement:
 
     def stringMaker(self, list):
         self.DataList = list
-        self.stringlist = ["id,quantity,user,top_bid"]
 
         for item in self.DataList:
             self.string += item["id"] + "," + item["user"] + "," + str(item["top_bid"])
