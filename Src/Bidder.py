@@ -1,7 +1,5 @@
 import Behaviour
 import random
-# Matplotlib imported for testing only
-#import matplotlib.pyplot as plt 
 
 ###### amount should maybe be an amount taken from behaviour ######
 ###### TODO add timeslot parameter ######
@@ -147,17 +145,5 @@ def test():
   #print("Bidder 4 stopBid: ", bidder4.behaviour["stopBid"](bidder4.marketPrice))
 
 
-def testNormalDistributionGraph():
-  print("Normal distribution test (graph):")
-  value = 0
-  valueList = []
-  for i in range(2000):
-    value = random.normalvariate(1, 0.15)
-    valueList.append(value)
-  plt.hist(valueList, bins=200) 
-  plt.show()
-
-
 #test()
-#testNormalDistributionGraph()
 
