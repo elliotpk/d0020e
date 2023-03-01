@@ -406,8 +406,10 @@ resourceusage = sum / sumseller
 fairness,marketprice=referenceCalculator(sellerslist,bidderslist)
 for x in bidderslist:
     x.setMarketprice(marketprice)
+
+# TODO bidder init with len(sellerlist)/slotsize round upp
+# TODO init simEngine with slot_size = variable and end_threshold = variable
 aucitonengine = SimEngine(sellerslist,bidderslist)
 aucitonengine.simStart()
-print(aucitonengine)
 
 DataManagement().dataCollector(seed, sellerslist, bidderslist, resourceusage, sum, sumseller, checksum)

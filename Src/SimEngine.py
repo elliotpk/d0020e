@@ -28,7 +28,6 @@ class SimEngine():
         self.end_threshold = 2                                                      # How many rounds of inactive to keep an auction running for, config??
         self.slot_size = 2                                                          # How many auctions per "time slot", config??
         self.sellers = sellers
-        self.Buyers = buyers
         self.auctions = self.createAuctionList(self.sellers)                        # Create a list of all auctions
         self.auctionStatus = self.createAuctionStatus(self.auctions)                # Used to keep track of when a bid has not been placed recently (within x loops)
         self.loopLenght = len(self.auctions)
@@ -129,6 +128,10 @@ class SimEngine():
     def endAuction(self, auction):
         "Called to end the specific auction"
         link.endAuction(auction['id'], 'Seller', auction['user'])
+        for bidder in self.buyers:
+            if bidder.id == auction["user"]:
+                bidder.updateWonItems(auction["quantity"])
+                break
         self.finishedAuctions.append(auction)
         print("User: " + auction['user'] + " has won auction:" + auction['id'] + " for " + str(auction["quantity"]) + " units for " + str(auction["top_bid"]))
 

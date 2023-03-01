@@ -40,7 +40,7 @@ class DataManagement:
         
         self.stringlist = ["ID,Needs,Marketprice,Behaviour"]
         for bidder in bidderslist:
-            self.string = str(bidder.id) + "," + str(bidder.needs.amount) + "," + str(bidder.marketPrice) + "," + str(bidder.behavior["behaviour"])
+            self.string = str(bidder.id) + "," + str(bidder.needs.amount) + "," + str(bidder.marketPrice) + "," + str(bidder.behaviour["behaviour"])
             self.addToStringlist(self.string)
             self.string = ""
         #print(self.stringlist)
@@ -54,7 +54,6 @@ class DataManagement:
         testnr = 0
         while (os.path.exists(testtype+str(testnr)+'.csv')):
             testnr=testnr+1
-        print(testnr)
         mkcsv = open(testtype+str(testnr)+'.csv','w')
         for string in self.stringlist:
             for row in string.split(' '):
