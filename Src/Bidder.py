@@ -1,7 +1,6 @@
 import Behaviour
 import random
 # Matplotlib imported for testing only
-import matplotlib.pyplot as plt 
 
 ###### amount should maybe be an amount taken from behaviour ######
 class Bidder:
@@ -9,11 +8,11 @@ class Bidder:
     self.id = id
     self.needs = needs
     # Bidders will somewhat know the market price based on normal distribution (mean, standardDeviation)
-    self.marketPrice = marketPrice*random.normalvariate(1, 0.03)
+    self.marketPrice = 0
     self.behaviour = behaviour
     self.marketPriceFactor = behaviour["marketPriceFactor"]
     # Stops the bidders from bidding over a certain value based on market price and aggressiveness (code is also added in Behaviour.py)
-    self.stopBid = self.marketPrice*(1 + self.behaviour["aggressiveness"])
+    self.stopBid = 0
     #print("<init Class Bidder> Bidder ",self.id, " knows the market price: ", self.marketPrice, " and stopBid is: ", self.stopBid)
 
     # Bidders know this info about auctions
@@ -23,6 +22,10 @@ class Bidder:
     self.winningAuctions = 0 # is only incrementing in bidUpdate(), but isn't used anywhere
     self.rounds = 0 # not used
 
+
+  def setMarketprice(self,price):
+    self.marketPrice=price*random.normalvariate(1, 0.03)
+    self.stopBid=self.marketPrice*(1 + self.behaviour["aggressiveness"])
   
   # New bid function (Work In Progress)
   # Returns a list of all the auctions that the bidder can bid on
@@ -63,11 +66,14 @@ class Bidder:
         allBidsList.append((tempBid, tempAuction))
       else:
         continue
-    if(tempBid < 0 or (tempAuction["id"] == 0 and tempAuction["top_bid"] == 0 and tempAuction["quantity"] == 0)):
-      return []
+    if len(tempAuction) != 0:
+      if(tempBid < 0 or (tempAuction["id"] == '0' and tempAuction["top_bid"] == 0 and tempAuction["quantity"] == 0)):
+        return []
+      else:
+        return allBidsList
     else:
-      return allBidsList
-  
+      return []
+
   def updateMarketFactor(self, mean, standardDeviation):
     self.marketPriceFactor = self.behaviour["marketPriceFactorUpdate"](mean, standardDeviation)
 

@@ -2,6 +2,7 @@ import APILink as link
 from Bidder import *
 from Sellers import Sellers
 import random
+from DataManagement import *
 
 import os
 def printdata(string):
@@ -30,16 +31,18 @@ class SimEngine():
         self.Buyers = buyers
         self.auctions = self.createAuctionList(self.sellers)                        # Create a list of all auctions
         self.auctionStatus = self.createAuctionStatus(self.auctions)                # Used to keep track of when a bid has not been placed recently (within x loops)
+        self.loopLenght = len(self.auctions)
         self.auctionSlot = []                                                       # Holds all the auctions currently available to the bidders
         self.finishedAuctions = []                                                  # Auctions which have ended are placed here
         self.buyers = buyers
+        self.dataManagement = DataManagement()
         if(not self.addBuyers(self.buyers)):                                        # Error checking if adding buyers to auctions went well
             return None
 
     def simStart(self):
         "Start the simulation"
         #Round Start
-        while(len(self.auctions) > 0):
+        while(len(self.finishedAuctions) != self.loopLenght):
             if(len(self.auctionSlot) == 0):
                 self.updateAuctionSlot()
             # Update the auction list with current values
@@ -68,6 +71,7 @@ class SimEngine():
                         bids.append(t)
                 sort = sorted(bids, key=lambda i:int(i['top_bid']), reverse=True)                               # Sorts the list of bids by amount
                 if (len(sort) == 0): continue
+                self.dataManagement.stringMaker(sort)
                 # !! Pass the list "sort" to the datamanagement class here, before we pick out the top bids only !!
                 max_bid = sort[0]['top_bid']
                 top = []
@@ -92,6 +96,7 @@ class SimEngine():
             auction['top_bid'] = info['value']
             auction['user'] = info['user']
         self.saveData()
+        self.dataManagement.simulationDone()
 
     def updateAuctionSlot(self):
         for i in range(self.slot_size):
@@ -162,10 +167,10 @@ class SimEngine():
     def saveData(self):
         output = "RoomID, Quantity, Winner, Price \n"
         for auction in self.finishedAuctions:
-            output += auction['id'] + ',' + auction['quantity'] + ',' + auction['user'] + ',' + auction['top_bid'] + '\n'
+            output += auction['id'] + ',' + str(auction['quantity']) + ',' + auction['user'] + ',' + str(auction['top_bid']) + '\n'
         num = 0
         while(os.path.exists('test'+str(num)+'.csv')):
             num += 1
-        f = open('test'+str(num)+'.csv')
+        f = open('test'+str(num)+'.csv',"w")
         f.write(output)
         f.close()

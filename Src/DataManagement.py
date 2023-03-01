@@ -13,6 +13,7 @@ class DataManagement:
 
 
     def simulationDone(self):
+        self.printdata(testtype="testE")
         self.finished = True
 
     def temp(self, string):
@@ -24,11 +25,11 @@ class DataManagement:
         self.stringlist = ["id,quantity,user,top_bid"]
 
         for item in self.DataList:
-            self.string += item["id"] + "," + str(item["quantity"]) + "," + item["user"] + "," + str(item["top_bid"])
+            self.string += item["id"] + "," + item["user"] + "," + str(item["top_bid"])
             self.temp(self.string)
         #while self.finished:
             #self.printdata()
-        self.printdata(testtype = "testE")
+
 
     def dataCollector(self, seed, sellerslist, bidderslist, resourceusage, sum, sumseller, checksum):
         

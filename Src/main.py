@@ -9,7 +9,7 @@ bidderslist = []
 sellerslist = []
 seed = None
 
-
+#normalise random demand and multiply it with supply
 def readConfig():
     # Reads the config file for seed/numsellers/numbidders
     try:
@@ -77,6 +77,7 @@ def readConfig():
             """    
             have finished reading the prespecs and will now read real seller specs
             """
+            #TODO fix so that min dont overwrite inputs
     try:
         numsellers
         block = rowoflist.split(":")[1]
@@ -105,6 +106,7 @@ def readConfig():
             blocksize = int((x / sumofremainingblocks) * numbidder)+1
             blocklen.append(blocksize)
             block = block + "->"
+
         for x in range(int(numsellers)):
             blockatribute = block.split("->")[x]
             seller = Sellers.Sellers(len(sellerslist))
@@ -116,7 +118,7 @@ def readConfig():
                 supply = None
                 discountbool = True
                 try:
-                    blockinfo = blockatribute.split("[")[1].split("]")[0].split(",")
+                    blockinfo = blockatribute.split("[")[1].split("]")[0]
                 except:
                     blockatribute = blockatribute.strip(",")
                     blockinfo = blockatribute.split(",")
@@ -246,10 +248,11 @@ def readConfig():
                         marketprices.append(marketprice)
                         name = 200
                 if name != None:
-                    name = name + len(bidderslist)
+                    name ="Buyer"+ str(name + len(names))
                 else:
-                    name = len(bidderslist)
+                    name ="Buyer"+ str(len(names))
                 names.append(name)
+
                 if supply == None:
                     amounts.append(random.randrange(10, 200))
                 if demand == None:
@@ -357,7 +360,7 @@ def createBidder(**kwargs):
         behaviour = Behaviour.randomBehaviour()
 
     # id, currentamount, needs, behaviour, marketPrice
-    bidderslist.append(Bidder(namn, amount, need, marketprice, behaviour))
+    bidderslist.append(Bidder(namn, need, marketprice, behaviour))
     return need.amount
 
     # creates number of sellers
@@ -377,14 +380,13 @@ checksum = readConfig()
 sum = 0
 for x in bidderslist:
     sum = sum + x.needs.amount
-    print(x.needs.amount, "demand from bidders")
+    #print(x.needs.amount, "demand from bidders")
 print(sum, "sum of demand\n")
 
 for x in sellerslist:
-    #print(x.LinkOfBlocks.display())
-    for i in x.LinkOfBlocks.display():
-        print(i.Amount, "supply in blocks")
-
+    print(x.LinkOfBlocks.display())
+    #for i in x.LinkOfBlocks.display():
+     #   print(i.Amount, "supply in blocks")
 
 
 sumblocks = 0
@@ -398,9 +400,14 @@ for x in sellerslist:
 print(sumseller, "sum of supply\n")
 
 print(sumblocks, "number of blocks")
-print(len(bidderslist), "number of bidders")
+#print(len(bidderslist), "number of bidders")
 resourceusage = sum / sumseller
 
-# aucitonengine = SimEngine(sellerslist,10,bidderslist)
+fairness,marketprice=referenceCalculator(sellerslist,bidderslist)
+for x in bidderslist:
+    x.setMarketprice(marketprice)
+aucitonengine = SimEngine(sellerslist,bidderslist)
+aucitonengine.simStart()
+print(aucitonengine)
 
-# DataManagement().dataCollector(seed, sellerslist, bidderslist, resourceusage, sum, sumseller, checksum)
+DataManagement().dataCollector(seed, sellerslist, bidderslist, resourceusage, sum, sumseller, checksum)
