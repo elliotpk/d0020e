@@ -33,23 +33,26 @@ class DataManagement:
 
     def dataCollector(self, seed, sellerslist, bidderslist, resourceusage, sum, sumseller, checksum):
         
-        self.stringlist = [str(seed) + "," + str(sellerslist) + "," + str(bidderslist) + "," + str(resourceusage) + "," + str(sum) + "," + str(sumseller) + "," + str(sumseller) + "," + str(checksum)]
+        """self.stringlist = [str(seed) + "," + str(sellerslist) + "," + str(bidderslist) + "," + str(resourceusage) + "," + str(sum) + "," + str(sumseller) + "," + str(sumseller) + "," + str(checksum)]
         self.string = seed + "," + str(sellerslist) + "," + str(bidderslist) + "," + resourceusage + "," + str(sum) + "," + str(sumseller) + "," + str(sumseller) + "," + str(checksum)
         self.temp(self.string)
         self.printdata(testtype = "testJ")
-        self.stringlist = []
+        self.stringlist = []"""
 
-        for item in sellerslist:
-            self.string = str(item)
+        self.stringlist = ["ID" + "," + "AuctionID" + "Quantity" + "," + "NumOfAuctions"]
+
+        for seller in sellerslist:
+            self.string = str(seller.id) + "," + str(seller.auctionId) + "," + str(seller.quantity) + str(seller.LinkOfBlocks.size)
             self.temp(self.string)
             self.string = ""
 
         print(self.stringlist)
         self.printdata(testtype = "testJseller")
-        self.stringlist = []
+        
+        self.stringlist = ["ID" + "," + "Needs" + "," + "Market price" + "," + "Behaviour"]
 
-        for item in bidderslist:
-            self.string = str(item)
+        for bidder in bidderslist:
+            self.string = str(bidder.id) + "," + str(bidder.needs.amount) + "," + str(bidder.marketPrice) + "," + str(bidder.behavior["behaviour"])
             self.temp(self.string)
             self.string = ""
 
