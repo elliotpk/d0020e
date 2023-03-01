@@ -1,8 +1,10 @@
 import Behaviour
 import random
-# Matplotlib imported for testing only
 
 ###### amount should maybe be an amount taken from behaviour ######
+###### TODO add timeslot parameter ######
+###### TODO rounds increase in bidUpdate, add to behaviour (exponential behaviour depending on aggressiveness and rounds) ######
+###### TODO change so that marketPriceFactor changes internally in Bidder ######
 class Bidder:
   def __init__(self, id, needs, marketPrice, behaviour):
     self.id = id
@@ -21,7 +23,7 @@ class Bidder:
     self.currentAuctions = 0 # not used, is currently len(input) in bid(self, input) used by bidUpdate(self, input)
     self.winningAuctions = 0 # is only incrementing in bidUpdate(), but isn't used anywhere
     self.wonItems = 0
-    self.rounds = 0 # not used
+    self.rounds = 0 # not used, increase in bidUpdate, add to behaviour
 
 
   def setMarketprice(self,price):
@@ -150,17 +152,5 @@ def test():
   #print("Bidder 4 stopBid: ", bidder4.behaviour["stopBid"](bidder4.marketPrice))
 
 
-def testNormalDistributionGraph():
-  print("Normal distribution test (graph):")
-  value = 0
-  valueList = []
-  for i in range(2000):
-    value = random.normalvariate(1, 0.15)
-    valueList.append(value)
-  plt.hist(valueList, bins=200) 
-  plt.show()
-
-
 #test()
-#testNormalDistributionGraph()
 
