@@ -10,7 +10,6 @@ class DataManagement:
         self.string = ""
         self.stringlist = []
 
-
     def simulationDone(self):
         self.stringlist.insert(0,"id,user,bid")
         self.printdata(testtype="testE")
