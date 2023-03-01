@@ -105,10 +105,10 @@ class Needs:
 
 # Testing method for testing different behaviours
 def test():
-  bidder1 = Bidder(1, Needs(55, "steel beam"), 15000, Behaviour.A)
-  bidder2 = Bidder(2, Needs(55, "steel beam"), 15000, Behaviour.B)
-  bidder3 = Bidder(3, Needs(55, "steel beam"), 15000, Behaviour.C)
-  bidder4 = Bidder(4, Needs(55, "steel beam"), 15000, Behaviour.C)
+  bidder1 = Bidder('1', Needs(55, "steel beam"), 15000, Behaviour.A)
+  bidder2 = Bidder('2', Needs(55, "steel beam"), 15000, Behaviour.B)
+  bidder3 = Bidder('3', Needs(55, "steel beam"), 15000, Behaviour.C)
+  bidder4 = Bidder('4', Needs(55, "steel beam"), 15000, Behaviour.C)
 
   print("Created 3 bidders with behaviour type A, B and C respectively and an extra bidder with type C.")
   print("-----------------------------------------------------------------")
