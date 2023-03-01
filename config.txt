@@ -1,4 +1,1 @@
 seed=765
-resourceusage%=3
-seller=number=4,randomchainlength=true:
-bidder=number=2,copy=False:
