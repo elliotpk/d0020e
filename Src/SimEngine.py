@@ -89,12 +89,19 @@ class SimEngine():
             
             self.updateStatus(finished)
         
-        # Update the auction list with the final result, might not be needed really
+        # Update the auction list with the final result, and compute resulting fairness
+        nom = 0
+        denom = 0 
+        fairness = 0
         for auction in self.finishedAuctions:
             info = link.getRoomInfo(auction['id'], "Seller", 'bid')[0]
             auction['top_bid'] = info['value']
             auction['user'] = info['user']
-        self.saveData()
+            if(auction['top_bid'] == 0): continue
+            nom += (auction['quantity']/auction['top_bid'])
+            denom += (auction['quantity']/auction['top_bid'])**2
+        if(auction['top_bid'] != 0): fairness = (nom**2)/(len(self.buyers)*denom)
+        self.saveData(fairness)
         self.dataManagement.simulationDone()
 
     def updateAuctionSlot(self):
@@ -167,8 +174,8 @@ class SimEngine():
             result.append({'id':auction['id'], 'val' : self.end_threshold})                  # If threshold value goes below 0 we end the auction
         return result
 
-    def saveData(self):
-        output = "RoomID, Quantity, Winner, Price \n"
+    def saveData(self, fairness):
+        output = "Fairness: {} \nRoomID, Quantity, Winner, Price \n".format(fairness)
         for auction in self.finishedAuctions:
             output += auction['id'] + ',' + str(auction['quantity']) + ',' + auction['user'] + ',' + str(auction['top_bid']) + '\n'
         num = 0
