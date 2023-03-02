@@ -24,9 +24,9 @@ pris,data,vinnare,id
 #print(Api.data) print to csv-file
 
 class SimEngine():
-    def __init__(self, sellers, buyers):
-        self.end_threshold = 2                                                      # How many rounds of inactive to keep an auction running for, config??
-        self.slot_size = 2                                                          # How many auctions per "time slot", config??
+    def __init__(self, sellers, buyers, slot_size, threshold):
+        self.end_threshold = threshold                                              # How many rounds of inactive to keep an auction running for
+        self.slot_size = slot_size                                                  # How many auctions per "time slot"
         self.sellers = sellers
         self.auctions = self.createAuctionList(self.sellers)                        # Create a list of all auctions
         self.auctionStatus = self.createAuctionStatus(self.auctions)                # Used to keep track of when a bid has not been placed recently (within x loops)
