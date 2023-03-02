@@ -24,13 +24,15 @@ def readConfig():
         numrandombidders = random.randrange(5,15)
         ranodomprocent = random.random()
         resourceusage = ranodomprocent
+        endthreshold = 2
+        slotsize = 2
         config.write("seed=" + str(seed) + "\n" + "bidder=" + "number=" + str(
             numrandombidders) + "," + "copy=False" + ":" + "\n" + "seller=" + "number=" + str(
             numsellers) + "," + "randomchainlength=true" + ":" + "\n" + "resourceusage%=" + str(
-            int(ranodomprocent * 100)))
+            int(ranodomprocent * 100))+"\n"+"endthreshold = 2"+"\n"+"slotsize = 2")
         check = (seed * numsellers * numrandombidders)
         config.close()
-        return str(check)[0:4]
+        return str(check)[0:4],slotsize,endthreshold
 
         # Set the seed for all random numbers generated
     config = open("config.txt", "r")
@@ -68,43 +70,63 @@ def readConfig():
             for x in numsellers:
                 if x.find("number=") != -1:
                     numsellers = x.split("number=")[1]
-            randomchainlength = block.split(":")[0].split(",")
-            for x in randomchainlength:
                 if x.find("randomchainlength=") != -1:
                     randomchainlength = x.split("randomchainlength=")[1]
+
         if rowoflist.find("resourceusage%") != -1:
             resourceusage = int(rowoflist.split("resourceusage%=")[1]) / 100
+
+        if rowoflist.find("slotsize") != -1:
+            slotsize = int(rowoflist.split("slotsize=")[1])
+
+        if rowoflist.find("endthreshold") != -1:
+            endthreshold = int(rowoflist.split("endthreshold=")[1])
             """    
             have finished reading the prespecs and will now read real seller specs
             """
-            #TODO fix so that min dont overwrite inputs
+
     try:
         numsellers
-        block = rowoflist.split(":")[1]
+        block = block.split(":")[1]
         blocklen = []
-        if block.find("->") != -1:
-            for x in block.split("->"):
-                if x.find("chainlenght") != -1:
-                    blocklen.append(x.split("chainlenght=")[1].split(",")[0])
-                    block = block.replace(",chainlenght=" + str(x.split("chainlenght=")[1].split(",")[0]), "")
-                    block = block.replace("chainlenght=" + str(x.split("chainlenght=")[1].split(",")[0]), "")
-                elif x.find("[") != -1 and x.find("]") != -1:
-                    blocklen.append(x.count("["))
+        for x in block.split("->"):
+            if x.find("chainlength") != -1:
+                if x.find(",") != -1:
+                    blocklen.append(x.split("chainlength=")[1].split(",")[0])
                 else:
-                    if randomchainlength == "true":
-                        blocklen.append(random.randrange(2, 9))# can specify random range of blocklenght
-                    else:
-                        blocklen.append(1)
-                block = block + "->"
+                    blocklen.append(x.split("chainlength=")[1])
+            elif x.find("[") != -1 and x.find("]") != -1:
+                blocklen.append(x.count("["))
+            else:
+                if randomchainlength == "true":
+                    if len(block.split("->")) != 1:
+                        blocklen.append("replace")
+                else:
+                    blocklen.append("replace")
+
         sumofremainingblocks = 0
         randomblocklengt = []
-        for x in range(int(numsellers)-len(blocklen)):
+        listofreplace = []
+        loop = 0
+        for x in range(len(blocklen)):
+            if blocklen[x]== "replace":
+                listofreplace.append(x)
+        for x in range(int(numsellers)+len(listofreplace)-len(blocklen)):
             rng=random.randrange(10,100)
             sumofremainingblocks = sumofremainingblocks + rng
             randomblocklengt.append(rng)
         for x in randomblocklengt:
-            blocksize = int((x / sumofremainingblocks) * numbidder)+1
-            blocklen.append(blocksize)
+            if randomchainlength == "true":
+                factor = random.uniform(1,4)
+            else:
+                factor = 1
+            blocksize = 1+int((x / sumofremainingblocks) * numbidder*factor)
+            try:
+                listofreplace[loop]
+                blocklen[listofreplace[loop]] = blocksize
+            except:
+                blocklen.append(blocksize)
+            loop += 1
             block = block + "->"
 
         for x in range(int(numsellers)):
@@ -118,7 +140,7 @@ def readConfig():
                 supply = None
                 discountbool = True
                 try:
-                    blockinfo = blockatribute.split("[")[1].split("]")[0]
+                    blockinfo = blockatribute.split("[")[1].split("]")[0].split(",")
                 except:
                     blockatribute = blockatribute.strip(",")
                     blockinfo = blockatribute.split(",")
@@ -145,7 +167,7 @@ def readConfig():
                     supply = random.randrange(100, 1000)
                 if discountbool:
                     if i > 0:
-                        discount = discount + random.randrange(0,10)/(i+1)
+                        discount = int((discount + random.randrange(1,10))/(i+1))
                     else:
                         discount = random.randrange(0, 10)
 
@@ -172,7 +194,23 @@ def readConfig():
         config.write("\n" + "resourceusage%=" + str(int(ranodomprocent * 100)))
         config.close()
 
+    try:
+        if slotsize == None:
+            raise
+    except:
+        slotsize = 2
+        config = open("config.txt", "a")
+        config.write("\n" + "slotsize=" + str(slotsize))
+        config.close()
 
+    try:
+        if endthreshold == None:
+            raise
+    except:
+        endthreshold = 2
+        config = open("config.txt", "a")
+        config.write("\n" + "endthreshold=" + str(endthreshold))
+        config.close()
 
     # calculate the total sum of supply available
     sum = 0
@@ -301,7 +339,7 @@ def readConfig():
     numsellers = len(sellerslist)
     numbuyers = len(bidderslist)
     check = (seed * numsellers * numbuyers)
-    return str(check)[0:4]
+    return str(check)[0:4],slotsize,endthreshold
 
 
 def genSeed():
@@ -375,19 +413,20 @@ def createRandomSeller():
     sellerslist.append(seller)
 
 
-checksum = readConfig()
+checksum,slotsize,endthreshold = readConfig()
 
-sum = 0
-for x in bidderslist:
-    sum = sum + x.needs.amount
-    #print(x.needs.amount, "demand from bidders")
-print(sum, "sum of demand\n")
+# TODO bidder init with len(sellerlist)/slotsize round upp
 
 for x in sellerslist:
     print(x.LinkOfBlocks.display())
     #for i in x.LinkOfBlocks.display():
      #   print(i.Amount, "supply in blocks")
 
+sum = 0
+for x in bidderslist:
+    sum = sum + x.needs.amount
+    #print(x.needs.amount, "demand from bidders")
+print("\n",sum, "sum of demand")
 
 sumblocks = 0
 sumseller = 0
@@ -400,16 +439,15 @@ for x in sellerslist:
 print(sumseller, "sum of supply\n")
 
 print(sumblocks, "number of blocks")
-#print(len(bidderslist), "number of bidders")
+print(len(bidderslist), "number of bidders")
 resourceusage = sum / sumseller
 
 fairness,marketprice=referenceCalculator(sellerslist,bidderslist)
 for x in bidderslist:
     x.setMarketprice(marketprice)
 
-# TODO bidder init with len(sellerlist)/slotsize round upp
-# TODO init simEngine with slot_size = variable and end_threshold = variable
-aucitonengine = SimEngine(sellerslist,bidderslist)
+
+aucitonengine = SimEngine(sellerslist,bidderslist,slotsize,endthreshold)
 aucitonengine.simStart()
 
 DataManagement().dataCollector(seed, sellerslist, bidderslist, resourceusage, sum, sumseller, checksum)
