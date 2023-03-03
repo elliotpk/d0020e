@@ -33,7 +33,8 @@ class Bidder:
   def setMarketprice(self,price):
     self.marketPrice=price*random.normalvariate(1, 0.03)
     self.stopBid=self.marketPrice*(1 + self.behaviour["aggressiveness"])
-    print("<setMarketPrice()> Bidder ",self.id, " knows the market price: ", self.marketPrice, " and stopBid is: ", self.stopBid)
+    # Print for testing purposes:
+    #print("<setMarketPrice()> Bidder ",self.id, " knows the market price: ", self.marketPrice, " and stopBid is: ", self.stopBid)
   
   # Returns a list of all the auctions that the bidder can bid on.
   ############# self.behaviour["bidOverMarketPrice"] and a value of a range, can turn on/off if market price matters in the simulation or not ##############
@@ -102,7 +103,7 @@ class Bidder:
     currentItems = 0
 
     # Print for testing purposes:
-    print("Bidder", self.id, "desperation:", self.behaviour["desperation"](self.currentRound, self.maxRound))
+    #print("Bidder", self.id, "desperation:", self.behaviour["desperation"](self.currentRound, self.maxRound))
     for dictionary in input:
       if(dictionary["user"] == self.id):
           satisfiedNeed = satisfiedNeed + dictionary["quantity"]
@@ -187,5 +188,5 @@ def test():
   #print("Bidder 4 stopBid: ", bidder4.behaviour["stopBid"](bidder4.marketPrice))
 
 
-test()
+#test()
 
