@@ -98,10 +98,13 @@ def readConfig():
             elif x.find("[") != -1 and x.find("]") != -1:
                 blocklen.append(x.count("["))
             else:
-                if randomchainlength == "true":
-                    if len(block.split("->")) != 1:
-                        blocklen.append("replace")
-                else:
+                try:
+                    if randomchainlength == "true":
+                        if len(block.split("->")) != 1:
+                            blocklen.append("replace")
+                    else:
+                        raise
+                except:
                     blocklen.append("replace")
 
         sumofremainingblocks = 0
@@ -116,9 +119,12 @@ def readConfig():
             sumofremainingblocks = sumofremainingblocks + rng
             randomblocklengt.append(rng)
         for x in randomblocklengt:
-            if randomchainlength == "true":
-                factor = random.uniform(1,4)
-            else:
+            try:
+                if randomchainlength == "true":
+                    factor = random.uniform(1,4)
+                else:
+                    raise
+            except:
                 factor = 1
             blocksize = 1+int((x / sumofremainingblocks) * numbidder*factor)
             try:
@@ -177,7 +183,8 @@ def readConfig():
                     seller.genBlock(price, supply, discount)
                     headcreated = True
 
-    except:
+    except Exception as e:
+        print(e)
         if len(sellerslist) == 0:
             numsellers = genAmountSellers()
             config = open("config.txt", "a")
@@ -226,7 +233,7 @@ def readConfig():
         rowoflist = rowoflist.replace(" ", "")
 
         # reads demands for buyers
-        if rowoflist.find("bidder") != -1 and rowoflist.find("numrandombidders") == -1:
+        if rowoflist.find("bidder") != -1:
             bidderprespec = rowoflist.split("bidder=")[1]
             if bidderprespec.find("number") != -1:
                 numbidder = bidderprespec.split(":")[0].split(",")
@@ -250,11 +257,9 @@ def readConfig():
             while len(listbidderatribute) < int(numbidder):
                 listbidderatribute.append("")
             names = []
-            amounts = []
             needs = []
             behaviours = []
             marketprices = []
-            supply = None
             demand = None
             behaviour = None
             marketprice = None
@@ -262,18 +267,13 @@ def readConfig():
             listofzero = []
             for bidderattribute in listbidderatribute:
                 if copy != "true":
-                    supply = None
                     demand = None
                     behaviour = None
                     marketprice = None
                 name = None
                 attribute = bidderattribute.split(",")
                 for x in attribute:
-                    if x.find("supply=") != -1:
-                        supply = x.split("supply=")[1]
-                        amounts.append(supply)
-                        name = 200
-                    elif x.find("demand=") != -1:
+                    if x.find("demand=") != -1:
                         demand = x.split("demand=")[1]
                         needs.append(demand)
                         name = 200
@@ -291,8 +291,6 @@ def readConfig():
                     name ="Buyer"+ str(len(names))
                 names.append(name)
 
-                if supply == None:
-                    amounts.append(random.randrange(10, 200))
                 if demand == None:
                     needs.append(0)
                 if behaviour == None:
@@ -319,13 +317,12 @@ def readConfig():
                 i = i + 1
             for x in range(numbidder):
                 name = names[x]
-                supply = amounts[x]
                 demand = needs[x]
                 behaviour = behaviours[x]
                 marketprice = marketprices[x]
 
                 # id,supply,needs,behaviour,marketprice,totalbudget,resourceusage
-                spentbudget = createBidder(namn=name, amount=supply, needs=demand, behaviour=behaviour,
+                spentbudget = createBidder(namn=name, maxrounds=(len(sellerslist)/slotsize), needs=demand, behaviour=behaviour,
                                            marketprice=marketprice, budget=totalbudget)
                 totalbudget = totalbudget - spentbudget
 
@@ -369,12 +366,12 @@ def createBidder(**kwargs):
     except:
         kwargs["budget"] = random.randrange(10, 100)
     try:
-        if kwargs["amount"] != None:
-            amount = kwargs["amount"]
+        if kwargs["maxrounds"] != None:
+            maxrounds = kwargs["maxrounds"]
         else:
             raise
     except:
-        amount = random.randrange(10, 200)
+        maxrounds = random.randrange(1,20)
     try:
         namn = kwargs["namn"]
     except:
@@ -398,7 +395,7 @@ def createBidder(**kwargs):
         behaviour = Behaviour.randomBehaviour()
 
     # id, currentamount, needs, behaviour, marketPrice
-    bidderslist.append(Bidder(namn, need, marketprice, behaviour))
+    bidderslist.append(Bidder(namn, need, math.ceil(maxrounds), behaviour))
     return need.amount
 
     # creates number of sellers
@@ -415,7 +412,6 @@ def createRandomSeller():
 
 checksum,slotsize,endthreshold = readConfig()
 
-# TODO bidder init with len(sellerlist)/slotsize round upp
 
 for x in sellerslist:
     print(x.LinkOfBlocks.display())
