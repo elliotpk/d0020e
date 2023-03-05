@@ -30,7 +30,7 @@ class SimEngine():
         self.sellers = sellers
         self.auctions = self.createAuctionList(self.sellers)                        # Create a list of all auctions
         self.auctionStatus = self.createAuctionStatus(self.auctions)                # Used to keep track of when a bid has not been placed recently (within x loops)
-        self.loopLenght = len(self.auctions)
+        self.loopLength = len(self.auctions)
         self.auctionSlot = []                                                       # Holds all the auctions currently available to the bidders
         self.finishedAuctions = []                                                  # Auctions which have ended are placed here
         self.buyers = buyers
@@ -41,9 +41,12 @@ class SimEngine():
     def simStart(self):
         "Start the simulation"
         #Round Start
-        while(len(self.finishedAuctions) != self.loopLenght):
+        while(len(self.finishedAuctions) != self.loopLength):
             if(len(self.auctionSlot) == 0):
                 self.updateAuctionSlot()
+                for buyer in self.buyers:
+                    buyer.newRound()
+
             # Update the auction list with current values
             for auction in self.auctionSlot:
                 info = link.getRoomInfo(auction['id'], "Seller", 'bid')[0]   # Get highest bid in the auctions, auth is 'Seller' for all auctions in the current implementation
@@ -90,17 +93,11 @@ class SimEngine():
             self.updateStatus(finished)
         
         # Update the auction list with the final result, and compute resulting fairness
-        nom = 0
-        denom = 0 
-        fairness = 0
         for auction in self.finishedAuctions:
             info = link.getRoomInfo(auction['id'], "Seller", 'bid')[0]
             auction['top_bid'] = info['value']
             auction['user'] = info['user']
-            if(auction['top_bid'] == 0): continue
-            nom += (auction['quantity']/auction['top_bid'])
-            denom += (auction['quantity']/auction['top_bid'])**2
-        if(auction['top_bid'] != 0): fairness = (nom**2)/(len(self.buyers)*denom)
+        fairness = self.fairnessCalc()
         self.saveData(fairness)
         self.dataManagement.simulationDone()
 
@@ -173,6 +170,24 @@ class SimEngine():
         for auction in auctionList:
             result.append({'id':auction['id'], 'val' : self.end_threshold})                  # If threshold value goes below 0 we end the auction
         return result
+    
+    def fairnessCalc(self):
+        avgPrices = []
+        for buyer in self.buyers:                                           # Calculate the average price per unit each buyer got to buy
+            temp = 0                                                        # Only pays attention to buyers which have bought something
+            i = 0
+            for auction in self.finishedAuctions:
+                if(buyer.id == auction['user']):
+                    temp += auction['top_bid']/auction['quantity']
+                    i += 1
+            if i > 0:
+                avgPrices.append(temp/i)
+            else:
+                continue
+        nom = sum(avgPrices)**2
+        denom = sum([x**2 for x in avgPrices]) * len(avgPrices)
+        fairness = nom/denom
+        return fairness
 
     def saveData(self, fairness):
         output = "Fairness: {} \nRoomID, Quantity, Winner, Price \n".format(fairness)
