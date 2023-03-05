@@ -3,25 +3,7 @@ from Bidder import *
 from Sellers import Sellers
 import random
 from DataManagement import *
-
 import os
-def printdata(string):
-    #spara data före print
-    #prints the results into a csv file and labels the different runs into a new csv file
-    testnr = 0
-    while (os.path.exists('test'+str(testnr)+'.csv')):
-        testnr=testnr+1
-    print(testnr)
-    mkcsv = open('test'+str(testnr)+'.csv','w')
-    for x in string.split(';'):
-        mkcsv.write(x+'\n')
-    mkcsv.close()
-""""
-pris,data,vinnare,id
-1,sten,34,#91
-420,lera,2,#54
-"""
-#print(Api.data) print to csv-file
 
 class SimEngine():
     def __init__(self, sellers, buyers, slot_size, threshold):
@@ -74,7 +56,6 @@ class SimEngine():
                 sort = sorted(bids, key=lambda i:int(i['top_bid']), reverse=True)                               # Sorts the list of bids by amount
                 if (len(sort) == 0): continue
                 self.dataManagement.stringMaker(sort)
-                # !! Pass the list "sort" to the datamanagement class here, before we pick out the top bids only !!
                 max_bid = sort[0]['top_bid']
                 top = []
                 for i in range(len(sort)-1, -1, -1):                                                             # Pick out any potential ties for the top bid to randomize which one gets submitted
