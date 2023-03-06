@@ -32,7 +32,7 @@ class DataManagement:
 
         self.stringlist = ["ID,AuctionID,Quantity,NumOfAuctions"]
         for seller in sellerslist:
-            self.string = str(seller.id) + "," + str(seller.auctionId) + "," + str(seller.quantity) + str(seller.LinkOfBlocks.size)
+            self.string = str(seller.id) + "," + str(seller.auctionId) + "," + str(seller.quantity) +","+ str(seller.LinkOfBlocks.size+1)
             self.addToStringlist(self.string)
             self.string = ""
         #print(self.stringlist)

@@ -446,7 +446,6 @@ fairness,marketprice=referenceCalculator(sellerslist,bidderslist)
 for x in bidderslist:
     x.setMarketprice(marketprice)
 
-print(fairness)
 aucitonengine = SimEngine(sellerslist,bidderslist,slotsize,endthreshold)
 aucitonengine.simStart()
 

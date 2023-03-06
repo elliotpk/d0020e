@@ -11,8 +11,8 @@ class Sellers:
 
     def createAuction(self):
         try:
-            roomid=APILink.createAuction(str(self.id),"Seller",10)
-            self.auctionId = roomid
+            roomid=APILink.createAuction(str(self.id),"Seller",self.quantity)
+            self.auctionId=roomid
         except:
             roomid=None
         return roomid
