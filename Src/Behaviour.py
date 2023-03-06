@@ -8,6 +8,16 @@ def randomBehaviour():
   behaviourList = [A, B, C]
   return random.choice(behaviourList)
 
+def getBehaviour(input):
+    if input == A["behaviour"]:
+        return A
+    elif input == B["behaviour"]:
+        return B
+    elif input == C["behaviour"]:
+        return C
+    else:
+        return randomBehaviour()
+
 # Returns k random behaviours with weighted possibilities.
 # Example: weights = [1, 10, 1] means that the selection chance is 10 times bigger for the second behaviour.
 # Note: new behaviours must be added in the list.

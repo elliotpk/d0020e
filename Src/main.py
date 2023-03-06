@@ -390,8 +390,10 @@ def createBidder(**kwargs):
     except:
         marketprice = random.randrange(1000, 10000)
     try:
-        behaviour = kwargs["behaviour"]
-    except:
+        kwargs["behaviour"]
+        behaviour = Behaviour.getBehaviour(kwargs["behaviour"])
+    except Exception as e:
+        print(e)
         behaviour = Behaviour.randomBehaviour()
 
     # id, currentamount, needs, behaviour, marketPrice
@@ -425,14 +427,16 @@ for x in bidderslist:
 print("\n",sum, "sum of demand")
 
 sumblocks = 0
-sumseller = 0
+sumofsopply = 0
 for x in sellerslist:
+    sumseller = 0
     list = x.LinkOfBlocks.display()
     for i in list:
+        sumofsopply = sumofsopply + i.Amount
         sumseller = sumseller + i.Amount
-        x.quantity = i.Amount
+        x.quantity = sumseller
         sumblocks = sumblocks + 1
-print(sumseller, "sum of supply\n")
+print(sumofsopply, "sum of supply\n")
 
 print(sumblocks, "number of blocks")
 print(len(bidderslist), "number of bidders")
