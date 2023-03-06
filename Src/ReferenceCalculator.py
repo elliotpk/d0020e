@@ -148,7 +148,7 @@ def averageCost(boughtBlocks):
     totAmount = 0
     for block in boughtBlocks:
         discount = findDiscount(block,boughtBlocks)
-        sum = sum + (block.get_amount() * (block.get_price() * (1-(discount/100))))
+        sum = sum + (block.get_amount() * (block.get_price()/block.get_amount() * (1-(discount/100))))
         totAmount = totAmount + block.get_amount()
     return sum / totAmount
 
