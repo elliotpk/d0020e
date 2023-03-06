@@ -16,8 +16,6 @@ class Bidder:
     # Market factor changes how different the amount will be when bidders wants to bid with a mean and standard deviation value.
     self.updateMarketFactor(1, 0.05)
     self.marketPriceFactor = self.behaviour["marketPriceFactor"]
-    # Print for testing purposes:
-    #print("marketPriceFactor for bidder", self.id, " is:", self.behaviour["marketPriceFactor"])
     
     # Bidders know this info about auctions
     self.auctionsLost = 0 # not used, maybe shouldn't be needed
@@ -98,7 +96,6 @@ class Bidder:
     self.currentRound += 1
 
   # Returns a list of dictionaries with info about how the bidder bids.
-  # Note: currently it can bid on many auctions even if it just needs a small amount to fulfill the needs.
   def bidUpdate(self, input):
     satisfiedNeed = 0
     currentItems = 0
@@ -108,8 +105,6 @@ class Bidder:
     checkOnce = True
     index = 0
 
-    # Print for testing purposes:
-    #print("Bidder", self.id, "desperation:", self.behaviour["desperation"](self.currentRound, self.maxRound))
     for dictionary in input:
       if(dictionary["user"] == self.id):
           satisfiedNeed = satisfiedNeed + dictionary["quantity"]
