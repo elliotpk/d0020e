@@ -37,11 +37,11 @@ def marketPriceFactor(behaviour, aggressiveness, mean, standardDeviation):
 A = {
   "behaviour": "A",
   "aggressiveness": 0.9,
-  "adaptiveAggressiveness": lambda auctions, auctionsLost, currentBids:
-                            changeAggressiveness(A, A["aggressiveness"]) if(auctions > 4 and auctionsLost > 3 and currentBids >= 0) else
-                            changeAggressiveness(A, A["aggressiveness"]) if(auctions > 3 and auctionsLost > 2 and currentBids >= 0) else
-                            changeAggressiveness(A, A["aggressiveness"]) if(auctions > 2 and auctionsLost > 1 and currentBids >= 0) else
-                            changeAggressiveness(A, A["aggressiveness"]) if(auctions == 1 and currentBids > 10) else
+  "adaptiveAggressiveness": lambda currentRound, maxRound:
+                            changeAggressiveness(A, A["aggressiveness"]) if(maxRound - currentRound == 0) else
+                            changeAggressiveness(A, A["aggressiveness"]) if(maxRound - currentRound > 1) else
+                            changeAggressiveness(A, A["aggressiveness"]) if(maxRound - currentRound > 2) else
+                            changeAggressiveness(A, A["aggressiveness"]) if(maxRound - currentRound > 3) else
                             changeAggressiveness(A, A["aggressiveness"]),
   "desperation": lambda currentRound, maxRound:
                        A["aggressiveness"]*(maxRound-currentRound)/maxRound,
@@ -54,21 +54,20 @@ A = {
 }
 
 # Medium aggressive behaviour.
-# Aggressiveness increases when there are more auctions to bid on and how many auctions that is lost
-# or when there are more than 10 bids in 1 participated auction.
-# Doesn't bid if it's over the market value.
+# Aggressiveness increases when the current round is nearing the last round.
+# Can bid over the market value.
 B = {
   "behaviour": "B",
   "aggressiveness": 0.5,
-  "adaptiveAggressiveness": lambda auctions, auctionsLost, currentBids:
-                            changeAggressiveness(B, 0.8) if(auctions > 4 and auctionsLost > 3 and currentBids >= 0) else
-                            changeAggressiveness(B, 0.7) if(auctions > 3 and auctionsLost > 2 and currentBids >= 0) else
-                            changeAggressiveness(B, 0.6) if(auctions > 2 and auctionsLost > 1 and currentBids >= 0) else
-                            changeAggressiveness(B, 0.6) if(auctions == 1 and currentBids > 10) else
+  "adaptiveAggressiveness": lambda currentRound, maxRound:
+                            changeAggressiveness(B, 0.9) if(maxRound - currentRound == 0) else
+                            changeAggressiveness(B, 0.8) if(maxRound - currentRound > 1) else
+                            changeAggressiveness(B, 0.7) if(maxRound - currentRound > 2) else
+                            changeAggressiveness(B, 0.6) if(maxRound - currentRound > 3) else
                             changeAggressiveness(B, B["aggressiveness"]),
   "desperation": lambda currentRound, maxRound:
                        B["aggressiveness"]*(maxRound-currentRound)/maxRound,
-  "bidOverMarketPrice": False,
+  "bidOverMarketPrice": True,
   "marketPriceFactor": 1.0,
   "marketPriceFactorUpdate": lambda mean, standardDeviation:
                              marketPriceFactor(B, B["aggressiveness"], mean, standardDeviation),
@@ -77,21 +76,20 @@ B = {
 } 
 
 # Minimal and passive bidding behaviour.
-# Aggressiveness increases when there are more auctions to bid on and how many auctions that is lost
-# or when there are more than 10 bids in 1 participated auction.
-# Doesn't bid if it's over the market value.
+# Aggressiveness increases when the current round is nearing the last round.
+# Can bid over the market value.
 C = {
   "behaviour": "C",
   "aggressiveness": 0.2,
-  "adaptiveAggressiveness": lambda auctions, auctionsLost, currentBids:
-                            changeAggressiveness(C, 0.6) if(auctions > 4 and auctionsLost > 3 and currentBids >= 0) else
-                            changeAggressiveness(C, 0.4) if(auctions > 3 and auctionsLost > 2 and currentBids >= 0) else
-                            changeAggressiveness(C, 0.3) if(auctions > 2 and auctionsLost > 1 and currentBids >= 0) else
-                            changeAggressiveness(C, 0.3) if(auctions == 1 and currentBids > 10) else
+  "adaptiveAggressiveness": lambda currentRound, maxRound:
+                            changeAggressiveness(C, 0.6) if(maxRound - currentRound == 0) else
+                            changeAggressiveness(C, 0.5) if(maxRound - currentRound > 1) else
+                            changeAggressiveness(C, 0.4) if(maxRound - currentRound > 2) else
+                            changeAggressiveness(C, 0.3) if(maxRound - currentRound > 3) else
                             changeAggressiveness(C, C["aggressiveness"]),
   "desperation": lambda currentRound, maxRound:
                        C["aggressiveness"]*(maxRound-currentRound)/maxRound,
-  "bidOverMarketPrice": False,
+  "bidOverMarketPrice": True,
   "marketPriceFactor": 1.0,
   "marketPriceFactorUpdate": lambda mean, standardDeviation:
                              marketPriceFactor(C, C["aggressiveness"], mean, standardDeviation),

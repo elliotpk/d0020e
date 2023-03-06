@@ -13,34 +13,27 @@ class Bidder:
     self.behaviour = behaviour
     self.marketPrice = 0
     self.stopBid = 0
-    # Market factor changes how different the amount will be when bidders wants to bid with a mean and standard deviation value.
-    self.updateMarketFactor(1, 0.05)
     self.marketPriceFactor = self.behaviour["marketPriceFactor"]
     
     # Bidders know this info about auctions
-    self.auctionsLost = 0 # not used, maybe shouldn't be needed
-    self.auctionBids = 0
-    self.currentAuctions = 0
-    self.wonAuctions = 0 # maybe shouldn't be needed
     self.wonItems = 0
-    self.rounds = 0 # not used
     self.currentRound = 0 
 
-  # Bidders will somewhat know the market price based on normal distribution (mean, standardDeviation).
+  # Bidders will somewhat know the market price per unit based on normal distribution (mean, standardDeviation).
   # Then they will stop to bid at a certain value based on the market price and their aggressiveness,
-  # which will also be the maximum bid.
+  # which will also be the maximum bid (stopBid is also per unit).
   def setMarketprice(self,price):
     self.marketPrice=price*random.normalvariate(1, 0.03)
     self.stopBid=self.marketPrice*(1 + self.behaviour["aggressiveness"])
     # Print for testing purposes:
-    #print("<setMarketPrice()> Bidder ",self.id, " knows the market price: ", self.marketPrice, " and stopBid is: ", self.stopBid)
+    #print("<setMarketPrice()> Bidder ",self.id, " knows the market price/unit: ", self.marketPrice, " and stopBid/unit is: ", self.stopBid)
   
   # Returns a list of all the auctions that the bidder can bid on.
-  ############# self.behaviour["bidOverMarketPrice"] and a value of a range, can turn on/off if market price matters in the simulation or not ##############
   def bid(self, input):
-    self.currentAuctions = len(input)
-    # Update the aggressiveness of the behaviour.
-    self.behaviour["aggressiveness"] = self.behaviour["adaptiveAggressiveness"](self.currentAuctions, self.auctionsLost, self.auctionBids)
+    # Update the aggressiveness of the behaviour based on the current auction information.
+    self.behaviour["aggressiveness"] = self.behaviour["adaptiveAggressiveness"](self.currentRound, self.maxRound)
+    # Market factor changes how different the amount will be when bidders wants to bid, it uses a mean and standard deviation value.
+    self.updateMarketFactor(1, 0.05)
     # Keeps track on auctions that the bidder wants to bid on that will be added to the list of all the bids that the bidder wants to and can bid on.
     tempBid = 0
     tempAuction = {}
@@ -87,10 +80,6 @@ class Bidder:
   
   def updateWonItems(self, wonItems):
     self.wonItems += wonItems
-    self.wonAuctions += 1
-
-  def lostAuction(self):
-    self.auctionsLost += 1
   
   def newRound(self):
     self.currentRound += 1
@@ -104,6 +93,9 @@ class Bidder:
     bidOverOnce = False
     checkOnce = True
     index = 0
+
+    # Randomizes the input so that bidders will bid independent of the input order.
+    random.shuffle(input)
 
     for dictionary in input:
       if(dictionary["user"] == self.id):
@@ -122,7 +114,6 @@ class Bidder:
           continue
         elif(0 < currentItems and bidOverOnce or 0 < currentItems - tempQuantity + bidList[index][1]["quantity"]):
           returnList.append({'id' : bid[1]["id"], 'user' : self.id, 'top_bid' : bid[0]})
-          self.auctionBids += 1
       else:
         if(0 > currentItems - tempQuantity and checkOnce):
           bidOverOnce = True
@@ -131,9 +122,10 @@ class Bidder:
           continue
         elif(0 < currentItems and bidOverOnce or 0 < currentItems - tempQuantity + bidList[index+1][1]["quantity"]):
           returnList.append({'id' : bid[1]["id"], 'user' : self.id, 'top_bid' : bid[0]})
-          self.auctionBids += 1
           bidOverOnce = False
       index += 1
+
+    #print ("self.behaviour[""desperation""](self.currentRound, self.maxRound): ",self.behaviour["desperation"](self.currentRound, self.maxRound))
 
     # Check if the bidder should bid based on the desperation.
     # If the current round is the last round, then the bidder must place a bid if the needs isn't satisfied.
@@ -162,10 +154,10 @@ def test():
   print("-----------------------------------------------------------------")
 
   print("Testing the bidUpdate() function:")
-  simList = [{'id' : '1', 'quantity' : 40, 'user':'N/A' , 'top_bid' : 16000},
+  simList = [{'id' : '1', 'quantity' : 40, 'user':'N/A' , 'top_bid' : 12000},
              {'id' : '2', 'quantity' : 55, 'user':'N/A' , 'top_bid' : 13000},
              {'id' : '3', 'quantity' : 40, 'user':'N/A' , 'top_bid' : 11000},
-             {'id' : '4', 'quantity' : 50, 'user':'N/A' , 'top_bid' : 12000}]
+             {'id' : '4', 'quantity' : 50, 'user':'N/A' , 'top_bid' : 12500}]
   simList2 = [{'id': '63f6c3df7b6103af971aba61', 'quantity': 44, 'user': 'N/A', 'top_bid': 13000},
               {'id': '63f6c3e07b6103af971aba63', 'quantity': 41, 'user': 'N/A', 'top_bid': 0}]
 
