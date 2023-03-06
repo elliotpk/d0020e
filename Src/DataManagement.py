@@ -28,7 +28,7 @@ class DataManagement:
             #self.printdata()
 
 
-    def dataCollector(self, seed, sellerslist, bidderslist, resourceusage, sum, sumseller, checksum):
+    def dataCollector(self, seed, sellerslist, bidderslist, resourceusage, sum, sumseller, checksum, fairness):
 
         self.stringlist = ["ID,AuctionID,Quantity,NumOfAuctions"]
         for seller in sellerslist:
@@ -61,11 +61,6 @@ class DataManagement:
         mkcsv.close()
         self.stringlist = []
 
-    """"
-    pris,data,vinnare,id
-    1,sten,34,#91
-    420,lera,2,#54
-    """
     #print(Api.data) print to csv-file
 
     def testOutJ(self):
