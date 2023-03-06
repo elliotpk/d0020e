@@ -1,9 +1,10 @@
 import Behaviour
 import random
 
-###### TODO add timeslot or maxRound parameter to use with behaviour ######
-###### TODO rounds increase in bidUpdate, add to behaviour (exponential behaviour depending on aggressiveness and rounds) ######
-###### TODO change so that marketPriceFactor changes internally in Bidder ######
+# Bidders have an ID, needs with an amount and type.
+# A bidder knows when the last round will occur.
+# Every bidder has a behaviour/strategy.
+###### TODO change so that it bids based on the market price per unit ######
 class Bidder:
   def __init__(self, id, needs, maxRound, behaviour):
     self.id = id
@@ -52,21 +53,21 @@ class Bidder:
       
       # If top bid starts with 0, then the bidders will bid 1/5 of the market price multiplied by the aggressiveness and market price factor.
       if(genBid == 0):
-        genBid = int((self.marketPrice/5) * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor))
+        genBid = int((self.marketPrice*auction["quantity"]/5) * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor))
 
       # Print for testing purposes:
       #print("<from bid()> Bidder",self.id, "genBid: ", genBid, "  |  tempBid: ", tempBid, "  |  stopBid: ",self.behaviour["stopBid"](self.marketPrice), "  |  auction: ", auction["id"])
       
       # Checks if the bidder can bid based on its behaviour about bidding over the market price.
-      if(((self.marketPrice > genBid and not self.behaviour["bidOverMarketPrice"]) or (self.stopBid > genBid and self.behaviour["bidOverMarketPrice"]))
+      if(((self.marketPrice*auction["quantity"] > genBid and not self.behaviour["bidOverMarketPrice"]) or (self.stopBid*auction["quantity"] > genBid and self.behaviour["bidOverMarketPrice"]))
           or
           self.behaviour["bidOverMarketPrice"]
       ):
-        if(auction["top_bid"] > self.stopBid):
+        if(auction["top_bid"] > self.stopBid*auction["quantity"]):
           continue
         # Limits the maximum bid to be stop bid
-        if(self.stopBid < genBid):
-          tempBid = int(self.stopBid)
+        if(self.stopBid*auction["quantity"] < genBid):
+          tempBid = int(self.stopBid*auction["quantity"])
         else:
           tempBid = genBid
         tempAuction = auction
@@ -75,7 +76,7 @@ class Bidder:
         continue
     # The bidder won't bid if there is no auctions as input.
     if len(tempAuction) != 0:
-      # The bidder won't bid if the auction doesn't have any quantity and a top bid that is 0 or if the bid is negative.
+      # The bidder won't bid if the auction doesn't have any quantity and a top bid that is 0 or if the bid is negative (should never happen).
       if(tempBid < 0 or (tempAuction["top_bid"] == 0 and tempAuction["quantity"] == 0)):
         return []
       else:
@@ -169,9 +170,9 @@ def test():
     bidder3.newRound()
     bidder4.newRound()
 
-  bidder1.setMarketprice(15000)
-  bidder3.setMarketprice(15000)
-  bidder4.setMarketprice(15000)
+  bidder1.setMarketprice(275)
+  bidder3.setMarketprice(275)
+  bidder4.setMarketprice(275)
 
   bidder1Info = bidder1.bidUpdate(simList2)
   bidder3Info = bidder3.bidUpdate(simList2)
