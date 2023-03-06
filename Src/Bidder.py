@@ -4,7 +4,7 @@ import random
 # Bidders have an ID, needs with an amount and type.
 # A bidder knows when the last round will occur.
 # Every bidder has a behaviour/strategy.
-###### TODO change so that it bids based on the market price per unit ######
+###### TODO add a check so that bidders doesn't bid for more quanitity than needed ######
 class Bidder:
   def __init__(self, id, needs, maxRound, behaviour):
     self.id = id
@@ -56,7 +56,7 @@ class Bidder:
         genBid = int((self.marketPrice*auction["quantity"]/5) * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor))
 
       # Print for testing purposes:
-      #print("<from bid()> Bidder",self.id, "genBid: ", genBid, "  |  tempBid: ", tempBid, "  |  stopBid: ",self.behaviour["stopBid"](self.marketPrice), "  |  auction: ", auction["id"])
+      #print("<from bid()> Bidder",self.id, "genBid: ", genBid, "  |  stopBid: ",self.stopBid*auction["quantity"], "  |  market price: ",self.marketPrice*auction["quantity"], "  |  auction: ", auction["id"], "  |  tempBid: ", tempBid,)
       
       # Checks if the bidder can bid based on its behaviour about bidding over the market price.
       if(((self.marketPrice*auction["quantity"] > genBid and not self.behaviour["bidOverMarketPrice"]) or (self.stopBid*auction["quantity"] > genBid and self.behaviour["bidOverMarketPrice"]))
@@ -102,6 +102,11 @@ class Bidder:
   def bidUpdate(self, input):
     satisfiedNeed = 0
     currentItems = 0
+    returnList = [] # doesn't include quantity
+    tempQuantity = 0
+    bidOverOnce = False
+    checkOnce = True
+    index = 0
 
     # Print for testing purposes:
     #print("Bidder", self.id, "desperation:", self.behaviour["desperation"](self.currentRound, self.maxRound))
@@ -111,15 +116,29 @@ class Bidder:
 
     currentItems = self.needs.amount - satisfiedNeed - self.wonItems
     bidList = self.bid(input)
-    returnList = []
-
+    
+    # Doesn't bid if it the bidder is winning on items that satisfies the needs.
+    # Also, the bidder shouldn't bid for more than needed on the quantity in the current round.
     # bid[0] = bid <int>, bid[1] = auction <dictionary>
     for bid in bidList:
-      if(bid[1]["user"] == self.id):
-        continue
-      elif(0 < currentItems):
-        returnList.append({'id' : bid[1]["id"], 'user' : self.id, 'top_bid' : bid[0]})
-        self.auctionBids += 1
+      tempQuantity += bid[1]["quantity"]
+      if(index+1 > len(bidList)-1):
+        if(bid[1]["user"] == self.id):
+          continue
+        elif(0 < currentItems and bidOverOnce or 0 < currentItems - tempQuantity + bidList[index][1]["quantity"]):
+          returnList.append({'id' : bid[1]["id"], 'user' : self.id, 'top_bid' : bid[0]})
+          self.auctionBids += 1
+      else:
+        if(0 > currentItems - tempQuantity and checkOnce):
+          bidOverOnce = True
+          checkOnce = False
+        if(bid[1]["user"] == self.id):
+          continue
+        elif(0 < currentItems and bidOverOnce or 0 < currentItems - tempQuantity + bidList[index+1][1]["quantity"]):
+          returnList.append({'id' : bid[1]["id"], 'user' : self.id, 'top_bid' : bid[0]})
+          self.auctionBids += 1
+          bidOverOnce = False
+      index += 1
 
     # Check if the bidder should bid based on the desperation.
     # If the current round is the last round, then the bidder must place a bid if the needs isn't satisfied.
@@ -128,16 +147,6 @@ class Bidder:
     # If the desperation is high, then the bidder will try to bid.
     if(self.behaviour["desperation"](self.currentRound, self.maxRound) > random.random() and 0 < currentItems):
       return returnList
-    
-    # Check if the bidder bids more than needed on the quantity in the current round,
-    # if so, the bidder should only bid on the cheapest auction/auctions (Work In Progress).
-    #for bid in returnList:
-    #  cheapestBids = []
-    #  i = 0
-    #  if(cheapestBids == []):
-    #    continue
-    #  if(bid["top_bid"] < cheapestBids[i]):
-    #    cheapestBids.append(bid["top_bid"])
 
     return []
 
@@ -158,12 +167,12 @@ def test():
   print("-----------------------------------------------------------------")
 
   print("Testing the bidUpdate() function:")
-  simList = [{'id' : '1', 'quantity' : 60, 'user':'N/A' , 'top_bid' : 16000},
+  simList = [{'id' : '1', 'quantity' : 40, 'user':'N/A' , 'top_bid' : 16000},
              {'id' : '2', 'quantity' : 55, 'user':'N/A' , 'top_bid' : 13000},
              {'id' : '3', 'quantity' : 40, 'user':'N/A' , 'top_bid' : 11000},
              {'id' : '4', 'quantity' : 50, 'user':'N/A' , 'top_bid' : 12000}]
-  simList2 = [{'id': '63f6c3df7b6103af971aba61', 'quantity': 441, 'user': 'N/A', 'top_bid': 13000},
-              {'id': '63f6c3e07b6103af971aba63', 'quantity': 411, 'user': 'N/A', 'top_bid': 0}]
+  simList2 = [{'id': '63f6c3df7b6103af971aba61', 'quantity': 44, 'user': 'N/A', 'top_bid': 13000},
+              {'id': '63f6c3e07b6103af971aba63', 'quantity': 41, 'user': 'N/A', 'top_bid': 0}]
 
   for i in range(1):
     bidder1.newRound()
@@ -174,9 +183,9 @@ def test():
   bidder3.setMarketprice(275)
   bidder4.setMarketprice(275)
 
-  bidder1Info = bidder1.bidUpdate(simList2)
-  bidder3Info = bidder3.bidUpdate(simList2)
-  bidder4Info = bidder4.bidUpdate(simList2)
+  bidder1Info = bidder1.bidUpdate(simList)
+  bidder3Info = bidder3.bidUpdate(simList)
+  bidder4Info = bidder4.bidUpdate(simList)
 
   print("Bidder 1 decisions: ", bidder1Info)
   #print("Bidder 1 needs: ", bidder1.needs.amount)
