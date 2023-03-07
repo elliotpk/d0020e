@@ -412,7 +412,45 @@ def createRandomSeller():
     sellerslist.append(seller)
 
 
+
+
+
+
+
+def uppdateBidder():
+    fairness, marketprice = referenceCalculator(sellerslist, bidderslist)
+    for x in bidderslist:
+        x.setMarketprice(marketprice)
+    return fairness
+
+def uppdateSeller():
+    sum = 0
+    for x in bidderslist:
+        sum = sum + x.needs.amount
+        # print(x.needs.amount, "demand from bidders")
+    print("\n", sum, "sum of demand")
+
+    sumblocks = 0
+    sumofsopply = 0
+    for x in sellerslist:
+        sumseller = 0
+        list = x.LinkOfBlocks.display()
+        for i in list:
+            sumofsopply = sumofsopply + i.Amount
+            sumseller = sumseller + i.Amount
+            x.quantity.append(i.Amount)
+            sumblocks = sumblocks + 1
+    print(sumofsopply, "sum of supply\n")
+    print(sumblocks, "number of blocks")
+    print(len(bidderslist), "number of bidders")
+    resourceusage = (sum/sumseller)
+    return resourceusage,sumseller,sum
+
+
 checksum,slotsize,endthreshold = readConfig()
+fairness=uppdateBidder()
+resourceusage,sumseller,sum = uppdateSeller()
+
 
 
 for x in sellerslist:
@@ -420,31 +458,13 @@ for x in sellerslist:
     #for i in x.LinkOfBlocks.display():
      #   print(i.Amount, "supply in blocks")
 
-sum = 0
-for x in bidderslist:
-    sum = sum + x.needs.amount
-    #print(x.needs.amount, "demand from bidders")
-print("\n",sum, "sum of demand")
 
-sumblocks = 0
-sumofsopply = 0
-for x in sellerslist:
-    sumseller = 0
-    list = x.LinkOfBlocks.display()
-    for i in list:
-        sumofsopply = sumofsopply + i.Amount
-        sumseller = sumseller + i.Amount
-        x.quantity = sumseller
-        sumblocks = sumblocks + 1
-print(sumofsopply, "sum of supply\n")
 
-print(sumblocks, "number of blocks")
-print(len(bidderslist), "number of bidders")
-resourceusage = sum / sumseller
 
-fairness,marketprice=referenceCalculator(sellerslist,bidderslist)
-for x in bidderslist:
-    x.setMarketprice(marketprice)
+
+
+
+
 
 aucitonengine = SimEngine(sellerslist,bidderslist,slotsize,endthreshold)
 aucitonengine.simStart()
