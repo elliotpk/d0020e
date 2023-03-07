@@ -179,5 +179,23 @@ class SimEngine():
         while(os.path.exists('test'+str(num)+'.csv')):
             num += 1
         f = open('test'+str(num)+'.csv',"w")
-        f.write(output)
+        finalStatus = self.bidderFinalStatsus()
+        f.write(output + '\n' + finalStatus)
         f.close()
+
+    def bidderFinalStatsus(self):
+        output = 'Behaviour, BuyerId, PricePaid, QuantityBought, DemandLeft\n'
+        for buyer in self.buyers:
+            bidderId = buyer.id
+            bidderNeed = buyer.needs.amount
+            quantityBought = 0
+            pricePaid = 0
+            noAuctions = 0
+            for auction in self.finishedAuctions:
+                if(auction['user'] == bidderId):
+                    noAuctions += 1
+                    quantityBought += auction['quantity']
+                    pricePaid += auction['top_bid']/auction['quantity']
+            if(noAuctions == 0): noAuctions = -1
+            output += buyer.behaviour['behaviour'] + ', '+ bidderId + ', ' + str(pricePaid/noAuctions) + ', ' + str(quantityBought) + ', ' + str(bidderNeed - quantityBought) + '\n'
+        return output
