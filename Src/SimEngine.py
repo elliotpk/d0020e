@@ -137,12 +137,13 @@ class SimEngine():
             if(not seller.createAuction()):
                 print("Error when sending auction to API")
                 return
-            topBid = link.getRoomInfo(seller.auctionId, "Seller", 'bid')
-            if(len(topBid) == 0):
-                temp.append({'id' : seller.auctionId, 'quantity' : seller.quantity, 'user':'N/A' , 'top_bid' : 0})
-            else:
-                topBid = topBid[0]  
-                temp.append({'id' : seller.auctionId, 'quantity' : seller.quantity, 'user':topBid ['user'] , 'top_bid' : topBid['value']})     # Should contain all the information needed per auction
+            for i in range(len(seller.auctionId)):
+                topBid = link.getRoomInfo(seller.auctionId[i], "Seller", 'bid')
+                if(len(topBid) == 0):
+                    temp.append({'id' : seller.auctionId[i], 'quantity' : seller.quantity[i], 'user':'N/A' , 'top_bid' : 0})
+                else:
+                    topBid = topBid[0]  
+                    temp.append({'id' : seller.auctionId[i], 'quantity' : seller.quantity[i], 'user':topBid ['user'] , 'top_bid' : topBid['value']})     # Should contain all the information needed per auction
         return temp
     
     def createAuctionStatus(self, auctionList):
