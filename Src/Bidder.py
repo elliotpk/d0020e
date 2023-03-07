@@ -132,7 +132,7 @@ class Bidder:
     if(self.behaviour["desperation"](self.currentRound, self.maxRound) == 0  and 0 < currentItems):
       return returnList
     # If the desperation is high, then the bidder will try to bid.
-    if(self.behaviour["desperation"](self.currentRound, self.maxRound) > random.random() and 0 < currentItems):
+    if(self.behaviour["desperation"](self.currentRound, self.maxRound) >= random.random() and 0 < currentItems):
       return returnList
 
     return []

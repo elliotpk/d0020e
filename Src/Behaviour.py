@@ -70,10 +70,11 @@ B = {
   "behaviour": "B",
   "aggressiveness": 0.5,
   "adaptiveAggressiveness": lambda currentRound, maxRound:
-                            changeAggressiveness(B, 0.9) if(maxRound - currentRound == 0) else
-                            changeAggressiveness(B, 0.8) if(maxRound - currentRound > 1) else
-                            changeAggressiveness(B, 0.7) if(maxRound - currentRound > 2) else
-                            changeAggressiveness(B, 0.6) if(maxRound - currentRound > 3) else
+                            changeAggressiveness(B, 1.0) if(maxRound - currentRound == 0) else
+                            changeAggressiveness(B, 0.9) if(currentRound/maxRound >= 0.90) else                            
+                            changeAggressiveness(B, 0.8) if(currentRound/maxRound >= 0.75) else
+                            changeAggressiveness(B, 0.7) if(currentRound/maxRound >= 0.50) else
+                            changeAggressiveness(B, 0.6) if(currentRound/maxRound >= 0.25) else
                             changeAggressiveness(B, B["aggressiveness"]),
   "desperation": lambda currentRound, maxRound:
                        B["aggressiveness"]*(maxRound-currentRound)/maxRound,
@@ -92,10 +93,11 @@ C = {
   "behaviour": "C",
   "aggressiveness": 0.2,
   "adaptiveAggressiveness": lambda currentRound, maxRound:
-                            changeAggressiveness(C, 0.6) if(maxRound - currentRound == 0) else
-                            changeAggressiveness(C, 0.5) if(maxRound - currentRound > 1) else
-                            changeAggressiveness(C, 0.4) if(maxRound - currentRound > 2) else
-                            changeAggressiveness(C, 0.3) if(maxRound - currentRound > 3) else
+                            changeAggressiveness(C, 1.0) if(maxRound - currentRound == 0) else
+                            changeAggressiveness(C, 0.8) if(currentRound/maxRound >= 0.90) else
+                            changeAggressiveness(C, 0.6) if(currentRound/maxRound >= 0.75) else
+                            changeAggressiveness(C, 0.4) if(currentRound/maxRound >= 0.50) else
+                            changeAggressiveness(C, 0.3) if(currentRound/maxRound >= 0.25) else
                             changeAggressiveness(C, C["aggressiveness"]),
   "desperation": lambda currentRound, maxRound:
                        C["aggressiveness"]*(maxRound-currentRound)/maxRound,

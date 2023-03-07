@@ -419,6 +419,7 @@ def createRandomSeller():
 
 def uppdateBidder():
     fairness, marketprice = referenceCalculator(sellerslist, bidderslist)
+    if fairness == -1: print("No valid combinations were found")
     for x in bidderslist:
         x.setMarketprice(marketprice)
     return fairness

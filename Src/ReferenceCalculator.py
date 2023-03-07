@@ -29,6 +29,7 @@ def referenceCalculator(sellerlist, buyers, outputAllCombinations = False):
     permNum = 0
     permAndComb = 0
     averageCostsForBuyers = []
+    bestAverageCostsForBuyers = []
     
     print("Beginning reference calculation,", int((len(blocklist)/2)+1) * math.comb(len(blocklist), len(buyers)) * len(blocklist), "combinations to test")
     
@@ -45,6 +46,7 @@ def referenceCalculator(sellerlist, buyers, outputAllCombinations = False):
                     RajJainCostFairness = rajJainFairness(averageCostsForBuyers)
                     if (RajJainCostFairness > bestRajJainCostFairness):
                         bestRajJainCostFairness = RajJainCostFairness
+                        bestAverageCostsForBuyers = averageCostsForBuyers
                         #bestData = bestData + "\nPermutation " + str(permNum) + " Combination " + str(permAndComb) + "\n"
                         #bestData = bestData + formatCombination(combination,buyers,sellerlist,averageCostsForBuyers,RajJainCostFairness)
                     if (outputAllCombinations):
@@ -59,7 +61,7 @@ def referenceCalculator(sellerlist, buyers, outputAllCombinations = False):
     #print(bestData)    # For testing 
     if (outputAllCombinations):
             outputCombinations(allCombinationData, sellerlist)
-    return bestRajJainCostFairness, sum(averageCostsForBuyers)/len(buyers)
+    return bestRajJainCostFairness, sum(bestAverageCostsForBuyers)/len(buyers)
 
 
 # Helper function that takes in a list and returns a list of all rotations of that list.
