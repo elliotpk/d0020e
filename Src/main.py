@@ -316,13 +316,17 @@ def readConfig():
                 needs[x] = budgetuse
                 i = i + 1
             for x in range(numbidder):
+                maxround=0
+                for i in sellerslist:
+                    list = i.LinkOfBlocks.display()
+                    maxround = maxround+len(list)
                 name = names[x]
                 demand = needs[x]
                 behaviour = behaviours[x]
                 marketprice = marketprices[x]
 
                 # id,supply,needs,behaviour,marketprice,totalbudget,resourceusage
-                spentbudget = createBidder(namn=name, maxrounds=(len(sellerslist)/slotsize), needs=demand, behaviour=behaviour,
+                spentbudget = createBidder(namn=name, maxrounds=maxround/slotsize, needs=demand, behaviour=behaviour,
                                            marketprice=marketprice, budget=totalbudget)
                 totalbudget = totalbudget - spentbudget
 
@@ -410,10 +414,6 @@ def createRandomSeller():
     seller = Sellers.Sellers(len(sellerslist))
     seller.genBlock(price, amount, discount)
     sellerslist.append(seller)
-
-
-
-
 
 
 
