@@ -4,7 +4,6 @@ import random
 # Bidders have an ID, needs with an amount and type.
 # A bidder knows when the last round will occur.
 # Every bidder has a behaviour/strategy.
-###### TODO add a check so that bidders doesn't bid for more quanitity than needed ######
 class Bidder:
   def __init__(self, id, needs, maxRound, behaviour):
     self.id = id
@@ -14,8 +13,6 @@ class Bidder:
     self.marketPrice = 0
     self.stopBid = 0
     self.marketPriceFactor = self.behaviour["marketPriceFactor"]
-    
-    # Bidders know this info about auctions
     self.wonItems = 0
     self.currentRound = 0 
 
@@ -25,14 +22,11 @@ class Bidder:
   def setMarketprice(self,price):
     self.marketPrice=price*random.normalvariate(1, 0.03)
     self.stopBid=self.marketPrice*(1 + self.behaviour["aggressiveness"])
-    # Print for testing purposes:
-    #print("<setMarketPrice()> Bidder ",self.id, " knows the market price/unit: ", self.marketPrice, " and stopBid/unit is: ", self.stopBid)
   
   # Returns a list of all the auctions that the bidder can bid on.
   def bid(self, input):
     # Update the aggressiveness of the behaviour based on the current auction information.
     self.behaviour["aggressiveness"] = self.behaviour["adaptiveAggressiveness"](self.currentRound, self.maxRound)
-    # Market factor changes how different the amount will be when bidders wants to bid, it uses a mean and standard deviation value.
     self.updateMarketFactor(1, 0.05)
     # Keeps track on auctions that the bidder wants to bid on that will be added to the list of all the bids that the bidder wants to and can bid on.
     tempBid = 0
@@ -46,9 +40,6 @@ class Bidder:
       if(genBid == 0):
         genBid = int((self.marketPrice*auction["quantity"]/5) * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor))
 
-      # Print for testing purposes:
-      #print("<from bid()> Bidder",self.id, "genBid: ", genBid, "  |  stopBid: ",self.stopBid*auction["quantity"], "  |  market price: ",self.marketPrice*auction["quantity"], "  |  auction: ", auction["id"], "  |  tempBid: ", tempBid,)
-      
       # Checks if the bidder can bid based on its behaviour about bidding over the market price.
       if(((self.marketPrice*auction["quantity"] > genBid and not self.behaviour["bidOverMarketPrice"]) or (self.stopBid*auction["quantity"] > genBid and self.behaviour["bidOverMarketPrice"]))
           or
@@ -75,6 +66,7 @@ class Bidder:
     else:
       return []
 
+  # Market factor changes how different the amount will be when bidders wants to bid, it uses a mean and standard deviation value.
   def updateMarketFactor(self, mean, standardDeviation):
     self.marketPriceFactor = self.behaviour["marketPriceFactorUpdate"](mean, standardDeviation)
   
@@ -84,6 +76,7 @@ class Bidder:
   def newRound(self):
     self.currentRound += 1
 
+  # This function receives a list of dictionaries describing the auction states from SimEngine.
   # Returns a list of dictionaries with info about how the bidder bids.
   def bidUpdate(self, input):
     satisfiedNeed = 0
@@ -97,6 +90,7 @@ class Bidder:
     # Randomizes the input so that bidders will bid independent of the input order.
     random.shuffle(input)
 
+    # Counts how many items that the bidder is currently winning
     for dictionary in input:
       if(dictionary["user"] == self.id):
           satisfiedNeed = satisfiedNeed + dictionary["quantity"]
@@ -125,13 +119,27 @@ class Bidder:
           bidOverOnce = False
       index += 1
 
-    #print ("self.behaviour[""desperation""](self.currentRound, self.maxRound): ",self.behaviour["desperation"](self.currentRound, self.maxRound))
-
     # Check if the bidder should bid based on the desperation.
     # If the current round is the last round, then the bidder must place a bid if the needs isn't satisfied.
+    # Checks so that if there is an auction with no bids and if the bidder hasn't satisfied the needs,
+    # it will place a last bid on that auction to satisfy the needs.
     if(self.behaviour["desperation"](self.currentRound, self.maxRound) == 0  and 0 < currentItems):
+      for dictionary in input:
+        # lastBid is the same as genBid from the bid(self, input) function currently.
+        lastBid = int((self.marketPrice*dictionary["quantity"]/5) * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor))
+        canBidOnEmptyAuction = True
+        if(dictionary["user"] == "N/A" and 0 < currentItems):
+            for bid in returnList:
+              # Doesn't bid if the bidder already bids on the auction
+              if(dictionary["id"] == bid["id"]):
+                canBidOnEmptyAuction = False
+                break
+              else:
+                continue
+            if(canBidOnEmptyAuction):
+              returnList.append({'id' : dictionary["id"], 'user' : self.id, 'top_bid' : lastBid})
       return returnList
-    # If the desperation is high, then the bidder will try to bid.
+    # If the desperation is high, then the bidder will most likely try to bid.
     if(self.behaviour["desperation"](self.currentRound, self.maxRound) >= random.random() and 0 < currentItems):
       return returnList
 
@@ -141,49 +149,4 @@ class Needs:
   def __init__(self, amount, type):
     self.amount = amount
     self.type = type
-
-# Testing method for testing different behaviours.
-def test():
-  maxRound = 5
-  bidder1 = Bidder('1', Needs(55, "steel beam"), maxRound, Behaviour.A)
-  bidder2 = Bidder('2', Needs(55, "steel beam"), maxRound, Behaviour.B)
-  bidder3 = Bidder('3', Needs(55, "steel beam"), maxRound, Behaviour.C)
-  bidder4 = Bidder('4', Needs(55, "steel beam"), maxRound, Behaviour.C)
-
-  print("Created 3 bidders with behaviour type A, B and C respectively and an extra bidder with type C.")
-  print("-----------------------------------------------------------------")
-
-  print("Testing the bidUpdate() function:")
-  simList = [{'id' : '1', 'quantity' : 40, 'user':'N/A' , 'top_bid' : 12000},
-             {'id' : '2', 'quantity' : 55, 'user':'N/A' , 'top_bid' : 13000},
-             {'id' : '3', 'quantity' : 40, 'user':'N/A' , 'top_bid' : 11000},
-             {'id' : '4', 'quantity' : 50, 'user':'N/A' , 'top_bid' : 12500}]
-  simList2 = [{'id': '63f6c3df7b6103af971aba61', 'quantity': 44, 'user': 'N/A', 'top_bid': 13000},
-              {'id': '63f6c3e07b6103af971aba63', 'quantity': 41, 'user': 'N/A', 'top_bid': 0}]
-
-  for i in range(1):
-    bidder1.newRound()
-    bidder3.newRound()
-    bidder4.newRound()
-
-  bidder1.setMarketprice(275)
-  bidder3.setMarketprice(275)
-  bidder4.setMarketprice(275)
-
-  bidder1Info = bidder1.bidUpdate(simList)
-  bidder3Info = bidder3.bidUpdate(simList)
-  bidder4Info = bidder4.bidUpdate(simList)
-
-  print("Bidder 1 decisions: ", bidder1Info)
-  #print("Bidder 1 needs: ", bidder1.needs.amount)
-  #print("Bidder 1 stopBid: ", bidder1.behaviour["stopBid"](bidder1.marketPrice))
-  print("Bidder 3 decisions: ", bidder3Info)
-  #print("Bidder 3 needs: ", bidder3.needs.amount)
-  #print("Bidder 3 stopBid: ", bidder3.behaviour["stopBid"](bidder3.marketPrice))
-  print("Bidder 4 decisions: ", bidder4Info)
-  #print("Bidder 4 needs: ", bidder4.needs.amount)
-  #print("Bidder 4 stopBid: ", bidder4.behaviour["stopBid"](bidder4.marketPrice))
-
-
-#test()
 

@@ -48,10 +48,11 @@ A = {
   "behaviour": "A",
   "aggressiveness": 0.9,
   "adaptiveAggressiveness": lambda currentRound, maxRound:
-                            changeAggressiveness(A, A["aggressiveness"]) if(maxRound - currentRound == 0) else
-                            changeAggressiveness(A, A["aggressiveness"]) if(maxRound - currentRound > 1) else
-                            changeAggressiveness(A, A["aggressiveness"]) if(maxRound - currentRound > 2) else
-                            changeAggressiveness(A, A["aggressiveness"]) if(maxRound - currentRound > 3) else
+                            changeAggressiveness(A, 1.0) if(maxRound - currentRound == 0) else
+                            changeAggressiveness(A, A["aggressiveness"]) if(currentRound/maxRound >= 0.90) else
+                            changeAggressiveness(A, A["aggressiveness"]) if(currentRound/maxRound >= 0.75) else
+                            changeAggressiveness(A, A["aggressiveness"]) if(currentRound/maxRound >= 0.50) else
+                            changeAggressiveness(A, A["aggressiveness"]) if(currentRound/maxRound >= 0.25) else
                             changeAggressiveness(A, A["aggressiveness"]),
   "desperation": lambda currentRound, maxRound:
                        A["aggressiveness"]*(maxRound-currentRound)/maxRound,
