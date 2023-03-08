@@ -17,6 +17,7 @@ class SimEngine():
         self.finishedAuctions = []                                                  # Auctions which have ended are placed here
         self.buyers = buyers
         self.dataManagement = DataManagement()
+        self.counter = 0
         if(not self.addBuyers(self.buyers)):                                        # Error checking if adding buyers to auctions went well
             return None
 
@@ -24,6 +25,7 @@ class SimEngine():
         "Start the simulation"
         #Round Start
         while(len(self.finishedAuctions) != self.loopLength):
+            self.counter += 1
             if(len(self.auctionSlot) == 0):
                 self.updateAuctionSlot()
                 for buyer in self.buyers:
@@ -55,7 +57,7 @@ class SimEngine():
                         bids.append(t)
                 sort = sorted(bids, key=lambda i:int(i['top_bid']), reverse=True)                               # Sorts the list of bids by amount
                 if (len(sort) == 0): continue
-                self.dataManagement.stringMaker(sort)
+                self.dataManagement.stringMaker(self.counter, sort)
                 max_bid = sort[0]['top_bid']
                 top = []
                 for i in range(len(sort)-1, -1, -1):                                                             # Pick out any potential ties for the top bid to randomize which one gets submitted
