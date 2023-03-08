@@ -10,17 +10,22 @@ class DataManagement:
         self.DataList = None
         self.string = ""
         self.stringlist = []
-        self.temp = []
 
+    #When this function is called, stringlist have all the strings it need
+    #to write a CSV-file so it just adds a title to every column and prints it.
     def simulationDone(self):
         self.stringlist.insert(0,"id,user,bid")
-        self.temp = self.stringlist
+        self.stringlist
         self.printdata(testtype="testE")
 
+    #Everytime a row of data is made to a string this function adds it to stringlist
+    #and resets the string-variable.
     def addToStringlist(self, string):
         self.stringlist.append(string)
         self.string = ""
 
+    #Recievs a list with data from SimEngine and data from every item becomes one string
+    #that will make one row in a csvfile.
     def stringMaker(self, list):
         self.DataList = list
 
@@ -28,29 +33,39 @@ class DataManagement:
             self.string += item["id"] + "," + item["user"] + "," + str(item["top_bid"])
             self.addToStringlist(self.string)
 
-
+    #Recievs data of different types from main. Just like stringmaker every string represents
+    #a row in the becoming csvfile
     def dataCollector(self, seed, sellerslist, bidderslist, resourceusage, sum, sumseller, checksum, rajFairness):
 
+        #Begins vid the header row with tiles for each column
         self.stringlist = ["ID,AuctionID,Quantity,NumOfAuctions,RajFairness"]
+        #Sellerslist contain instances of the seller class.
+        #Loop throug all sellers and makes string of relevant data in them
+        #and adds the to stringlist
         for seller in sellerslist:
             self.string = str(seller.id) + "," + str(seller.auctionId) + "," + str(seller.quantity) + str(seller.LinkOfBlocks.size) + str(rajFairness)
             self.addToStringlist(self.string)
             self.string = ""
-        self.mktxtfl(seed)
+        #self.mktxtfl(seed)
+        #When the loop is done printdata is called to make a csvfile
         self.printdata(testtype = "testJseller")
         
+        #Begins vid the header row with tiles for each column
         self.stringlist = ["ID,Needs,Marketprice,Behaviour"]
+        #bidderslist contain instances of the bidder class.
+        #Loop throug all bidders and makes string of relevant data in them
+        #and adds the to stringlist
         for bidder in bidderslist:
             self.string = str(bidder.id) + "," + str(bidder.needs.amount) + "," + str(bidder.marketPrice) + "," + str(bidder.behaviour["behaviour"])
             self.addToStringlist(self.string)
             self.string = ""
-        self.mktxtfl(seed)
+        #self.mktxtfl(seed)
+        #Like above an new csvfile is made
         self.printdata(testtype = "testJbidder")
 
 
+    #Prints the results into a csv file and labels the different runs into a new csv file
     def printdata(self, testtype):
-        #spara data före print
-        #prints the results into a csv file and labels the different runs into a new csv file
         testnr = 0
         while (os.path.exists(testtype+str(testnr)+'.csv')):
             testnr=testnr+1
@@ -62,6 +77,7 @@ class DataManagement:
         mkcsv.close()
         self.stringlist = []
 
+    #Function to plot graphs with information. Not invoked because its not finished
     def graphPloter(self, csvfile):
 
         datafile = pd.read_csv(csvfile)
@@ -70,7 +86,8 @@ class DataManagement:
         graphs.set_ylabel('bids (USD)')
         plt.show()
 
-    def mktxtfl(self, seed):
+    def mktxtfl(self, seed, testid):
+
      
         if (os.path.exists(str(seed)+'.txt')):
             mktxt = open(str(seed)+'.txt','w')
@@ -79,11 +96,6 @@ class DataManagement:
                 for row in string.split(' '):
                     mktxt.write(row+"\n")
             mktxt.write("\n\n")
-            for string in self.temp:
-                for row in string.split(' '):
-                    mktxt.write(row+'\n')
-            mktxt.close()
-            self.temp = []
         else:
             mktxt = open(str(seed)+'.txt','w')
             for string in self.stringlist:
@@ -93,59 +105,5 @@ class DataManagement:
 
 
         
-        
-
-
-
-    """"
-    pris,data,vinnare,id
-    1,sten,34,#91
-    420,lera,2,#54
-    """
-    #print(Api.data) print to csv-file
-
-    def testOutJ(self):
-
-        self.seed = "Exempel"
-        self.sellerslist = ["Hubert", "Bart", "Jakob", "Kasper"]
-        self.bidderslist = ["Kenneth", "Per", "Olof", "Eskil"]
-        self.resourceusage = "0.3"
-        self.sum = 1000
-        self.sumseller = 7000
-        self.checksum = 2500
-
-        self.dataCollector(self.seed, self.sellerslist, self.bidderslist, self.resourceusage, self.sum, self.sumseller, self.checksum)
-
     
-    def testOutE(self):
-
-        auctionId = "100001"
-        quantity = 5
-        topBid = {'user' : 1, 'value' : 2000}
-        auctionId1 = "100002"
-        quantity1 = 7
-        topBid1 = {'user' : 2, 'value' : 3000}        
-        auctionId2 = "100003"
-        quantity2 = 1
-        topBid2 = {'user' : 3, 'value' : 4000}        
-        auctionId3 = "100004"
-        quantity3 = 14
-        topBid3 = {'user' : 4, 'value' : 5000}        
-        auctionId4 = "100005"
-        quantity4 = 20
-        topBid4 = {'user' : 5, 'value' : 6000}
-
-
-        list = [{'id' : auctionId, 'quantity' : quantity, 'user': "Cristian" , 'top_bid' : 500},
-                {'id' : auctionId1, 'quantity' : quantity1, 'user': "Edvin" , 'top_bid' : 3500},
-                {'id' : auctionId2, 'quantity' : quantity2, 'user': "Johanna" , 'top_bid' : 4300},
-                {'id' : auctionId3, 'quantity' : quantity3, 'user': "Gry" , 'top_bid' : 15300},
-                {'id' : auctionId4, 'quantity' : quantity4, 'user': "Edward" , 'top_bid' : 1300}]
-
-        self.stringMaker(list)
-       
-#D = DataManagement()
-
-#D.testOutE()
-
 
