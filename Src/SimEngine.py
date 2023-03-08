@@ -183,7 +183,7 @@ class SimEngine():
         while(os.path.exists('test'+str(num)+'.csv')):
             num += 1
         f = open('test'+str(num)+'.csv',"w")
-        finalStatus = self.bidderFinalStatsus()
+        finalStatus = self.bidderFinalStatus()
         f.write(output + '\n' + finalStatus)
         f.close()
 
