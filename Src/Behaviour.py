@@ -55,7 +55,8 @@ A = {
                             changeAggressiveness(A, A["aggressiveness"]) if(currentRound/maxRound >= 0.25) else
                             changeAggressiveness(A, A["aggressiveness"]),
   "desperation": lambda currentRound, maxRound:
-                       A["aggressiveness"]*(maxRound-currentRound)/maxRound,
+                       0 if(maxRound == currentRound) else
+                       A["aggressiveness"]*currentRound/maxRound,
   "bidOverMarketPrice": True,
   "marketPriceFactor": 1.0,
   "marketPriceFactorUpdate": lambda mean, standardDeviation:
@@ -78,7 +79,8 @@ B = {
                             changeAggressiveness(B, 0.6) if(currentRound/maxRound >= 0.25) else
                             changeAggressiveness(B, B["aggressiveness"]),
   "desperation": lambda currentRound, maxRound:
-                       B["aggressiveness"]*(maxRound-currentRound)/maxRound,
+                       0 if(maxRound == currentRound) else
+                       B["aggressiveness"]*currentRound/maxRound,
   "bidOverMarketPrice": True,
   "marketPriceFactor": 1.0,
   "marketPriceFactorUpdate": lambda mean, standardDeviation:
@@ -101,7 +103,8 @@ C = {
                             changeAggressiveness(C, 0.3) if(currentRound/maxRound >= 0.25) else
                             changeAggressiveness(C, C["aggressiveness"]),
   "desperation": lambda currentRound, maxRound:
-                       C["aggressiveness"]*(maxRound-currentRound)/maxRound,
+                       0 if(maxRound == currentRound) else
+                       C["aggressiveness"]*currentRound/maxRound,
   "bidOverMarketPrice": True,
   "marketPriceFactor": 1.0,
   "marketPriceFactorUpdate": lambda mean, standardDeviation:
