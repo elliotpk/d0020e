@@ -1,5 +1,6 @@
 #DataManagement
-import csv
+import pandas as pd
+import matplotlib.pyplot as plt
 import os
 
 
@@ -9,9 +10,11 @@ class DataManagement:
         self.DataList = None
         self.string = ""
         self.stringlist = []
+        self.temp = []
 
     def simulationDone(self):
         self.stringlist.insert(0,"id,user,bid")
+        self.temp = self.stringlist
         self.printdata(testtype="testE")
 
     def addToStringlist(self, string):
@@ -24,28 +27,25 @@ class DataManagement:
         for item in self.DataList:
             self.string += item["id"] + "," + item["user"] + "," + str(item["top_bid"])
             self.addToStringlist(self.string)
-        #while self.finished:
-            #self.printdata()
 
 
-    def dataCollector(self, seed, sellerslist, bidderslist, resourceusage, sum, sumseller, checksum, fairness):
+    def dataCollector(self, seed, sellerslist, bidderslist, resourceusage, sum, sumseller, checksum, rajFairness):
 
-        self.stringlist = ["ID,AuctionID,Quantity,NumOfAuctions"]
+        self.stringlist = ["ID,AuctionID,Quantity,NumOfAuctions,RajFairness"]
         for seller in sellerslist:
-            self.string = str(seller.id) + "," + str(seller.auctionId) + "," + str(seller.quantity) +","+ str(seller.LinkOfBlocks.size+1)
+            self.string = str(seller.id) + "," + str(seller.auctionId) + "," + str(seller.quantity) + str(seller.LinkOfBlocks.size) + str(rajFairness)
             self.addToStringlist(self.string)
             self.string = ""
-        #print(self.stringlist)
+        self.mktxtfl(seed)
         self.printdata(testtype = "testJseller")
         
         self.stringlist = ["ID,Needs,Marketprice,Behaviour"]
         for bidder in bidderslist:
-            self.string = str(bidder.id) + "," + str(bidder.needs.amount) + "," + str(bidder.marketPrice) + "," + str(bidder.behaviour["behaviour"])
+            self.string = str(bidder.id) + "," + str(bidder.needs.amount) + "," + str(bidder.marketPrice) + "," + str(bidder.behavior["behaviour"])
             self.addToStringlist(self.string)
             self.string = ""
-        #print(self.stringlist)
+        self.mktxtfl(seed)
         self.printdata(testtype = "testJbidder")
-        #for item in bidder
 
 
     def printdata(self, testtype):
@@ -54,6 +54,7 @@ class DataManagement:
         testnr = 0
         while (os.path.exists(testtype+str(testnr)+'.csv')):
             testnr=testnr+1
+        print(testnr)
         mkcsv = open(testtype+str(testnr)+'.csv','w')
         for string in self.stringlist:
             for row in string.split(' '):
@@ -61,6 +62,46 @@ class DataManagement:
         mkcsv.close()
         self.stringlist = []
 
+    def graphPloter(self, csvfile):
+
+        datafile = pd.read_csv(csvfile)
+
+        graphs = datafile.plot(x='Bidders', y=['bidder1', 'bidder2','bidder3','bidder4'])
+        graphs.set_ylabel('bids (USD)')
+        plt.show()
+
+    def mktxtfl(self, seed):
+     
+        if (os.path.exists(str(seed)+'.txt')):
+            mktxt = open(str(seed)+'.txt','w')
+            mktxt.write("\n\n")
+            for string in self.stringlist:
+                for row in string.split(' '):
+                    mktxt.write(row+"\n")
+            mktxt.write("\n\n")
+            for string in self.temp:
+                for row in string.split(' '):
+                    mktxt.write(row+'\n')
+            mktxt.close()
+            self.temp = []
+        else:
+            mktxt = open(str(seed)+'.txt','w')
+            for string in self.stringlist:
+                for row in string.split(' '):
+                    mktxt.write(row+"\n")
+            mktxt.close()
+
+
+        
+        
+
+
+
+    """"
+    pris,data,vinnare,id
+    1,sten,34,#91
+    420,lera,2,#54
+    """
     #print(Api.data) print to csv-file
 
     def testOutJ(self):
