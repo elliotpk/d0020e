@@ -9,9 +9,8 @@ bidderslist = []
 sellerslist = []
 seed = None
 
-#normalise random demand and multiply it with supply
 def readConfig():
-    # Reads the config file for seed/numsellers/numbidders
+    # Reads the config file if it exists
     try:
         config = open("config.txt", "r")
         config.close()
@@ -34,7 +33,7 @@ def readConfig():
         config.close()
         return str(check)[0:4],slotsize,endthreshold
 
-        # Set the seed for all random numbers generated
+        # Find if there is a seed in the config
     config = open("config.txt", "r")
     text = config.read()
     config.close()
@@ -45,6 +44,7 @@ def readConfig():
             seed = int(rowoflist.split("seed=")[1])
             random.seed(seed)
 
+        # if there is no seed one gets generated
     try:
         if seed == None:
             raise
@@ -54,16 +54,18 @@ def readConfig():
         config.write("seed=" + str(seed))
         config.close()
 
-    # reads number of sellers and creates the supply of available material
+    # reads number of sellers and generates the supply of available material
     for rowoflist in line:
         rowoflist = rowoflist.replace(" ", "")
 
+        # read number of bidders
         if rowoflist.find("bidder") != -1:
             numbidder = rowoflist.split(":")[0].split(",")
             for x in numbidder:
                 if x.find("number=") != -1:
                     numbidder = int(x.split("number=")[1])
 
+        # read number of sellers, and if randomchainlenght is true
         if rowoflist.find("seller") != -1:
             block = rowoflist.split("seller=")[1]
             numsellers = block.split(":")[0].split(",")
@@ -73,6 +75,7 @@ def readConfig():
                 if x.find("randomchainlength=") != -1:
                     randomchainlength = x.split("randomchainlength=")[1]
 
+        # reads resourceusage%, slotsize, endthreshold
         if rowoflist.find("resourceusage%") != -1:
             resourceusage = int(rowoflist.split("resourceusage%=")[1]) / 100
 
@@ -84,8 +87,9 @@ def readConfig():
             """    
             have finished reading the prespecs and will now read real seller specs
             """
-
+    # Generates the data for every seller
     try:
+        # Reads the specified amount of blocks
         numsellers
         block = block.split(":")[1]
         blocklen = []
@@ -107,6 +111,7 @@ def readConfig():
                 except:
                     blocklen.append("replace")
 
+        # Generates the missing blocks to match the number of buyers
         sumofremainingblocks = 0
         randomblocklengt = []
         listofreplace = []
@@ -135,6 +140,7 @@ def readConfig():
             loop += 1
             block = block + "->"
 
+        #generates /reads the information in each block
         for x in range(int(numsellers)):
             blockatribute = block.split("->")[x]
             seller = Sellers.Sellers(len(sellerslist))
@@ -183,15 +189,15 @@ def readConfig():
                     seller.genBlock(price, supply, discount)
                     headcreated = True
 
+    #generates new sellers if none existed in the config
     except Exception as e:
-        print(e)
         if len(sellerslist) == 0:
             numsellers = genAmountSellers()
             config = open("config.txt", "a")
             config.write("\nseller=" + "number=" + str(numsellers) + "," + "randomchainlength=true" + ":")
             config.close()
 
-
+    #check if resourceusage, slotsize, endthreshold exists
     try:
         resourceusage
     except:
@@ -404,9 +410,7 @@ def createBidder(**kwargs):
     bidderslist.append(Bidder(namn, need, math.ceil(maxrounds), behaviour))
     return need.amount
 
-    # creates number of sellers
-
-
+    # creates random sellers
 def createRandomSeller():
     price = random.randrange(1000, 10000)
     amount = random.randrange(100, 1000)
@@ -415,21 +419,19 @@ def createRandomSeller():
     seller.genBlock(price, amount, discount)
     sellerslist.append(seller)
 
-
-
-def uppdateBidder():
+def callOnReferenceCalculator():
     fairness, marketprice = referenceCalculator(sellerslist, bidderslist)
     if fairness == -1: print("No valid combinations were found")
+    return fairness, marketprice
+
+def uppdateBidder(marketprice):
     for x in bidderslist:
         x.setMarketprice(marketprice)
-    return fairness
 
 def uppdateSeller():
     sum = 0
     for x in bidderslist:
         sum = sum + x.needs.amount
-        # print(x.needs.amount, "demand from bidders")
-    print("\n", sum, "sum of demand")
 
     sumblocks = 0
     sumofsopply = 0
@@ -441,31 +443,16 @@ def uppdateSeller():
             sumseller = sumseller + i.Amount
             x.quantity.append(i.Amount)
             sumblocks = sumblocks + 1
-    print(sumofsopply, "sum of supply\n")
-    print(sumblocks, "number of blocks")
-    print(len(bidderslist), "number of bidders")
     resourceusage = (sum/sumseller)
     return resourceusage,sumseller,sum
 
 
 checksum,slotsize,endthreshold = readConfig()
-fairness=uppdateBidder()
+#starts the other prosseces
+
+fairness,marketprice=callOnReferenceCalculator()
+uppdateBidder(marketprice)
 resourceusage,sumseller,sum = uppdateSeller()
-
-
-
-for x in sellerslist:
-    print(x.LinkOfBlocks.display())
-    #for i in x.LinkOfBlocks.display():
-     #   print(i.Amount, "supply in blocks")
-
-
-
-
-
-
-
-
 
 aucitonengine = SimEngine(sellerslist,bidderslist,slotsize,endthreshold)
 aucitonengine.simStart()

@@ -57,7 +57,7 @@ class SimEngine():
                         bids.append(t)
                 sort = sorted(bids, key=lambda i:int(i['top_bid']), reverse=True)                               # Sorts the list of bids by amount
                 if (len(sort) == 0): continue
-                self.dataManagement.stringMaker(self.counter, sort)
+                self.dataManagement.stringMaker(sort)
                 max_bid = sort[0]['top_bid']
                 top = []
                 for i in range(len(sort)-1, -1, -1):                                                             # Pick out any potential ties for the top bid to randomize which one gets submitted
@@ -183,7 +183,7 @@ class SimEngine():
         while(os.path.exists('test'+str(num)+'.csv')):
             num += 1
         f = open('test'+str(num)+'.csv',"w")
-        finalStatus = self.bidderFinalStatsus()
+        finalStatus = self.bidderFinalStatus()
         f.write(output + '\n' + finalStatus)
         f.close()
 
