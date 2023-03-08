@@ -42,7 +42,7 @@ class DataManagement:
         #and adds the to stringlist
         for seller in sellerslist:
             for i in range(len(seller.auctionId)):
-                self.string = str(seller.id) + "," + str(seller.auctionId[i]) + "," + str(seller.quantity[i]) + str(seller.LinkOfBlocks.size)
+                self.string = str(seller.id) + "," + str(seller.auctionId[i]) + "," + str(seller.quantity[i]) +","+ str(seller.LinkOfBlocks.size+1)
                 self.addToStringlist(self.string)
                 self.string = ""
         #self.mktxtfl(seed)
