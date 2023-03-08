@@ -47,8 +47,6 @@ def referenceCalculator(sellerlist, buyers, outputAllCombinations = False):
                     if (RajJainCostFairness > bestRajJainCostFairness):
                         bestRajJainCostFairness = RajJainCostFairness
                         bestAverageCostsForBuyers = averageCostsForBuyers
-                        #bestData = bestData + "\nPermutation " + str(permNum) + " Combination " + str(permAndComb) + "\n"
-                        #bestData = bestData + formatCombination(combination,buyers,sellerlist,averageCostsForBuyers,RajJainCostFairness)
                     if (outputAllCombinations):
                         allCombinationData = allCombinationData + formatCombination(combination,buyers,sellerlist,averageCostsForBuyers,RajJainCostFairness)
                 permAndComb = permAndComb + 1
@@ -57,8 +55,6 @@ def referenceCalculator(sellerlist, buyers, outputAllCombinations = False):
         if (permNum > len(blocklist)/2): # Due to the way permutations are listed in the permutation-function this will have tested all relevant possibilities given that the lists have also been rotated.
             break
         
-    #print("Permutation number ", permNum, "Combination number ", permAndComb)
-    #print(bestData)    # For testing 
     if (outputAllCombinations):
             outputCombinations(allCombinationData, sellerlist)
     return bestRajJainCostFairness, sum(bestAverageCostsForBuyers)/len(buyers)
