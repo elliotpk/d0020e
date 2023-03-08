@@ -14,7 +14,8 @@ class Bidder:
     self.stopBid = 0
     self.marketPriceFactor = self.behaviour["marketPriceFactor"]
     self.wonItems = 0
-    self.currentRound = 0 
+    self.currentRound = 0
+    self.bidIndex = 0
 
   # Bidders will somewhat know the market price per unit based on normal distribution (mean, standardDeviation).
   # Then they will stop to bid at a certain value based on the market price and their aggressiveness,
@@ -75,10 +76,12 @@ class Bidder:
   
   def newRound(self):
     self.currentRound += 1
+    self.bidIndex = 0
 
   # This function receives a list of dictionaries describing the auction states from SimEngine.
   # Returns a list of dictionaries with info about how the bidder bids.
   def bidUpdate(self, input):
+    self.bidIndex += 1
     satisfiedNeed = 0
     currentItems = 0
     returnList = [] # doesn't include quantity
@@ -123,7 +126,7 @@ class Bidder:
     # If the current round is the last round, then the bidder must place a bid if the needs isn't satisfied.
     # Checks so that if there is an auction with no bids and if the bidder hasn't satisfied the needs,
     # it will place a last bid on that auction to satisfy the needs.
-    if(self.behaviour["desperation"](self.currentRound, self.maxRound) == 0  and 0 < currentItems):
+    if(self.currentRound == self.maxRound and 0 < currentItems):
       for dictionary in input:
         # lastBid is the same as genBid from the bid(self, input) function currently.
         lastBid = int((self.marketPrice*dictionary["quantity"]/5) * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor))
@@ -142,6 +145,20 @@ class Bidder:
     # If the desperation is high, then the bidder will most likely try to bid.
     if(self.behaviour["desperation"](self.currentRound, self.maxRound) >= random.random() and 0 < currentItems):
       return returnList
+    
+    for dictionary in input:
+      lastBid = int((self.marketPrice*dictionary["quantity"]/5) * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor))
+      noDuplicateBidOnEmptyAuction = True
+      if(self.bidIndex > 1 and 0 < currentItems and dictionary['top_bid'] == 0):
+        for bid in returnList:
+          if(dictionary["id"] == bid["id"]):
+            noDuplicateBidOnEmptyAuction = False
+            break
+          else:
+            continue
+          if(noDuplicateBidOnEmptyAuction):
+              returnList.append({'id' : dictionary["id"], 'user' : self.id, 'top_bid' : lastBid})
+    return returnList
 
     return []
 
