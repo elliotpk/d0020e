@@ -128,7 +128,7 @@ class Bidder:
         # lastBid is the same as genBid from the bid(self, input) function currently.
         lastBid = int((self.marketPrice*dictionary["quantity"]/5) * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor))
         canBidOnEmptyAuction = True
-        if(dictionary["user"] == "N/A" and 0 < currentItems):
+        if((dictionary["user"] == "N/A" or dictionary["top_bid"] == 0) and 0 < currentItems):
             for bid in returnList:
               # Doesn't bid if the bidder already bids on the auction
               if(dictionary["id"] == bid["id"]):
