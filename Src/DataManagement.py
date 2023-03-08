@@ -1,6 +1,4 @@
 #DataManagement
-import pandas as pd
-import matplotlib.pyplot as plt
 import os
 
 
@@ -38,14 +36,15 @@ class DataManagement:
     def dataCollector(self, seed, sellerslist, bidderslist, resourceusage, sum, sumseller, checksum, rajFairness):
 
         #Begins vid the header row with tiles for each column
-        self.stringlist = ["ID,AuctionID,Quantity,NumOfAuctions,RajFairness"]
+        self.stringlist = ["ID,AuctionID,Quantity,NumOfAuctions," + "Rajafairness=" + str(rajFairness)]
         #Sellerslist contain instances of the seller class.
         #Loop throug all sellers and makes string of relevant data in them
         #and adds the to stringlist
         for seller in sellerslist:
-            self.string = str(seller.id) + "," + str(seller.auctionId) + "," + str(seller.quantity) + str(seller.LinkOfBlocks.size) + str(rajFairness)
-            self.addToStringlist(self.string)
-            self.string = ""
+            for i in range(len(seller.auctionId)):
+                self.string = str(seller.id) + "," + str(seller.auctionId[i]) + "," + str(seller.quantity[i]) + str(seller.LinkOfBlocks.size)
+                self.addToStringlist(self.string)
+                self.string = ""
         #self.mktxtfl(seed)
         #When the loop is done printdata is called to make a csvfile
         self.printdata(testtype = "testJseller")
@@ -78,6 +77,7 @@ class DataManagement:
         self.stringlist = []
 
     #Function to plot graphs with information. Not invoked because its not finished
+    """
     def graphPloter(self, csvfile):
 
         datafile = pd.read_csv(csvfile)
@@ -85,6 +85,7 @@ class DataManagement:
         graphs = datafile.plot(x='Bidders', y=['bidder1', 'bidder2','bidder3','bidder4'])
         graphs.set_ylabel('bids (USD)')
         plt.show()
+    """
 
     def mktxtfl(self, seed, testid):
 
