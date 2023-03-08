@@ -84,6 +84,7 @@ class SimEngine():
         self.saveData(fairness)
         self.dataManagement.simulationDone()
 
+    # Starts new auctions, typically ran when the current slot is empty
     def updateAuctionSlot(self):
         for i in range(self.slot_size):
             if(len(self.auctions) == 0):
@@ -111,7 +112,7 @@ class SimEngine():
                         auction['val'] -= 1
                         break
 
-
+    # Ends an auction, moves it into a new list
     def endAuction(self, auction):
         "Called to end the specific auction"
         link.endAuction(auction['id'], 'Seller', auction['user'])
@@ -173,6 +174,7 @@ class SimEngine():
         fairness = nom/denom
         return fairness
 
+    # Saves the data to a csv with the won auctions and resulting fairness from it
     def saveData(self, fairness):
         output = "Fairness: {} \nRoomID, Quantity, Winner, Price \n".format(fairness)
         for auction in self.finishedAuctions:
@@ -185,7 +187,8 @@ class SimEngine():
         f.write(output + '\n' + finalStatus)
         f.close()
 
-    def bidderFinalStatsus(self):
+    # Aggregates the final result for each of the bidders such as how much they paid and how unfulfilled demand left
+    def bidderFinalStatus(self):
         output = 'Behaviour, BuyerId, PricePaid, QuantityBought, DemandLeft\n'
         for buyer in self.buyers:
             bidderId = buyer.id
