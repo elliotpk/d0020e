@@ -127,16 +127,16 @@ class Bidder:
       for dictionary in input:
         # lastBid is the same as genBid from the bid(self, input) function currently.
         lastBid = int((self.marketPrice*dictionary["quantity"]/5) * (1 + self.behaviour["aggressiveness"] * self.marketPriceFactor))
-        canBidOnEmptyAuction = True
+        noDuplicateBidOnEmptyAuction = True
         if((dictionary["user"] == "N/A" or dictionary["top_bid"] == 0) and 0 < currentItems):
             for bid in returnList:
               # Doesn't bid if the bidder already bids on the auction
               if(dictionary["id"] == bid["id"]):
-                canBidOnEmptyAuction = False
+                noDuplicateBidOnEmptyAuction = False
                 break
               else:
                 continue
-            if(canBidOnEmptyAuction):
+            if(noDuplicateBidOnEmptyAuction):
               returnList.append({'id' : dictionary["id"], 'user' : self.id, 'top_bid' : lastBid})
       return returnList
     # If the desperation is high, then the bidder will most likely try to bid.
