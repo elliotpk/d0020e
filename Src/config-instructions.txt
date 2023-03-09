@@ -1,0 +1,36 @@
+1. Seed. The seed is the base for random number generation to set the seed to ensure that the random numbers are the
+ same between tests one can set the seed with: seed=1234
+
+2.Resourceusage. Resourceusage is the procent of the total supply that is matched by demand so supply/demand=resourceusage.
+ One can set resourceusage with: resourceusage%=80
+
+3.Seller. Sellers are what generates the supply and they generate it in different blocks. The first step with sellers is to set how many: seller=number=7
+ Here you can also specify whether they should generate the bare minimum or go random, this can be done with: seller=number=7,randomchainlength=true:
+ After the number of sellers are setup one can specify the different blocks by adding after the colon: seller=number=7,randomchainlength=true:[price=100,supply=101,discount=1]
+ For every block that you want specified. You can also if you want unspecified leave empty: [][][].
+ You can also specify for example price in block 3 : [][][price=200]. or write: chainlength=4.
+ To specify between sellers you can add: -> to signify that it is a new seller. Exampel: [][price=101]->[price=200][supply=201]
+
+4.Bidder. Bidders are what generates the demand and just as with sellers the first step is to specify the number of bidders: bidder=number=5:
+ Here you can also specify whether you want the bidders to be clones of eachother: bidder=number=5,copy=true:
+ After the number of bidders are setup one can specify the different bidders after the colon bidder=number=5,copy=true:demand=100,marketprice=5000,behaviour=A
+ To specify more than one bidder one can add: -> to signify a new bidder. Example: demand=100,marketprice=5000,behaviour=A->demand=200->behaviour=B
+ Note that unspecified values will get automaticly generated
+
+5.Slotsize. Slotsize is the amount of auctions that will take place at the same instance.
+ Example if there are 5 sellers with a slotsize of 2 there will be 2 auctions and when they are done 2 more and after them one more.
+ To set the slotsize write: slotsize=2
+
+6.Endthreshold. Endthreshold is the amount of rounds in an auction that has to pass without new bids, for that auction to close
+ To set endthreshold write: endthreshold=2
+
+Important: Linebreaks are important to read the config properly.
+Note that unspecified values will get automatically generated and if no configfile exists a new one will be written
+
+Example of a proper config:
+seed=1234
+resourceusage%=80
+seller=number=7,randomchainlength=true:[price=100,supply=101,discount=1]->->chainlength=4
+bidder=number=5,clone=false:price=100->price=200
+slotsize=2
+endthreshold=2

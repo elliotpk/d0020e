@@ -1,0 +1,6 @@
+seed=765
+seller=number=5,randomchainlength=true:
+resourceusage%=96
+slotsize=2
+endthreshold=2
+bidder=number=14,copy=False:
