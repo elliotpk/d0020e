@@ -15,3 +15,24 @@ This diagram shows the rough process of the simulation.
 ## Class Diagram
 
 <img src="images\classes.png" width="75%" height="75%">
+
+## Behaviour library
+
+There are 3 types of behaviours:
+
+1. A: This is the most aggressive behaviour that will try to bid aggressively with higher bids and bid early.
+2. B: This behaviour is a mixture of behaviour A and C that is medium aggressive.
+3. C: This is the most passive behaviour and will most likely bid late with lower bids.
+
+### Dictionary keys
+
+Every behaviour has the dictionary keys:
+
+1. "behaviour": Tells what type of behaviour it is.
+2. "agressiveness": A number between 0 and 1 that tells how aggressive the bidder is. It affects the bid amount and desperation.
+3. "adaptiveAggressiveness": Updates the aggressiveness depending on the current round and the max round.
+4. "desperation": It is a number between 0 and 1 and tells how likely it is for a bidder to bid depending on the aggressiveness, current round and the max round. 
+5. "bidOverMarketPrice": Tells if the bidder can bid over the market price or not.
+6. "marketPriceFactor": This affects the bid amount based on normal distribution with a mean and standard deviation value and the aggressiveness.
+7. "marketPriceFactorUpdate": This updates the marketPriceFactor value depending on the aggressiveness, mean and standard deviation value.
+8. "stopBid": This is the amount of bid that the bidder can't bid over and it's also the maximum bid on an auction. It's in price/unit.
