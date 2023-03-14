@@ -32,11 +32,11 @@ There are 3 types of behaviours:
 
 Every behaviour has the dictionary keys:
 
-1. "behaviour": Tells what type of behaviour it is.
+1. "behaviour": This is what type of behaviour it is.
 2. "agressiveness": A number between 0 and 1 that tells how aggressive the bidder is. It affects the bid amount and desperation.
 3. "adaptiveAggressiveness": Updates the aggressiveness depending on the current round and the max round.
 4. "desperation": It is a number between 0 and 1 and tells how likely it is for a bidder to bid depending on the aggressiveness, current round and the max round. 
-5. "bidOverMarketPrice": Tells if the bidder can bid over the market price or not.
+5. "bidOverMarketPrice": This tells if the bidder can bid over the market price or not.
 6. "marketPriceFactor": This affects the bid amount based on normal distribution with a mean and standard deviation value and the aggressiveness.
 7. "marketPriceFactorUpdate": This updates the marketPriceFactor value depending on the aggressiveness, mean and standard deviation value.
 8. "stopBid": This is the amount of bid that the bidder can't bid over and it's also the maximum bid on an auction. It's in price/unit.
