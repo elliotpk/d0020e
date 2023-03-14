@@ -10,6 +10,18 @@ Download the simulation environment and install the required libraries (requirem
 
 Setup the config for the simulation you would like to perform (or leave blank for random generation), detailed instructions for how to construct the config.txt can be found in the accompaning "config-instructions.txt". Be warned that setting a high amount of sellers/bidders (especially with random chainlength) will cause the reference calculation to take quite a while.
 
+After this is done you can start the program by running "main.py", it will first generate all the input data such as blocks, sellers and buyers. This will get computed by the reference calculation to get a fairness value and market price for the optimal match between blocks and buyers.
+
+After this is done the simulator will start and the program will terminate after it has completed it's run. 
+
+After a finished run several csv files will be saved in the file path of the project, which run the files belong to can be identified by the digit in the file name.
+
+* test*.csv - Finished auction result, fairness value and buyer final status.
+* testE*.csv - All the bids which were submitted by the buyers throughout the simulation, id stands for in which batch of bids they were sent.
+* testJbidder*.csv - The configuration of the buyers which were used
+* testJseller*.csv - The configuration of the sellers and blocks they have
+* refcalcOutdata.csv (optional) - Details related to the reference calculation (needs to be manually enabled in ReferenceCalculator.py line 24)
+
 ## Sequence Diagram
 
 <img src="images/sequence.png" width="75%" height="75%">
