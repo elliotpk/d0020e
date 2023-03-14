@@ -4,7 +4,11 @@ This project aims to provide a simulation environment and matchmaking for demand
 
 ## How to run:
 
-The simulator is dependant on the Negotiation Engine API: https://github.com/EricChiquitoG/NegotiationEngine
+The simulator is dependant on a fork of the Negotiation Engine API: https://github.com/elliotpk/NegotiationEngine to run the simulations, you will also need to setup a mongoDB database. For this system we use "API PILOT 1" from the API, make sure to set your database in db.py, "client = MongoClient....".
+
+Download the simulation environment and install the required libraries (requirements.txt), if your API is not running on localhost port 5000 you may need to change that in APILink.py. 
+
+Setup the config for the simulation you would like to perform (or leave blank for random generation), detailed instructions for how to construct the config.txt can be found in the accompaning "config-instructions.txt". Be warned that setting a high amount of sellers/bidders (especially with random chainlength) will cause the reference calculation to take quite a while.
 
 ## Sequence Diagram
 
