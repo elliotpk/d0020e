@@ -52,3 +52,17 @@ Every behaviour has the dictionary keys:
 6. "marketPriceFactor": This affects the bid amount based on normal distribution with a mean and standard deviation value and the aggressiveness.
 7. "marketPriceFactorUpdate": This updates the marketPriceFactor value depending on the aggressiveness, mean and standard deviation value.
 8. "stopBid": This is the amount of bid that the bidder can't bid over and it's also the maximum bid on an auction. It's in price/unit.
+
+## Reference Calculation
+The reference calculation will look through almost every way the blocks of products can be distributed among the sellers to find the greatest Raj Jain fairness. This will result in many combinations being tested, the exact amount being printed before the function starts its calculations. The function will give periodic updates on its progress in order to help estimate the amount of time. 
+If one wants a short running time one should:
+1. Keep the number of blocks low.
+2. Keep the number of buyers/bidders either very low or very close to the number of blocks. 
+3. Not have Reference Calculation output enabled unless one is interested in the data.
+
+### Reference Calculation Output
+Near the end of the code in main.py inside the callOnReferenceCalculator function one can add True as a third argument to referenceCalculation in order to enable output of reference calculation data. Refcalc will then output a .csv-file containing all valid ways blocks of products can be bought by the buyers. It will also have data on the blocks bought, the average price paid, the calculated Raj Jain fairness and is ready to be built out to also accept distance and average distance as variables.
+
+### Discounts
+For the reference calculation discounts are a thing that is taken into account. These are automatically generated unless one manually defines the discounts according to the instructions in "config-instructions.txt". Discount is defined as the percentage unit difference in discount compares to the previous block of products. So if you for instance want blocks with a 0% | 4% | 7% | 9% | 10% discount they should be input as 0 | 4 | 3 | 2 | 1.
+
