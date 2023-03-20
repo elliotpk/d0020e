@@ -1,6 +1,6 @@
 # Simulation environment for demand-supply matching
 
-This project aims to provide a simulation environment and matchmaking for demand-supply matching.
+This repository provides a system for simulating and investigating different behaviors and factors in a demand-supply market. This is done by running a reference calculation which is a matchmaking computation to get the most fair allocation of resources. Together with this a simulation is run where different buyers can be customized with different behaviors. For full details about this project see the "d0020e-Report.pdf".
 
 ## How to run:
 
